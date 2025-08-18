@@ -1,0 +1,30 @@
+# Virtual environments
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter / pytest / mypy caches
+.ipynb_checkpoints/
+.mypy_cache/
+.pytest_cache/
+
+# Data files (large, should not be in git)
+data/interim/
+data/processed/
+data/embeddings/
+
+# Logs
+logs/
+*.log
+
+# Environment / secrets
+.env
+.env.*
+
+# OS junk
+.DS_Store
+Thumbs.db

@@ -1,0 +1,6 @@
+tiktoken
+pandas
+tqdm
+PyMuPDF
+PyPDF2
+
