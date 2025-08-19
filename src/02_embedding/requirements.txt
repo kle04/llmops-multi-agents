@@ -1,5 +1,6 @@
-sentence-transformers
-torch
-numpy
-tqdm
-qdrant-client
+sentence-transformers==5.1.0
+torch==2.8.0
+numpy==2.3.2
+tqdm==4.67.1
+qdrant-client==1.15.1
+httpx==0.28.1

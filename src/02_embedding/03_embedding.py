@@ -23,7 +23,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--chunks_dir", default="data/processed/chunks", help="Thư mục chứa các *.jsonl")
     ap.add_argument("--out_dir",    default="data/embeddings",      help="Nơi lưu .npz")
-    ap.add_argument("--model",      default="BAAI/bge-m3",          help="Model embedding")
+    ap.add_argument("--model",      default="AITeamVN/Vietnamese_Embedding_v2",          help="Model embedding")
     ap.add_argument("--batch_size", type=int, default=32)
     ap.add_argument("--normalize",  action="store_true", help="L2-normalize vectors")
     args = ap.parse_args()
