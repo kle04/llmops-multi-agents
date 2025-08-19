@@ -12,10 +12,6 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 
-# Data files (large, should not be in git)
-data/interim/
-data/processed/
-data/embeddings/
 
 # Logs
 logs/

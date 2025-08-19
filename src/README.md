@@ -38,3 +38,15 @@ python src/02_embedding/03_embedding.py \
   --normalize
 ```
 * Lúc này, sẽ tạo các vector ở data/embeddings
+
+
+## Bước 5: Upsert vector vào Qdrant DB
+```
+python src/02_embedding/03b_upsert_qdrant.py \
+  --emb_dir data/embeddings \
+  --chunks_dir data/processed/chunks \
+  --qdrant_url http://localhost:6333 \
+  --collection mental_health_vi \
+  --distance cosine \
+  --batch_size 256
+```

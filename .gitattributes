@@ -1,0 +1,39 @@
+# --- Handle line endings ---
+# Mặc định: normalize tất cả text file về LF trong repo
+* text=auto eol=lf
+
+# Nhưng khi checkout trên Windows, Git sẽ tự chuyển LF -> CRLF nếu user config core.autocrlf=true
+
+# --- File types ---
+# Source code (cố định LF)
+*.py text eol=lf
+*.sh text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+*.md text eol=lf
+*.tex text eol=lf
+
+# --- Documentation (LF để build LaTeX không lỗi) ---
+*.bib text eol=lf
+
+# --- Binary files (không diff, không đổi line endings) ---
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.npz binary
+*.npy binary
+*.pt binary
+*.onnx binary
+*.h5 binary
+*.db binary
+*.sqlite binary
+
+# --- OS-specific ---
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary

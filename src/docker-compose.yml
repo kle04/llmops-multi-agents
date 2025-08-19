@@ -1,0 +1,60 @@
+services:
+  # --- B1: Extract pages -> data/processed/text ---
+  extractor:
+    build:
+      context: ./01_preprocessing
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    command: >
+      python src/01_preprocessing/01_extract_text.py
+      --catalog data/metadata/catalog.csv
+      --raw_dir data/raw
+      --out_dir data/processed/text
+
+  # --- B2: Chunk -> data/processed/chunks ---
+  chunker:
+    build:
+      context: ./01_preprocessing
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    command: >
+      python src/01_preprocessing/02_chunk_text.py
+      --catalog data/metadata/catalog.csv
+      --text_dir data/processed/text
+      --out_dir data/processed/chunks
+      --max_tokens 800 --overlap 120 --min_tokens 120
+      --auto_toc
+
+  # --- B3: Embedding -> data/embeddings (bge-m3) ---
+  embedder:
+    build:
+      context: ./02_embedding
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    command: >
+      python src/02_embedding/03_embedding.py
+      --chunks_dir data/processed/chunks
+      --out_dir data/embeddings
+      --model BAAI/bge-m3
+      --batch_size 32
+      --normalize
+
+  # --- B4: Upsert Qdrant (tùy chọn) ---
+
+
+  # Qdrant để test local
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+volumes:
+  qdrant_storage:
