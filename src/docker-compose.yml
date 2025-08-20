@@ -1,0 +1,40 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  embedding:
+    build:
+      context: ./02_embedding
+      dockerfile: Dockerfile
+    environment:
+      CHUNKS_DIR: "/workspace/data/processed/chunks"
+      OUT_DIR: "/workspace/data/embeddings"
+      MODEL: "AITeamVN/Vietnamese_Embedding_v2"
+      QDRANT_URL: "http://qdrant:6333"
+      QDRANT_COLLECTION: "mental_health_vi"
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    depends_on:
+      - qdrant
+
+  # retrieval:
+  #   build:
+  #     context: ./retrieval
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     QDRANT_URL: "localhost:6333"
+  #     QDRANT_COLLECTION: "mental_health_vi"
+  #     EMBED_MODEL: "AITeamVN/Vietnamese_Embedding_v2"
+  #   volumes:
+  #     - ..:/workspace
+  #   working_dir: /workspace
+  #   ports:
+  #     - "8000:8000"
+
+volumes:
+  qdrant_storage:

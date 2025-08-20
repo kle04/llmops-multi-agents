@@ -3,211 +3,620 @@
 
 import argparse
 import json
+import logging
 import math
 import re
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from functools import lru_cache
 from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple, Any
 
 import pandas as pd
+from tqdm import tqdm
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
+
+# Custom exceptions
+class ChunkingError(Exception):
+    """Raised when chunking fails"""
+    pass
+
+class ConfigurationError(Exception):
+    """Raised when configuration is invalid"""
+    pass
 
 # ---------- Token counter ----------
-_enc = None
-def count_tokens(text: str) -> int:
-    """Ưu tiên tiktoken; nếu không có, ước lượng 4 ký tự ~ 1 token."""
-    global _enc
-    try:
-        import tiktoken
-        if _enc is None:
-            _enc = tiktoken.get_encoding("cl100k_base")
-        return len(_enc.encode(text))
-    except Exception:
-        return max(1, math.ceil(len(text) / 4))
+class TokenCounter:
+    """Thread-safe token counter with caching"""
+    
+    def __init__(self):
+        self._encoder = None
+        self._cache = {}
+    
+    def _get_encoder(self):
+        """Lazy load tiktoken encoder"""
+        if self._encoder is None:
+            try:
+                import tiktoken
+                self._encoder = tiktoken.get_encoding("cl100k_base")
+            except ImportError:
+                logger.warning("tiktoken not available, using fallback estimation")
+                self._encoder = "fallback"
+        return self._encoder
+    
+    @lru_cache(maxsize=1024)
+    def count_tokens(self, text: str) -> int:
+        """Count tokens with caching for performance"""
+        if not text:
+            return 0
+            
+        encoder = self._get_encoder()
+        if encoder == "fallback":
+            # Fallback: estimate 4 chars ~ 1 token
+            return max(1, math.ceil(len(text) / 4))
+        else:
+            return len(encoder.encode(text))
+
+# Global token counter instance
+token_counter = TokenCounter()
+
+# Pre-compile regex patterns for performance
+PATTERNS = {
+    'toc_dots': re.compile(r"\.{2,}\s*\d{1,4}$"),
+    'heading_chapter': re.compile(r"^(CHƯƠNG|PHẦN|MỤC)\s+\d+[:\. ]", re.IGNORECASE),
+    'heading_numbered': re.compile(r"^\d+(\.\d+)*\s+"),
+    'whitespace': re.compile(r'\s+'),
+}
 
 # ---------- Helpers ----------
-def parse_skip_pages(cell: str):
-    """Chuyển '1-3,5,8-9' -> set({1,2,3,5,8,9})"""
+def parse_skip_pages(cell: str) -> Set[int]:
+    """
+    Parse skip pages string like '1-3,5,8-9' -> set({1,2,3,5,8,9})
+    
+    Args:
+        cell: String with page ranges/numbers
+        
+    Returns:
+        Set of page numbers to skip
+        
+    Raises:
+        ValueError: If page format is invalid
+    """
     if not isinstance(cell, str) or not cell.strip():
         return set()
-    out = set()
-    for part in cell.split(","):
-        part = part.strip()
-        if "-" in part:
-            a, b = part.split("-", 1)
-            a, b = int(a), int(b)
-            out.update(range(min(a,b), max(a,b)+1))
-        else:
-            out.add(int(part))
-    return out
+    
+    pages = set()
+    try:
+        for part in cell.split(","):
+            part = part.strip()
+            if "-" in part:
+                start_str, end_str = part.split("-", 1)
+                start, end = int(start_str), int(end_str)
+                pages.update(range(min(start, end), max(start, end) + 1))
+            else:
+                pages.add(int(part))
+    except ValueError as e:
+        raise ValueError(f"Invalid skip_pages format '{cell}': {e}")
+    
+    return pages
 
 def is_toc_page(text: str) -> bool:
-    """Heuristic nhận diện 'MỤC LỤC': nhiều dòng kết thúc số, có chữ 'MỤC LỤC'."""
-    txt = text.upper()
-    if "MỤC LỤC" in txt or "MUC LUC" in txt:
+    """
+    Detect table of contents pages using heuristics.
+    
+    Args:
+        text: Page text content
+        
+    Returns:
+        True if page appears to be a table of contents
+    """
+    if not text or not text.strip():
+        return False
+        
+    # Check for explicit TOC keywords
+    upper_text = text.upper()
+    if "MỤC LỤC" in upper_text or "MUC LUC" in upper_text:
         return True
-    # nhiều dòng có '.... 12' hoặc '... 5' => giống mục lục
-    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-    matched = 0
-    for ln in lines:
-        if re.search(r"\.{2,}\s*\d{1,4}$", ln):
-            matched += 1
-    return matched >= max(3, len(lines) // 3)
+    
+    # Check for TOC-like patterns (many lines ending with page numbers)
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if len(lines) < 3:
+        return False
+        
+    matched_lines = sum(1 for line in lines if PATTERNS['toc_dots'].search(line))
+    threshold = max(3, len(lines) // 3)
+    
+    return matched_lines >= threshold
 
 def is_heading(line: str) -> bool:
-    """Nhận diện tiêu đề chương/mục đơn giản."""
-    l = line.strip()
-    if not l:
+    """
+    Detect if a line is likely a heading/title.
+    
+    Args:
+        line: Text line to check
+        
+    Returns:
+        True if line appears to be a heading
+    """
+    line = line.strip()
+    if not line:
         return False
-    # Các pattern thường gặp
-    if re.match(r"^(CHƯƠNG|PHẦN|MỤC)\s+\d+[:\. ]", l, flags=re.IGNORECASE):
+    
+    # Check common heading patterns
+    if PATTERNS['heading_chapter'].match(line):
         return True
-    if re.match(r"^\d+(\.\d+)*\s+", l):  # 1, 1.1, 2.3.4 ...
+    if PATTERNS['heading_numbered'].match(line):
         return True
-    # dòng viết HOA và khá ngắn
-    if len(l) <= 70 and l == l.upper() and any(ch.isalpha() for ch in l):
+    
+    # Check for ALL CAPS short lines (likely headings)
+    if (len(line) <= 70 and 
+        line == line.upper() and 
+        any(ch.isalpha() for ch in line)):
         return True
+    
     return False
 
-def paragraphs_from_pages(pages):
-    """Ghép các trang -> đoạn (ngắt bởi dòng trống), giữ tiêu đề."""
-    text = "\n\n".join(pages)
-    paras = [p.strip() for p in text.split("\n\n") if p.strip()]
-    return paras
+def paragraphs_from_pages(pages: List[str]) -> List[str]:
+    """
+    Convert pages to paragraphs (split by double newlines).
+    
+    Args:
+        pages: List of page texts
+        
+    Returns:
+        List of paragraph texts
+    """
+    if not pages:
+        return []
+        
+    # Join all pages with double newlines
+    text = "\n\n".join(page for page in pages if page.strip())
+    
+    # Split into paragraphs and filter empty ones
+    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+    
+    return paragraphs
 
-def chunk_with_overlap(paras, max_toks, overlap, min_toks):
-    """Ghép paragraph thành chunk theo số token, có overlap."""
+def chunk_with_overlap(paras: List[str], max_tokens: int, overlap: int, min_tokens: int) -> List[str]:
+    """
+    Create chunks from paragraphs with overlap and token limits.
+    
+    Args:
+        paras: List of paragraph texts
+        max_tokens: Maximum tokens per chunk
+        overlap: Number of overlap tokens between chunks
+        min_tokens: Minimum tokens per chunk
+        
+    Returns:
+        List of chunk texts
+        
+    Raises:
+        ChunkingError: If chunking parameters are invalid
+    """
+    if max_tokens <= 0 or min_tokens <= 0 or overlap < 0:
+        raise ChunkingError(f"Invalid chunking parameters: max_tokens={max_tokens}, min_tokens={min_tokens}, overlap={overlap}")
+    
+    if overlap >= max_tokens:
+        raise ChunkingError(f"Overlap ({overlap}) must be less than max_tokens ({max_tokens})")
+    
     chunks = []
-    buf, tok = [], 0
-    for p in paras:
-        ptok = count_tokens(p)
-        # nếu 1 paragraph quá dài, cắt mạnh theo từ
-        if ptok > max_toks * 1.5:
-            words = p.split()
-            step = max(50, max_toks - overlap)
-            for i in range(0, len(words), step):
-                seg = " ".join(words[i:i+max_toks])
-                if count_tokens(seg) >= min_toks:
-                    chunks.append(seg)
+    current_buffer = []
+    current_tokens = 0
+    
+    for paragraph in paras:
+        if not paragraph.strip():
             continue
-
-        if tok + ptok <= max_toks:
-            buf.append(p); tok += ptok
+            
+        para_tokens = token_counter.count_tokens(paragraph)
+        
+        # Handle extremely long paragraphs by splitting them
+        if para_tokens > max_tokens * 1.5:
+            logger.warning(f"Very long paragraph ({para_tokens} tokens), splitting by words")
+            words = paragraph.split()
+            words_per_chunk = max(50, max_tokens - overlap)
+            
+            for i in range(0, len(words), words_per_chunk):
+                segment = " ".join(words[i:i + max_tokens])
+                segment_tokens = token_counter.count_tokens(segment)
+                
+                if segment_tokens >= min_tokens:
+                    chunks.append(segment)
+            continue
+        
+        # Check if we can add this paragraph to current chunk
+        if current_tokens + para_tokens <= max_tokens:
+            current_buffer.append(paragraph)
+            current_tokens += para_tokens
         else:
-            if tok >= min_toks:
-                chunks.append("\n\n".join(buf))
-                # overlap: lấy đuôi của buf để làm ngữ cảnh
-                if overlap > 0 and buf:
-                    tail, tail_tok = [], 0
-                    for para in reversed(buf):
-                        t = count_tokens(para)
-                        if tail_tok + t > overlap:
+            # Finalize current chunk if it meets minimum requirements
+            if current_tokens >= min_tokens and current_buffer:
+                chunks.append("\n\n".join(current_buffer))
+                
+                # Create overlap for next chunk
+                if overlap > 0 and current_buffer:
+                    overlap_buffer = []
+                    overlap_tokens = 0
+                    
+                    # Take paragraphs from the end for overlap
+                    for para in reversed(current_buffer):
+                        para_tokens = token_counter.count_tokens(para)
+                        if overlap_tokens + para_tokens > overlap:
                             break
-                        tail.append(para); tail_tok += t
-                    buf = list(reversed(tail))
-                    tok = sum(count_tokens(x) for x in buf)
-            # thêm paragraph hiện tại
-            buf.append(p); tok += ptok
+                        overlap_buffer.append(para)
+                        overlap_tokens += para_tokens
+                    
+                    current_buffer = list(reversed(overlap_buffer))
+                    current_tokens = overlap_tokens
+                else:
+                    current_buffer = []
+                    current_tokens = 0
+            else:
+                # Current buffer doesn't meet minimum, start fresh
+                current_buffer = []
+                current_tokens = 0
+            
+            # Add current paragraph to buffer
+            current_buffer.append(paragraph)
+            current_tokens += para_tokens
+    
+    # Add final chunk if it exists and meets requirements
+    if current_buffer and current_tokens >= min_tokens:
+        chunks.append("\n\n".join(current_buffer))
+    
+    # Filter out empty chunks
+    return [chunk for chunk in chunks if chunk.strip()]
 
-    if buf:
-        chunks.append("\n\n".join(buf))
-    return [c for c in chunks if c.strip()]
-
-def attach_sections(paras):
+def attach_sections(paras: List[str]) -> List[Tuple[str, str]]:
     """
-    Tìm heading gần nhất và gắn vào paragraph như nhãn 'section'.
-    Trả về list[(section, paragraph_text)]
+    Attach section headings to paragraphs.
+    
+    Args:
+        paras: List of paragraph texts
+        
+    Returns:
+        List of (section_name, paragraph_text) tuples
     """
-    out = []
-    current = ""
-    for p in paras:
-        lines = [ln for ln in p.splitlines() if ln.strip()]
-        if lines and is_heading(lines[0]):
-            current = lines[0].strip()
-        out.append((current, p))
-    return out
-
-# ---------- Main ----------
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--catalog", default="data/metadata/catalog.csv")
-    ap.add_argument("--text_dir", default="data/processed/text")
-    ap.add_argument("--out_dir", default="data/processed/chunks")
-    ap.add_argument("--max_tokens", type=int, default=800)
-    ap.add_argument("--overlap", type=int, default=120)
-    ap.add_argument("--min_tokens", type=int, default=120)
-    ap.add_argument("--auto_toc", action="store_true", help="Bật tự động nhận diện trang mục lục")
-    args = ap.parse_args()
-
-    catalog = pd.read_csv(args.catalog)
-
-    out_dir = Path(args.out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    for _, row in catalog.iterrows():
-        doc_id = str(row["doc_id"])
-        text_path = Path(args.text_dir) / f"{doc_id}.pages.jsonl"
-        if not text_path.exists():
-            print(f"[WARN] Không thấy: {text_path}")
+    if not paras:
+        return []
+        
+    result = []
+    current_section = ""
+    
+    for paragraph in paras:
+        if not paragraph.strip():
             continue
+            
+        lines = [line for line in paragraph.splitlines() if line.strip()]
+        
+        # Check if first line is a heading
+        if lines and is_heading(lines[0]):
+            current_section = lines[0].strip()
+        
+        result.append((current_section, paragraph))
+    
+    return result
 
-        # đọc các trang
+def validate_configuration(catalog_path: Path, text_dir: Path, max_tokens: int, min_tokens: int, overlap: int) -> None:
+    """
+    Validate configuration parameters.
+    
+    Args:
+        catalog_path: Path to catalog CSV
+        text_dir: Path to text directory
+        max_tokens: Maximum tokens per chunk
+        min_tokens: Minimum tokens per chunk
+        overlap: Overlap tokens between chunks
+        
+    Raises:
+        ConfigurationError: If configuration is invalid
+    """
+    if not catalog_path.exists():
+        raise ConfigurationError(f"Catalog file not found: {catalog_path}")
+    
+    if not text_dir.exists():
+        raise ConfigurationError(f"Text directory not found: {text_dir}")
+    
+    if max_tokens <= 0:
+        raise ConfigurationError(f"max_tokens must be positive: {max_tokens}")
+    
+    if min_tokens <= 0:
+        raise ConfigurationError(f"min_tokens must be positive: {min_tokens}")
+    
+    if overlap < 0:
+        raise ConfigurationError(f"overlap cannot be negative: {overlap}")
+    
+    if overlap >= max_tokens:
+        raise ConfigurationError(f"overlap ({overlap}) must be less than max_tokens ({max_tokens})")
+    
+    if min_tokens > max_tokens:
+        raise ConfigurationError(f"min_tokens ({min_tokens}) cannot be greater than max_tokens ({max_tokens})")
+
+def process_single_document(row: pd.Series, text_dir: Path, out_dir: Path, 
+                          max_tokens: int, overlap: int, min_tokens: int, 
+                          auto_toc: bool) -> Dict[str, Any]:
+    """
+    Process a single document for chunking.
+    
+    Args:
+        row: Catalog row for the document
+        text_dir: Directory containing text files
+        out_dir: Output directory for chunks
+        max_tokens: Maximum tokens per chunk
+        overlap: Overlap tokens between chunks
+        min_tokens: Minimum tokens per chunk
+        auto_toc: Whether to automatically skip TOC pages
+        
+    Returns:
+        Processing statistics dictionary
+    """
+    start_time = time.time()
+    doc_id = str(row["doc_id"])
+    
+    stats = {
+        "doc_id": doc_id,
+        "status": "success",
+        "pages_processed": 0,
+        "pages_skipped": 0,
+        "paragraphs": 0,
+        "chunks": 0,
+        "processing_time": 0,
+        "errors": []
+    }
+    
+    try:
+        text_path = text_dir / f"{doc_id}.pages.jsonl"
+        if not text_path.exists():
+            raise ChunkingError(f"Text file not found: {text_path}")
+        
+        # Load pages
         pages = []
-        with open(text_path, "r", encoding="utf-8") as f:
-            for line in f:
-                obj = json.loads(line)
-                pages.append((int(obj["page"]), obj.get("text", "")))
-
-        # bỏ trang theo catalog (skip_pages)
-        skip = parse_skip_pages(str(row.get("skip_pages", "")))
-        if skip:
-            pages = [(pg, txt) for (pg, txt) in pages if pg not in skip]
-
-        # auto bỏ trang mục lục (tùy chọn)
-        if args.auto_toc:
+        with text_path.open("r", encoding="utf-8") as f:
+            for line_num, line in enumerate(f, 1):
+                try:
+                    obj = json.loads(line)
+                    page_num = int(obj["page"])
+                    text = obj.get("text", "")
+                    pages.append((page_num, text))
+                except (json.JSONDecodeError, KeyError, ValueError) as e:
+                    error_msg = f"Invalid JSON on line {line_num}: {e}"
+                    stats["errors"].append(error_msg)
+                    logger.warning(f"{doc_id}: {error_msg}")
+        
+        if not pages:
+            raise ChunkingError(f"No valid pages found in {text_path}")
+        
+        # Parse skip pages from catalog
+        try:
+            skip_pages = parse_skip_pages(str(row.get("skip_pages", "")))
+        except ValueError as e:
+            error_msg = f"Invalid skip_pages format: {e}"
+            stats["errors"].append(error_msg)
+            logger.warning(f"{doc_id}: {error_msg}")
+            skip_pages = set()
+        
+        # Filter pages
+        original_count = len(pages)
+        if skip_pages:
+            pages = [(pg, txt) for (pg, txt) in pages if pg not in skip_pages]
+            logger.debug(f"{doc_id}: Skipped {original_count - len(pages)} pages by catalog")
+        
+        # Auto-skip TOC pages
+        if auto_toc:
+            before_toc = len(pages)
             pages = [(pg, txt) for (pg, txt) in pages if not is_toc_page(txt)]
-
-        # tạo paragraphs và gắn section (heading)
+            toc_skipped = before_toc - len(pages)
+            if toc_skipped > 0:
+                logger.debug(f"{doc_id}: Auto-skipped {toc_skipped} TOC pages")
+        
+        stats["pages_processed"] = len(pages)
+        stats["pages_skipped"] = original_count - len(pages)
+        
+        if not pages:
+            raise ChunkingError("No pages remaining after filtering")
+        
+        # Convert to paragraphs
         ordered_texts = [txt for _, txt in sorted(pages, key=lambda x: x[0])]
-        paras = paragraphs_from_pages(ordered_texts)
-        sec_paras = attach_sections(paras)
-
-        # Nhưng chunker hoạt động theo paragraph text; ta giữ mapping section theo thứ tự
-        paras_only = [p for (sec, p) in sec_paras]
-        chunks = chunk_with_overlap(paras_only, args.max_tokens, args.overlap, args.min_tokens)
-
-        # build payload cho từng chunk
-        rows = []
-        for i, ch in enumerate(chunks):
-            # section gần nhất cho chunk = section của paragraph đầu tiên trong chunk
-            first_para = ch.split("\n\n", 1)[0]
-            # tìm lại section
+        paragraphs = paragraphs_from_pages(ordered_texts)
+        stats["paragraphs"] = len(paragraphs)
+        
+        if not paragraphs:
+            raise ChunkingError("No paragraphs extracted")
+        
+        # Attach sections
+        section_paragraphs = attach_sections(paragraphs)
+        
+        # Create chunks
+        paragraph_texts = [p for (sec, p) in section_paragraphs]
+        chunks = chunk_with_overlap(paragraph_texts, max_tokens, overlap, min_tokens)
+        stats["chunks"] = len(chunks)
+        
+        if not chunks:
+            raise ChunkingError("No chunks created")
+        
+        # Build chunk payloads
+        chunk_records = []
+        for i, chunk_text in enumerate(chunks):
+            # Find section for this chunk
+            first_paragraph = chunk_text.split("\n\n", 1)[0]
             section = ""
-            for (sec, p) in sec_paras:
-                if p == first_para:
+            for (sec, para) in section_paragraphs:
+                if para.startswith(first_paragraph[:100]):  # More robust matching
                     section = sec
                     break
-
+            
             chunk_id = f"{doc_id}_{i:05d}"
-            payload = {
+            record = {
                 "id": chunk_id,
                 "chunk_id": chunk_id,
                 "doc_id": doc_id,
-                "title": row.get("title", ""),
-                "source": row.get("source", ""),
-                "year": row.get("year", ""),
-                "language": row.get("language", "vi"),
+                "title": str(row.get("title", "")),
+                "source": str(row.get("source", "")),
+                "year": str(row.get("year", "")),
+                "language": str(row.get("language", "vi")),
                 "audience": str(row.get("audience", "")),
                 "grade_range": str(row.get("grade_range", "")),
                 "topics": str(row.get("topics", "")),
                 "section": section,
-                "text": ch
+                "text": chunk_text,
+                "token_count": token_counter.count_tokens(chunk_text)
             }
-            rows.append(payload)
-
+            chunk_records.append(record)
+        
+        # Write output
         out_file = out_dir / f"{doc_id}.jsonl"
-        with open(out_file, "w", encoding="utf-8") as f:
-            for r in rows:
-                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        with out_file.open("w", encoding="utf-8") as f:
+            for record in chunk_records:
+                json.dump(record, f, ensure_ascii=False)
+                f.write("\n")
+        
+        stats["processing_time"] = time.time() - start_time
+        logger.info(f"Successfully processed {doc_id}: {stats['chunks']} chunks, "
+                   f"{stats['paragraphs']} paragraphs, {stats['processing_time']:.2f}s")
+        
+    except Exception as e:
+        stats["status"] = "failed"
+        stats["error"] = str(e)
+        stats["processing_time"] = time.time() - start_time
+        logger.error(f"Failed to process {doc_id}: {e}")
+    
+    return stats
 
-        print(f"[OK] {doc_id}: {len(rows)} chunks → {out_file}")
+# ---------- Main ----------
+def main():
+    """Main function with improved error handling and parallel processing."""
+    parser = argparse.ArgumentParser(
+        description="Create text chunks from extracted text with optimized performance"
+    )
+    parser.add_argument("--catalog", default="data/metadata/catalog.csv",
+                       help="Path to catalog CSV file")
+    parser.add_argument("--text_dir", default="data/processed/text",
+                       help="Directory containing extracted text files")
+    parser.add_argument("--out_dir", default="data/processed/chunks",
+                       help="Output directory for chunk files")
+    parser.add_argument("--max_tokens", type=int, default=800,
+                       help="Maximum tokens per chunk")
+    parser.add_argument("--overlap", type=int, default=120,
+                       help="Number of overlap tokens between chunks")
+    parser.add_argument("--min_tokens", type=int, default=120,
+                       help="Minimum tokens per chunk")
+    parser.add_argument("--auto_toc", action="store_true",
+                       help="Automatically skip table of contents pages")
+    parser.add_argument("--max_workers", type=int, default=4,
+                       help="Maximum number of parallel workers")
+    parser.add_argument("--log_level", choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
+                       default='INFO', help="Logging level")
+    
+    args = parser.parse_args()
+    
+    # Set logging level
+    logger.setLevel(getattr(logging, args.log_level))
+    
+    # Convert to Path objects
+    catalog_path = Path(args.catalog)
+    text_dir = Path(args.text_dir)
+    out_dir = Path(args.out_dir)
+    
+    try:
+        # Validate configuration
+        validate_configuration(catalog_path, text_dir, args.max_tokens, 
+                             args.min_tokens, args.overlap)
+        
+        # Create output directory
+        out_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Load catalog
+        catalog = pd.read_csv(catalog_path)
+        logger.info(f"Loaded catalog with {len(catalog)} documents")
+        
+        # Filter valid documents
+        valid_rows = []
+        for _, row in catalog.iterrows():
+            doc_id = str(row["doc_id"])
+            text_path = text_dir / f"{doc_id}.pages.jsonl"
+            if text_path.exists():
+                valid_rows.append(row)
+            else:
+                logger.warning(f"Text file not found for {doc_id}: {text_path}")
+        
+        if not valid_rows:
+            logger.error("No valid documents found")
+            return 1
+        
+        logger.info(f"Processing {len(valid_rows)} valid documents")
+        
+        # Process documents
+        max_workers = min(args.max_workers, len(valid_rows))
+        all_stats = []
+        
+        if max_workers == 1:
+            # Sequential processing
+            for row in tqdm(valid_rows, desc="Chunking documents"):
+                stats = process_single_document(
+                    row, text_dir, out_dir, args.max_tokens, 
+                    args.overlap, args.min_tokens, args.auto_toc
+                )
+                all_stats.append(stats)
+        else:
+            # Parallel processing
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                future_to_doc = {
+                    executor.submit(
+                        process_single_document, row, text_dir, out_dir,
+                        args.max_tokens, args.overlap, args.min_tokens, args.auto_toc
+                    ): str(row["doc_id"])
+                    for row in valid_rows
+                }
+                
+                for future in tqdm(as_completed(future_to_doc), 
+                                 total=len(future_to_doc),
+                                 desc="Chunking documents"):
+                    doc_id = future_to_doc[future]
+                    try:
+                        stats = future.result()
+                        all_stats.append(stats)
+                    except Exception as e:
+                        logger.error(f"Task failed for {doc_id}: {e}")
+                        all_stats.append({
+                            "doc_id": doc_id,
+                            "status": "failed",
+                            "error": str(e)
+                        })
+        
+        # Print summary
+        successful = [s for s in all_stats if s["status"] == "success"]
+        failed = [s for s in all_stats if s["status"] != "success"]
+        
+        total_chunks = sum(s.get("chunks", 0) for s in successful)
+        total_paragraphs = sum(s.get("paragraphs", 0) for s in successful)
+        total_time = sum(s.get("processing_time", 0) for s in successful)
+        
+        logger.info(f"\n=== CHUNKING SUMMARY ===")
+        logger.info(f"Total documents: {len(all_stats)}")
+        logger.info(f"Successful: {len(successful)}")
+        logger.info(f"Failed: {len(failed)}")
+        logger.info(f"Total chunks created: {total_chunks}")
+        logger.info(f"Total paragraphs processed: {total_paragraphs}")
+        logger.info(f"Total processing time: {total_time:.2f}s")
+        logger.info(f"Average chunks per document: {total_chunks / max(len(successful), 1):.1f}")
+        
+        if failed:
+            logger.warning(f"Failed documents: {[s['doc_id'] for s in failed]}")
+        
+        return 0 if not failed else 1
+        
+    except ConfigurationError as e:
+        logger.error(f"Configuration error: {e}")
+        return 1
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        return 1
 
 if __name__ == "__main__":
-    main()
+    exit(main())
