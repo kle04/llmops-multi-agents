@@ -6,26 +6,8 @@ services:
     volumes:
       - qdrant_storage:/qdrant/storage
 
-  embedding:
-    build:
-      context: ./02_embedding
-      dockerfile: Dockerfile
-    environment:
-      CHUNKS_DIR: "/workspace/data/processed/chunks"
-      OUT_DIR: "/workspace/data/embeddings"
-      MODEL: "AITeamVN/Vietnamese_Embedding_v2"
-      QDRANT_URL: "http://qdrant:6333"
-      QDRANT_COLLECTION: "mental_health_vi"
-    volumes:
-      - ..:/workspace
-    working_dir: /workspace
-    depends_on:
-      - qdrant
-
   retrieval:
-    build:
-      context: ./retrieval
-      dockerfile: Dockerfile
+    image: khanhle04/retrieval:latest
     environment:
       QDRANT_URL: "http://qdrant:6333"
       QDRANT_COLLECTION: "mental_health_vi"
@@ -35,5 +17,37 @@ services:
     depends_on:
       - qdrant
 
+  # FastAPI Embedding Service
+  deploy-embedding:
+    build:
+      context: ./deploy_embedding
+      dockerfile: Dockerfile
+    # image: khanhle04/deploy-embedding:latest  # Use this if image is pre-built
+    environment:
+      PORT: "8000"
+      PYTHONUNBUFFERED: "1"
+      HF_HOME: "/app/.cache/huggingface"
+    ports:
+      - "8000:8000"
+    volumes:
+      - model_cache:/app/.cache/huggingface  # Shared model cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+          cpus: "2.0"
+        reservations:
+          memory: 1G
+          cpus: "1.0"
+
 volumes:
   qdrant_storage:
+  model_cache:  # Shared cache for models
