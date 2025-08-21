@@ -22,19 +22,18 @@ services:
     depends_on:
       - qdrant
 
-  # retrieval:
-  #   build:
-  #     context: ./retrieval
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     QDRANT_URL: "localhost:6333"
-  #     QDRANT_COLLECTION: "mental_health_vi"
-  #     EMBED_MODEL: "AITeamVN/Vietnamese_Embedding_v2"
-  #   volumes:
-  #     - ..:/workspace
-  #   working_dir: /workspace
-  #   ports:
-  #     - "8000:8000"
+  retrieval:
+    build:
+      context: ./retrieval
+      dockerfile: Dockerfile
+    environment:
+      QDRANT_URL: "http://qdrant:6333"
+      QDRANT_COLLECTION: "mental_health_vi"
+      EMBED_MODEL: "AITeamVN/Vietnamese_Embedding_v2"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - qdrant
 
 volumes:
   qdrant_storage:
