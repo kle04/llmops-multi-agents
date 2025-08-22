@@ -2,6 +2,10 @@
 .git
 .gitignore
 
+# Documentation
+README.md
+*.md
+
 # Python
 __pycache__
 *.pyc
@@ -19,22 +23,21 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
-.git
 .mypy_cache
 .pytest_cache
 .hypothesis
 
 # Virtual environments
+.venv
 venv/
-env/
 ENV/
+env/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
 # OS
 .DS_Store
@@ -45,11 +48,15 @@ ENV/
 ehthumbs.db
 Thumbs.db
 
-# Documentation
-*.md
-docs/
+# Temp files
+*.tmp
+*.temp
+
+# Poetry
+dist/
+build/
 
 # Test files
-test_*.py
+test_*
 *_test.py
 tests/

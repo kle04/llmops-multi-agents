@@ -67,27 +67,21 @@ class TokenCounter:
 # Global token counter instance
 token_counter = TokenCounter()
 
-# Pre-compile regex patterns for performance
+# Pre-compile regex patterns for Vietnamese educational documents
 PATTERNS = {
     'toc_dots': re.compile(r"\.{2,}\s*\d{1,4}$"),
-    'heading_chapter': re.compile(r"^(CHƯƠNG|PHẦN|MỤC)\s+\d+[:\. ]", re.IGNORECASE),
-    'heading_numbered': re.compile(r"^\d+(\.\d+)*\s+"),
+    'heading_part': re.compile(r"^(PHẦN|CHƯƠNG|MỤC)\s+\d+[\.\:\s]", re.IGNORECASE),
+    'heading_numbered': re.compile(r"^\d+(\.\d+)*\.?\s+"),
+    'heading_intro': re.compile(r"^(LỜI MỞ ĐẦU|MỤC LỤC|GIỚI THIỆU|GIẢI THÍCH THUẬT NGỮ|TÀI LIỆU THAM KHẢO|PHỤ LỤC)", re.IGNORECASE),
     'whitespace': re.compile(r'\s+'),
+    'page_number': re.compile(r"^\d{1,4}\s*$"),
+    'danh_muc': re.compile(r"^(DANH MỤC|BẢNG BIỂU)", re.IGNORECASE),
 }
 
 # ---------- Helpers ----------
 def parse_skip_pages(cell: str) -> Set[int]:
     """
     Parse skip pages string like '1-3,5,8-9' -> set({1,2,3,5,8,9})
-    
-    Args:
-        cell: String with page ranges/numbers
-        
-    Returns:
-        Set of page numbers to skip
-        
-    Raises:
-        ValueError: If page format is invalid
     """
     if not isinstance(cell, str) or not cell.strip():
         return set()
@@ -109,20 +103,14 @@ def parse_skip_pages(cell: str) -> Set[int]:
 
 def is_toc_page(text: str) -> bool:
     """
-    Detect table of contents pages using heuristics.
-    
-    Args:
-        text: Page text content
-        
-    Returns:
-        True if page appears to be a table of contents
+    Detect table of contents pages using heuristics for Vietnamese documents.
     """
     if not text or not text.strip():
         return False
         
     # Check for explicit TOC keywords
     upper_text = text.upper()
-    if "MỤC LỤC" in upper_text or "MUC LUC" in upper_text:
+    if any(keyword in upper_text for keyword in ["MỤC LỤC", "MUC LUC", "DANH MỤC"]):
         return True
     
     # Check for TOC-like patterns (many lines ending with page numbers)
@@ -137,22 +125,20 @@ def is_toc_page(text: str) -> bool:
 
 def is_heading(line: str) -> bool:
     """
-    Detect if a line is likely a heading/title.
-    
-    Args:
-        line: Text line to check
-        
-    Returns:
-        True if line appears to be a heading
+    Detect if a line is likely a heading/title for Vietnamese educational documents.
     """
     line = line.strip()
     if not line:
         return False
     
-    # Check common heading patterns
-    if PATTERNS['heading_chapter'].match(line):
+    # Check common heading patterns for Vietnamese educational documents
+    if PATTERNS['heading_part'].match(line):
         return True
     if PATTERNS['heading_numbered'].match(line):
+        return True
+    if PATTERNS['heading_intro'].match(line):
+        return True
+    if PATTERNS['danh_muc'].match(line):
         return True
     
     # Check for ALL CAPS short lines (likely headings)
@@ -163,15 +149,33 @@ def is_heading(line: str) -> bool:
     
     return False
 
+def extract_section_title(paragraph: str) -> str:
+    """
+    Extract section title from paragraph for Vietnamese educational documents.
+    """
+    lines = [line.strip() for line in paragraph.splitlines() if line.strip()]
+    if not lines:
+        return ""
+    
+    first_line = lines[0]
+    
+    # Check for different heading patterns
+    if PATTERNS['heading_part'].match(first_line):
+        return first_line
+    elif PATTERNS['heading_numbered'].match(first_line):
+        return first_line
+    elif PATTERNS['heading_intro'].match(first_line):
+        return first_line
+    elif PATTERNS['danh_muc'].match(first_line):
+        return first_line
+    elif is_heading(first_line):
+        return first_line
+    
+    return ""
+
 def paragraphs_from_pages(pages: List[str]) -> List[str]:
     """
-    Convert pages to paragraphs (split by double newlines).
-    
-    Args:
-        pages: List of page texts
-        
-    Returns:
-        List of paragraph texts
+    Convert pages to paragraphs with better handling for Vietnamese text.
     """
     if not pages:
         return []
@@ -182,23 +186,20 @@ def paragraphs_from_pages(pages: List[str]) -> List[str]:
     # Split into paragraphs and filter empty ones
     paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
     
-    return paragraphs
+    # Filter out page numbers and very short meaningless paragraphs
+    filtered_paragraphs = []
+    for p in paragraphs:
+        if len(p.strip()) < 10:  # Skip very short paragraphs
+            continue
+        if PATTERNS['page_number'].match(p.strip()):  # Skip standalone page numbers
+            continue
+        filtered_paragraphs.append(p)
+    
+    return filtered_paragraphs
 
 def chunk_with_overlap(paras: List[str], max_tokens: int, overlap: int, min_tokens: int) -> List[str]:
     """
-    Create chunks from paragraphs with overlap and token limits.
-    
-    Args:
-        paras: List of paragraph texts
-        max_tokens: Maximum tokens per chunk
-        overlap: Number of overlap tokens between chunks
-        min_tokens: Minimum tokens per chunk
-        
-    Returns:
-        List of chunk texts
-        
-    Raises:
-        ChunkingError: If chunking parameters are invalid
+    Create chunks from paragraphs with overlap and token limits, optimized for Vietnamese educational content.
     """
     if max_tokens <= 0 or min_tokens <= 0 or overlap < 0:
         raise ChunkingError(f"Invalid chunking parameters: max_tokens={max_tokens}, min_tokens={min_tokens}, overlap={overlap}")
@@ -216,18 +217,28 @@ def chunk_with_overlap(paras: List[str], max_tokens: int, overlap: int, min_toke
             
         para_tokens = token_counter.count_tokens(paragraph)
         
-        # Handle extremely long paragraphs by splitting them
+        # Handle extremely long paragraphs by splitting them at sentence boundaries
         if para_tokens > max_tokens * 1.5:
-            logger.warning(f"Very long paragraph ({para_tokens} tokens), splitting by words")
-            words = paragraph.split()
-            words_per_chunk = max(50, max_tokens - overlap)
+            logger.warning(f"Very long paragraph ({para_tokens} tokens), splitting by sentences")
+            # Split by Vietnamese sentence endings
+            sentences = re.split(r'[.!?](?:\s|$)', paragraph)
+            sentence_chunk = ""
             
-            for i in range(0, len(words), words_per_chunk):
-                segment = " ".join(words[i:i + max_tokens])
-                segment_tokens = token_counter.count_tokens(segment)
-                
-                if segment_tokens >= min_tokens:
-                    chunks.append(segment)
+            for sentence in sentences:
+                sentence = sentence.strip()
+                if not sentence:
+                    continue
+                    
+                test_chunk = sentence_chunk + ". " + sentence if sentence_chunk else sentence
+                if token_counter.count_tokens(test_chunk) > max_tokens:
+                    if sentence_chunk and token_counter.count_tokens(sentence_chunk) >= min_tokens:
+                        chunks.append(sentence_chunk)
+                    sentence_chunk = sentence
+                else:
+                    sentence_chunk = test_chunk
+            
+            if sentence_chunk and token_counter.count_tokens(sentence_chunk) >= min_tokens:
+                chunks.append(sentence_chunk)
             continue
         
         # Check if we can add this paragraph to current chunk
@@ -275,13 +286,7 @@ def chunk_with_overlap(paras: List[str], max_tokens: int, overlap: int, min_toke
 
 def attach_sections(paras: List[str]) -> List[Tuple[str, str]]:
     """
-    Attach section headings to paragraphs.
-    
-    Args:
-        paras: List of paragraph texts
-        
-    Returns:
-        List of (section_name, paragraph_text) tuples
+    Attach section headings to paragraphs for Vietnamese educational documents.
     """
     if not paras:
         return []
@@ -293,11 +298,11 @@ def attach_sections(paras: List[str]) -> List[Tuple[str, str]]:
         if not paragraph.strip():
             continue
             
-        lines = [line for line in paragraph.splitlines() if line.strip()]
+        # Extract section title from this paragraph
+        section_title = extract_section_title(paragraph)
         
-        # Check if first line is a heading
-        if lines and is_heading(lines[0]):
-            current_section = lines[0].strip()
+        if section_title:
+            current_section = section_title
         
         result.append((current_section, paragraph))
     
@@ -306,16 +311,6 @@ def attach_sections(paras: List[str]) -> List[Tuple[str, str]]:
 def validate_configuration(catalog_path: Path, text_dir: Path, max_tokens: int, min_tokens: int, overlap: int) -> None:
     """
     Validate configuration parameters.
-    
-    Args:
-        catalog_path: Path to catalog CSV
-        text_dir: Path to text directory
-        max_tokens: Maximum tokens per chunk
-        min_tokens: Minimum tokens per chunk
-        overlap: Overlap tokens between chunks
-        
-    Raises:
-        ConfigurationError: If configuration is invalid
     """
     if not catalog_path.exists():
         raise ConfigurationError(f"Catalog file not found: {catalog_path}")
@@ -342,19 +337,7 @@ def process_single_document(row: pd.Series, text_dir: Path, out_dir: Path,
                           max_tokens: int, overlap: int, min_tokens: int, 
                           auto_toc: bool) -> Dict[str, Any]:
     """
-    Process a single document for chunking.
-    
-    Args:
-        row: Catalog row for the document
-        text_dir: Directory containing text files
-        out_dir: Output directory for chunks
-        max_tokens: Maximum tokens per chunk
-        overlap: Overlap tokens between chunks
-        min_tokens: Minimum tokens per chunk
-        auto_toc: Whether to automatically skip TOC pages
-        
-    Returns:
-        Processing statistics dictionary
+    Process a single document for chunking with improved Vietnamese support.
     """
     start_time = time.time()
     doc_id = str(row["doc_id"])
@@ -440,16 +423,27 @@ def process_single_document(row: pd.Series, text_dir: Path, out_dir: Path,
         if not chunks:
             raise ChunkingError("No chunks created")
         
-        # Build chunk payloads
+        # Build chunk payloads with improved section matching
         chunk_records = []
         for i, chunk_text in enumerate(chunks):
-            # Find section for this chunk
-            first_paragraph = chunk_text.split("\n\n", 1)[0]
+            # Find section for this chunk by matching the first meaningful paragraph
+            chunk_paragraphs = [p.strip() for p in chunk_text.split("\n\n") if p.strip()]
             section = ""
-            for (sec, para) in section_paragraphs:
-                if para.startswith(first_paragraph[:100]):  # More robust matching
-                    section = sec
-                    break
+            
+            if chunk_paragraphs:
+                first_para = chunk_paragraphs[0]
+                # Find the section this chunk belongs to
+                for (sec, para) in section_paragraphs:
+                    if para and first_para.startswith(para[:min(100, len(para))]):
+                        section = sec
+                        break
+                
+                # If no exact match, try to find section by partial content match
+                if not section:
+                    for (sec, para) in section_paragraphs:
+                        if para and any(first_para in chunk_para for chunk_para in chunk_paragraphs):
+                            section = sec
+                            break
             
             chunk_id = f"{doc_id}_{i:05d}"
             record = {
@@ -473,6 +467,23 @@ def process_single_document(row: pd.Series, text_dir: Path, out_dir: Path,
         out_file = out_dir / f"{doc_id}.jsonl"
         with out_file.open("w", encoding="utf-8") as f:
             for record in chunk_records:
+                # Clean and normalize text before saving
+                if "text" in record and record["text"]:
+                    # Remove problematic characters and normalize
+                    clean_text = record["text"]
+                    # Remove null bytes and control characters
+                    clean_text = clean_text.replace('\x00', ' ')
+                    clean_text = ' '.join(clean_text.split())  # Normalize whitespace
+                    record["text"] = clean_text
+                
+                # Clean other text fields
+                for field in ["title", "source", "section"]:
+                    if field in record and record[field]:
+                        clean_field = str(record[field])
+                        clean_field = clean_field.replace('\x00', ' ')
+                        clean_field = ' '.join(clean_field.split())
+                        record[field] = clean_field
+                
                 json.dump(record, f, ensure_ascii=False)
                 f.write("\n")
         
@@ -490,9 +501,9 @@ def process_single_document(row: pd.Series, text_dir: Path, out_dir: Path,
 
 # ---------- Main ----------
 def main():
-    """Main function with improved error handling and parallel processing."""
+    """Main function with improved Vietnamese document processing."""
     parser = argparse.ArgumentParser(
-        description="Create text chunks from extracted text with optimized performance"
+        description="Create text chunks from extracted text with improved Vietnamese support"
     )
     parser.add_argument("--catalog", default="data/metadata/catalog.csv",
                        help="Path to catalog CSV file")

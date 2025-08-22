@@ -115,12 +115,15 @@ def normalize_whitespace(text: str) -> str:
     if not text or not text.strip():
         return ""
     
-    # Join broken lines (not double newlines)
+    # Join broken lines (not double newlines) - be more careful with Vietnamese text
     text = PATTERNS['line_break'].sub(" ", text)
     # Compress multiple spaces/tabs
     text = PATTERNS['whitespace'].sub(" ", text)
     # Replace 3+ newlines with 2 newlines (preserve paragraphs)
     text = PATTERNS['multiple_newlines'].sub("\n\n", text)
+    
+    # Remove any null bytes or control characters that might interfere with JSON
+    text = text.replace('\x00', ' ')
     
     return text.strip()
 

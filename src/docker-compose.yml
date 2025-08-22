@@ -6,34 +6,58 @@ services:
     volumes:
       - qdrant_storage:/qdrant/storage
 
-  embedding:
+  # Context Retrieval Service
+  context-retrieval:
     build:
-      context: ./02_embedding
+      context: ./context-retrieval
       dockerfile: Dockerfile
+    # image: khanhle04/context-retrieval:latest  # Use this if image is pre-built
     environment:
-      CHUNKS_DIR: "/workspace/data/processed/chunks"
-      OUT_DIR: "/workspace/data/embeddings"
-      MODEL: "AITeamVN/Vietnamese_Embedding_v2"
       QDRANT_URL: "http://qdrant:6333"
       QDRANT_COLLECTION: "mental_health_vi"
-    volumes:
-      - ..:/workspace
-    working_dir: /workspace
+      EMBEDDING_SERVICE_URL: "http://deploy-embedding:5000"
+      MAX_RESULTS: "20"
+      PORT: "5005"
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "5005:5005"
     depends_on:
       - qdrant
+      - deploy-embedding
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+        reservations:
+          memory: 512M
+          cpus: "0.5"
 
-  retrieval:
+  # FastAPI Embedding Service
+  deploy-embedding:
     build:
-      context: ./retrieval
+      context: ./deploy_embedding
       dockerfile: Dockerfile
+    # image: khanhle04/deploy-embedding:latest  # Use this if image is pre-built
     environment:
-      QDRANT_URL: "http://qdrant:6333"
-      QDRANT_COLLECTION: "mental_health_vi"
-      EMBED_MODEL: "AITeamVN/Vietnamese_Embedding_v2"
+      PORT: "5000"
+      PYTHONUNBUFFERED: "1"
+      HF_HOME: "/app/.cache/huggingface"
     ports:
       - "5000:5000"
-    depends_on:
-      - qdrant
+    volumes:
+      - model_cache:/app/.cache/huggingface  # Shared model cache
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+          cpus: "2.0"
+        reservations:
+          memory: 1G
+          cpus: "1.0"
 
 volumes:
   qdrant_storage:
+  model_cache:  # Shared cache for models
