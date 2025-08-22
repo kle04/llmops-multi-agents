@@ -30,8 +30,7 @@ RUN find /usr/local/lib/python3.11/site-packages -type d -name '__pycache__' -ex
     find /usr/local -type f -name '*.pyo' -delete && \
     find /usr/local -type f -name '*.so' -exec strip --strip-unneeded {} + || true    
 
-# Preload model to cache it during build if needed
-RUN python -c "from transformers import AutoTokenizer, AutoModel; AutoTokenizer.from_pretrained('dangvantuan/vietnamese-embedding'); AutoModel.from_pretrained('dangvantuan/vietnamese-embedding')"
+\
 
 # ===========================
 #  📦 Stage 2: Final Runtime
@@ -54,11 +53,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin/uvicorn /usr/local/bin/uvicorn
 
-# Copy Hugging Face model cache and set correct permissions
-COPY --from=builder /root/.cache/huggingface /app/.cache/huggingface
-
-RUN chown -R appuser:app /app/.cache && \
-    rm -rf /root/.cache/huggingface  
+# Context retrieval doesn't need model cache
+# RUN mkdir -p /app/.cache && chown -R appuser:app /app/.cache  
 
 # Copy your app code
 COPY app.py /app/
@@ -67,14 +63,13 @@ COPY app.py /app/
 ENV PYTHONPATH=/app \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONFAULTHANDLER=1 \
-    PYTHONHASHSEED=random \
-    HF_HOME=/app/.cache/huggingface
+    PYTHONHASHSEED=random
 
 # Change to non-root user
 USER appuser
 
 # Expose FastAPI port
-EXPOSE 5000
+EXPOSE 5005
 
 # Run FastAPI app via uvicorn
-CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-5000} --workers 1 --no-access-log"]
+CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-5005} --workers 1 --no-access-log"]

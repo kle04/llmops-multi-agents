@@ -6,16 +6,33 @@ services:
     volumes:
       - qdrant_storage:/qdrant/storage
 
-  retrieval:
-    image: khanhle04/retrieval:latest
+  # Context Retrieval Service
+  context-retrieval:
+    build:
+      context: ./context-retrieval
+      dockerfile: Dockerfile
+    # image: khanhle04/context-retrieval:latest  # Use this if image is pre-built
     environment:
       QDRANT_URL: "http://qdrant:6333"
       QDRANT_COLLECTION: "mental_health_vi"
-      EMBED_MODEL: "AITeamVN/Vietnamese_Embedding_v2"
+      EMBEDDING_SERVICE_URL: "http://deploy-embedding:5000"
+      MAX_RESULTS: "20"
+      PORT: "5005"
+      PYTHONUNBUFFERED: "1"
     ports:
-      - "5000:5000"
+      - "5005:5005"
     depends_on:
       - qdrant
+      - deploy-embedding
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+        reservations:
+          memory: 512M
+          cpus: "0.5"
 
   # FastAPI Embedding Service
   deploy-embedding:
@@ -24,21 +41,14 @@ services:
       dockerfile: Dockerfile
     # image: khanhle04/deploy-embedding:latest  # Use this if image is pre-built
     environment:
-      PORT: "8000"
+      PORT: "5000"
       PYTHONUNBUFFERED: "1"
       HF_HOME: "/app/.cache/huggingface"
     ports:
-      - "8000:8000"
+      - "5000:5000"
     volumes:
       - model_cache:/app/.cache/huggingface  # Shared model cache
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    # Resource limits for production
     deploy:
       resources:
         limits:
