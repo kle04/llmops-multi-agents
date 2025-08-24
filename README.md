@@ -1,11 +1,11 @@
 # LLMOps - Multi Agents - A2A 
 
-## Kiến trúc hệ thống
+## 1. Kiến trúc hệ thống
 
-### Kiến trúc tổng quan của hệ thống
+### 1.1. Kiến trúc tổng quan của hệ thống
 ![Alt text](images/architecture_multi_agents.png "Kiến trúc tổng quan của hệ thống")
 
-### Flow hoạt động của Context Retrieval
+### 1.2. Flow hoạt động của Context Retrieval
 ![Alt text](images/context_retrieval.png "Flow hoạt động của Context Retrieval")
 Context Retrieval là thành phần quan trọng trong hệ thống, hoạt động theo flow sau:
 1. **User Query** - Người dùng gửi câu hỏi đến hệ thống
