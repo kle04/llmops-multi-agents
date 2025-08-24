@@ -414,31 +414,149 @@ def process_single_document(file_path: Path, out_dir: Path, model,
         
         logger.info(f"{doc_id}: Processing {len(cleaned_texts)}/{len(texts)} valid texts")
         
-        # Generate embeddings with error handling
+        # Generate embeddings with robust error handling
+        vectors = None
         try:
+            logger.debug(f"{doc_id}: Generating embeddings for {len(cleaned_texts)} texts")
+            
+            # Filter out any remaining problematic texts
+            final_texts = []
+            final_indices = []
+            
+            for i, text in enumerate(cleaned_texts):
+                # Additional validation for embedding model
+                try:
+                    # Check if text can be properly tokenized
+                    if len(text.strip()) < 3:  # Very short texts
+                        logger.warning(f"{doc_id}: Skipping very short text at index {i}: {repr(text)}")
+                        continue
+                    
+                    # Check for extremely long texts that might cause issues
+                    if len(text) > 8000:  # More conservative limit
+                        logger.warning(f"{doc_id}: Truncating very long text at index {i} ({len(text)} chars)")
+                        text = text[:8000]
+                    
+                    # Additional text cleaning for problematic sequences
+                    # Remove any remaining null bytes or control characters
+                    text = ''.join(char for char in text if ord(char) >= 32 or char in '\n\r\t ')
+                    
+                    # Check for empty text after cleaning
+                    if not text.strip():
+                        logger.warning(f"{doc_id}: Text became empty after cleaning at index {i}")
+                        continue
+                    
+                    # Test tokenization compatibility
+                    words = text.split()
+                    if len(words) < 2:  # Need at least 2 words for meaningful embedding
+                        logger.warning(f"{doc_id}: Too few words at index {i}: {len(words)}")
+                        continue
+                    
+                    # Check for extremely repetitive text that might cause issues
+                    unique_words = set(words)
+                    if len(unique_words) == 1 and len(words) > 10:  # Repetitive text
+                        logger.warning(f"{doc_id}: Skipping repetitive text at index {i}")
+                        continue
+                    
+                    # Test basic string operations
+                    _ = text.encode('utf-8').decode('utf-8')
+                    
+                    # Additional check for problematic patterns
+                    if len(text) / max(len(unique_words), 1) > 50:  # Too repetitive
+                        logger.warning(f"{doc_id}: Skipping highly repetitive text at index {i}")
+                        continue
+                    
+                    final_texts.append(text.strip())
+                    final_indices.append(i)
+                    
+                except Exception as e:
+                    logger.warning(f"{doc_id}: Skipping problematic text at index {i}: {e}")
+                    continue
+            
+            if not final_texts:
+                raise EmbeddingError(f"No valid texts remaining after final filtering for {doc_id}")
+            
+            logger.info(f"{doc_id}: Final processing {len(final_texts)}/{len(cleaned_texts)} texts")
+            
+            # Try embedding generation with multiple fallback strategies
+            effective_batch_size = min(batch_size, len(final_texts), 16)  # Cap at 16 for safety
+            logger.debug(f"{doc_id}: Using batch_size={effective_batch_size}")
+            
             vectors = model.encode(
-                cleaned_texts,
-                batch_size=batch_size,
-                normalize_embeddings=False,  # Manual normalization for consistency
-                show_progress_bar=True,
+                final_texts,
+                batch_size=effective_batch_size,
+                normalize_embeddings=False,
+                show_progress_bar=len(final_texts) > 10,  # Only show progress for larger batches
                 convert_to_numpy=True,
                 convert_to_tensor=False
             ).astype(np.float32)
             
+            # Update indices to match final texts
+            cleaned_texts = final_texts
+            valid_indices = [valid_indices[i] for i in final_indices]
+            
+            # Verify embedding dimensions
+            if vectors.shape[1] != 768:
+                raise EmbeddingError(f"Generated embeddings have wrong dimension: {vectors.shape[1]}, expected 768")
+            
         except Exception as e:
-            # Try with smaller batch size if failed
-            logger.warning(f"{doc_id}: Failed with batch_size={batch_size}, trying with batch_size=1")
+            logger.warning(f"{doc_id}: Failed with batch_size={min(batch_size, len(final_texts) if 'final_texts' in locals() else len(cleaned_texts))}: {e}")
+            
+            # Fallback 1: Try with batch_size=1
             try:
+                logger.info(f"{doc_id}: Trying with batch_size=1")
+                texts_to_use = final_texts if 'final_texts' in locals() else cleaned_texts
+                
                 vectors = model.encode(
-                    cleaned_texts,
+                    texts_to_use,
                     batch_size=1,
                     normalize_embeddings=False,
                     show_progress_bar=True,
                     convert_to_numpy=True,
                     convert_to_tensor=False
                 ).astype(np.float32)
+                
+                if vectors.shape[1] != 768:
+                    raise EmbeddingError(f"Generated embeddings have wrong dimension: {vectors.shape[1]}, expected 768")
+                    
             except Exception as e2:
-                raise EmbeddingError(f"Failed to generate embeddings even with batch_size=1: {e2}")
+                logger.warning(f"{doc_id}: Batch processing failed: {e2}")
+                
+                # Fallback 2: Process one by one
+                try:
+                    logger.info(f"{doc_id}: Trying individual text processing")
+                    texts_to_use = final_texts if 'final_texts' in locals() else cleaned_texts
+                    individual_vectors = []
+                    successful_texts = []
+                    successful_indices = []
+                    
+                    for i, text in enumerate(texts_to_use):
+                        try:
+                            # Process single text
+                            vec = model.encode([text], convert_to_numpy=True, convert_to_tensor=False)
+                            if vec.shape[1] == 768:
+                                individual_vectors.append(vec[0])
+                                successful_texts.append(text)
+                                if 'final_texts' in locals():
+                                    successful_indices.append(valid_indices[i])
+                                else:
+                                    successful_indices.append(valid_indices[i])
+                            else:
+                                logger.warning(f"{doc_id}: Wrong dimension for text {i}: {vec.shape[1]}")
+                        except Exception as e3:
+                            logger.warning(f"{doc_id}: Failed to process individual text {i}: {e3}")
+                            continue
+                    
+                    if not individual_vectors:
+                        raise EmbeddingError(f"No texts could be processed individually for {doc_id}")
+                    
+                    vectors = np.array(individual_vectors, dtype=np.float32)
+                    cleaned_texts = successful_texts
+                    valid_indices = successful_indices
+                    
+                    logger.info(f"{doc_id}: Successfully processed {len(individual_vectors)} texts individually")
+                    
+                except Exception as e3:
+                    raise EmbeddingError(f"All embedding strategies failed for {doc_id}: {e3}")
         
         # Update data to match cleaned texts
         ids = [ids[i] for i in valid_indices]
@@ -565,10 +683,10 @@ def main():
                        help="Directory containing chunk JSONL files")
     parser.add_argument("--out_dir", default="data/embeddings",
                        help="Output directory for embedding files")
-    parser.add_argument("--model", default="AITeamVN/Vietnamese_Embedding",
+    parser.add_argument("--model", default="dangvantuan/vietnamese-embedding",
                        help="Embedding model name or path")
-    parser.add_argument("--batch_size", type=int, default=32,
-                       help="Batch size for encoding")
+    parser.add_argument("--batch_size", type=int, default=8,
+                       help="Batch size for encoding (default: 8 for stability)")
     parser.add_argument("--normalize", action="store_true",
                        help="L2-normalize embedding vectors")
     parser.add_argument("--max_workers", type=int, default=1,
@@ -631,9 +749,15 @@ def main():
             from sentence_transformers import SentenceTransformer
             model = SentenceTransformer(model_name, device=device)
             actual_dim = model.get_sentence_embedding_dimension()
-            if actual_dim != embedding_dim:
-                logger.warning(f"Dimension mismatch: expected {embedding_dim}, got {actual_dim}")
-                embedding_dim = actual_dim
+            
+            # Ensure we get 768 dimensions for dangvantuan/vietnamese_embedding
+            if actual_dim != 768:
+                logger.warning(f"Expected 768 dimensions but got {actual_dim} for model {model_name}")
+                if "dangvantuan/vietnamese_embedding" in model_name:
+                    logger.error(f"Model {model_name} should produce 768-dimensional embeddings")
+                    raise ConfigurationError(f"Incorrect embedding dimension: {actual_dim}, expected 768")
+            
+            embedding_dim = actual_dim
             logger.info(f"Model loaded successfully. Embedding dimension: {embedding_dim}")
         except Exception as e:
             raise ConfigurationError(f"Failed to load model: {e}")

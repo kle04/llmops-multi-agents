@@ -45,7 +45,7 @@ WORKDIR /app
 
 # Install runtime system packages # NOT ON DISTROLESS!!
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libglib2.0-0 libsm6 libxrender1 libxext6 \
+    curl libglib2.0-0 libsm6 libxrender1 libxext6 \
     && apt-get purge -y --auto-remove && \
     rm -rf /var/lib/apt/lists/*
 
