@@ -7,15 +7,15 @@ services:
       - qdrant_storage:/qdrant/storage
 
   # Context Retrieval Service
-  context-retrieval:
-    build:
-      context: ./context-retrieval
-      dockerfile: Dockerfile
-    # image: khanhle04/context-retrieval:latest  # Use this if image is pre-built
+  context_retrieval_service:
+    # build:
+    #   context: ./context-retrieval
+    #   dockerfile: Dockerfile
+    image: khanhle04/context_retrieval_service:2.0  # Use this if image is pre-built
     environment:
       QDRANT_URL: "http://qdrant:6333"
       QDRANT_COLLECTION: "mental_health_vi"
-      EMBEDDING_SERVICE_URL: "http://deploy-embedding:5000"
+      EMBEDDING_SERVICE_URL: "http://embedding_service:5000"
       MAX_RESULTS: "20"
       PORT: "5005"
       PYTHONUNBUFFERED: "1"
@@ -23,7 +23,7 @@ services:
       - "5005:5005"
     depends_on:
       - qdrant
-      - deploy-embedding
+      - embedding_service
     restart: unless-stopped
     deploy:
       resources:
@@ -33,13 +33,19 @@ services:
         reservations:
           memory: 512M
           cpus: "0.5"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # FastAPI Embedding Service
-  deploy-embedding:
-    build:
-      context: ./deploy_embedding
-      dockerfile: Dockerfile
-    # image: khanhle04/deploy-embedding:latest  # Use this if image is pre-built
+  embedding_service:
+    # build:
+    #   context: ./deploy_embedding
+    #   dockerfile: Dockerfile
+    image: khanhle04/embedding_service:2.0
     environment:
       PORT: "5000"
       PYTHONUNBUFFERED: "1"
@@ -57,6 +63,12 @@ services:
         reservations:
           memory: 1G
           cpus: "1.0"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 volumes:
   qdrant_storage:

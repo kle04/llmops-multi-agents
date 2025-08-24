@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-MODEL_NAME = "AITeamVN/Vietnamese_Embedding"
+MODEL_NAME = "dangvantuan/vietnamese-embedding"
 
 # Load model
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)

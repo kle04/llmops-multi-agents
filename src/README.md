@@ -5,36 +5,30 @@
 Thư mục này chứa source code của hệ thống LLMOps Multi Agents với kiến trúc microservices để xây dựng một hệ thống tư vấn và hỗ trợ sức khỏe tâm thần học sinh thông minh.
 
 
-## 📁 Cấu trúc thư mục
+## Cấu trúc thư mục
 
 ```
 src/
-├── 📝 README.md                     # Tài liệu này
-├── 🐳 docker-compose.yml            # Orchestration toàn bộ services
-├── 🔄 preprocessing/                 # Data pipeline & preprocessing
+├── README.md                      # Tài liệu này
+├── docker-compose.yml             # Orchestration toàn bộ services
+├── preprocessing/                 # Data pipeline & preprocessing
 │   ├── 01_extract_text.py          # Trích xuất text từ PDF
 │   ├── 02_chunk_text.py            # Chia text thành chunks
 │   ├── 03_create_embeddings.py     # Tạo embeddings và lưu vector DB
 │   ├── requirements.txt            # Python dependencies
 │   └── README.md                   # Chi tiết data pipeline
-├── 🤖 deploy_embedding/             # Vietnamese Embedding Service
+├── deploy_embedding/              # Vietnamese Embedding Service
 │   ├── app.py                      # FastAPI embedding API
 │   ├── Dockerfile                  # Container definition
-│   ├── pyproject.toml             # Poetry dependencies
-│   └── README.md                  # Chi tiết embedding service
-├── 🔍 context-retrieval/           # RAG Context Retrieval Service  
-│   ├── app.py                     # FastAPI retrieval API
-│   ├── test_api.py                # API testing script
-│   ├── Dockerfile                 # Container definition
-│   └── pyproject.toml            # Poetry dependencies
-└── 🚧 agents/                     # [PLANNED] Multi-Agent System
-    ├── orchestrator/              # Orchestrator Agent
-    ├── rag_agent/                # RAG specialized agent
-    ├── response_agent/           # Response generation agent
-    └── evaluation_agent/         # Quality evaluation agent
+│   ├── pyproject.toml              # Poetry dependencies
+│   └── README.md                   # Chi tiết embedding service
+├── context-retrieval/             # RAG Context Retrieval Service  
+│   ├── app.py                      # FastAPI retrieval API
+│   ├── Dockerfile                  # Container definition
+│   └── pyproject.toml              # Poetry dependencies
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Khởi động toàn bộ hệ thống
 
@@ -79,31 +73,31 @@ cd ../../test_scripts/
 python test_integration.py --embedding_url http://localhost:5000 --retrieval_url http://localhost:5005
 ```
 
-## 🔧 Services chi tiết
+## Chi tiết các service
 
-### 🤖 Embedding Service (`deploy_embedding/`)
+### Embedding Service (`deploy_embedding/`)
 - **Model:** AITeamVN/Vietnamese_Embedding
 - **API:** FastAPI với endpoint `/embed` và `/health`
 - **Port:** 5000
-- **Features:** Vietnamese text embedding, 768-dimensional vectors
+- **Features:** Vietnamese text embedding, 1024-dimensional vectors
 
-### 🔍 Context Retrieval Service (`context-retrieval/`)
+### Context Retrieval Service (`context-retrieval/`)
 - **Database:** Qdrant vector database
 - **API:** Search endpoints với filtering và scoring
 - **Port:** 5005
 - **Features:** Semantic search, metadata filtering, relevance scoring
 
-### 🔄 Data Processing Pipeline (`preprocessing/`)
+### Data Processing Pipeline (`preprocessing/`)
 - **Input:** PDF documents với metadata catalog
 - **Output:** Vector embeddings trong Qdrant collection
 - **Features:** Text extraction, intelligent chunking, batch processing
 
-### 📊 Vector Database (Qdrant)
+### Vector Database (Qdrant)
 - **Port:** 6333
 - **Collection:** `mental_health_vi`
 - **Features:** Persistent storage, high-performance search
 
-## 🧪 Testing & Quality Assurance
+## Kiểm thử, đảm bảo chất lượng
 
 ### Comprehensive Test Suite
 ```bash
@@ -117,7 +111,7 @@ python test_context_retrieval.py --base_url http://localhost:5005
 python test_integration.py --load_requests 50 --max_concurrent 10
 ```
 
-### Test Scenarios
+### Các ngữ cảnh test
 - ✅ **Health checks** cho tất cả services
 - ✅ **Single query tests** với Vietnamese queries
 - ✅ **Batch processing tests** với multiple requests
