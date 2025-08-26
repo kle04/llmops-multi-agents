@@ -1,0 +1,5 @@
+# Core dependencies cho Orchestrator Agent
+fastapi==0.115.0
+uvicorn==0.30.0
+pydantic==2.0.0
+httpx==0.28.1
