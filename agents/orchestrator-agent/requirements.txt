@@ -1,5 +1,10 @@
-# Core dependencies cho Orchestrator Agent
-fastapi==0.115.0
-uvicorn==0.30.0
-pydantic==2.0.0
-httpx==0.28.1
+langchain>=0.2.0
+langchain_community>=0.2.0
+langchain-google-genai>=1.0.0
+langchain-huggingface>=0.0.3
+python-dotenv==1.1.1
+qdrant-client>=1.8.0
+sentence-transformers>=2.7.0
+httpx>=0.25.0
+transformers>=4.35.0
+torch>=2.0.0

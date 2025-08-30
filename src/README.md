@@ -11,7 +11,7 @@ Thư mục này chứa source code của hệ thống LLMOps Multi Agents với 
 src/
 ├── README.md                      # Tài liệu này
 ├── docker-compose.yml             # Orchestration toàn bộ services
-├── preprocessing/                 # Data pipeline & preprocessing
+├── indexing/                      # Data pipeline, indexing
 │   ├── 01_extract_text.py          # Trích xuất text từ PDF
 │   ├── 02_chunk_text.py            # Chia text thành chunks
 │   ├── 03_create_embeddings.py     # Tạo embeddings và lưu vector DB

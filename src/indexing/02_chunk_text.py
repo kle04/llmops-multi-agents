@@ -173,6 +173,61 @@ def extract_section_title(paragraph: str) -> str:
     
     return ""
 
+def extract_page_info(section: str, text: str) -> Optional[str]:
+    """
+    Trích xuất thông tin trang từ section hoặc text
+    
+    Args:
+        section: Section info từ chunk
+        text: Nội dung text
+        
+    Returns:
+        String mô tả trang hoặc None
+    """
+    # Pattern tìm số trang
+    page_patterns = [
+        r'(?:^|\s)(\d+)(?:\s|$)',  # Số đơn lẻ
+        r'(?:^|\s)(\d+)-(\d+)(?:\s|$)',  # Phạm vi trang
+        r'(?:^|\s)(\d+),\s*(\d+)(?:\s|$)',  # Nhiều trang
+    ]
+    
+    pages_found = set()
+    
+    # Tìm trong section
+    if section and isinstance(section, str):
+        for pattern in page_patterns:
+            matches = re.findall(pattern, section)
+            for match in matches:
+                if isinstance(match, tuple):
+                    pages_found.update(match)
+                else:
+                    pages_found.add(match)
+    
+    # Tìm trong text (chỉ ở đầu text)
+    text_start = text[:200] if text else ""
+    for pattern in page_patterns:
+        matches = re.findall(pattern, text_start)
+        for match in matches:
+            if isinstance(match, tuple):
+                pages_found.update(match)
+            else:
+                pages_found.add(match)
+            break  # Chỉ lấy match đầu tiên trong text
+    
+    if pages_found:
+        # Loại bỏ số quá lớn (không phải trang)
+        valid_pages = [int(p) for p in pages_found if p.isdigit() and 1 <= int(p) <= 1000]
+        if valid_pages:
+            valid_pages.sort()
+            if len(valid_pages) == 1:
+                return f"tr.{valid_pages[0]}"
+            elif len(valid_pages) == 2:
+                return f"tr.{valid_pages[0]}-{valid_pages[1]}"
+            else:
+                return f"tr.{valid_pages[0]}-{valid_pages[-1]}"
+    
+    return None
+
 def paragraphs_from_pages(pages: List[str]) -> List[str]:
     """
     Convert pages to paragraphs with better handling for Vietnamese text.
@@ -446,21 +501,30 @@ def process_single_document(row: pd.Series, text_dir: Path, out_dir: Path,
                             break
             
             chunk_id = f"{doc_id}_{i:05d}"
+            
+            # Tạo tên tài liệu ngắn gọn
+            title = str(row.get("title", ""))
+            source = str(row.get("source", ""))
+            if title and source:
+                document = f"{title} ({source})"
+            elif title:
+                document = title
+            else:
+                document = source if source else "Tài liệu không xác định"
+            
+            # Trích xuất thông tin trang từ section hoặc chunk_text
+            page_info = extract_page_info(section, chunk_text)
+            
+            # Tạo record đơn giản
             record = {
-                "id": chunk_id,
                 "chunk_id": chunk_id,
-                "doc_id": doc_id,
-                "title": str(row.get("title", "")),
-                "source": str(row.get("source", "")),
-                "year": str(row.get("year", "")),
-                "language": str(row.get("language", "vi")),
-                "audience": str(row.get("audience", "")),
-                "grade_range": str(row.get("grade_range", "")),
-                "topics": str(row.get("topics", "")),
-                "section": section,
                 "text": chunk_text,
-                "token_count": token_counter.count_tokens(chunk_text)
+                "document": document
             }
+            
+            # Chỉ thêm page_info nếu có
+            if page_info:
+                record["page_info"] = page_info
             chunk_records.append(record)
         
         # Write output
@@ -476,13 +540,12 @@ def process_single_document(row: pd.Series, text_dir: Path, out_dir: Path,
                     clean_text = ' '.join(clean_text.split())  # Normalize whitespace
                     record["text"] = clean_text
                 
-                # Clean other text fields
-                for field in ["title", "source", "section"]:
-                    if field in record and record[field]:
-                        clean_field = str(record[field])
-                        clean_field = clean_field.replace('\x00', ' ')
-                        clean_field = ' '.join(clean_field.split())
-                        record[field] = clean_field
+                # Clean document field
+                if "document" in record and record["document"]:
+                    clean_field = str(record["document"])
+                    clean_field = clean_field.replace('\x00', ' ')
+                    clean_field = ' '.join(clean_field.split())
+                    record["document"] = clean_field
                 
                 json.dump(record, f, ensure_ascii=False)
                 f.write("\n")
@@ -505,11 +568,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="Create text chunks from extracted text with improved Vietnamese support"
     )
-    parser.add_argument("--catalog", default="data/metadata/catalog.csv",
+    parser.add_argument("--catalog", default="../../data/metadata/catalog.csv",
                        help="Path to catalog CSV file")
-    parser.add_argument("--text_dir", default="data/processed/text",
+    parser.add_argument("--text_dir", default="../../data/processed/text",
                        help="Directory containing extracted text files")
-    parser.add_argument("--out_dir", default="data/processed/chunks",
+    parser.add_argument("--out_dir", default="../../data/processed/chunks",
                        help="Output directory for chunk files")
     parser.add_argument("--max_tokens", type=int, default=800,
                        help="Maximum tokens per chunk")
