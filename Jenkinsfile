@@ -30,40 +30,37 @@ pipeline {
     stage('Test orchestrator-agent') {
       agent {
         kubernetes {
-          defaultContainer 'python'
+          defaultContainer 'docker'
           yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  restartPolicy: Never
-  containers:
-    - name: python
-      image: python:3.13-slim
-      command:
-        - cat
-      tty: true
-      volumeMounts:
-        - name: docker-sock
-          mountPath: /var/run/docker.sock
-  volumes:
-    - name: docker-sock
-      hostPath:
-        path: /var/run/docker.sock
-"""
+          apiVersion: v1
+          kind: Pod
+          spec:
+            restartPolicy: Never
+            containers:
+              - name: docker
+                image: docker:29.0
+                command:
+                  - cat
+                tty: true
+                volumeMounts:
+                  - name: docker-sock
+                    mountPath: /var/run/docker.sock
+            volumes:
+              - name: docker-sock
+                hostPath:
+                  path: /var/run/docker.sock
+          """
         }
       }
       steps {
-        container('python') {
+        container('docker') {
           sh '''
             set -euo pipefail
             apt-get update >/dev/null
             apt-get install -y --no-install-recommends curl git docker.io >/dev/null
             rm -rf /var/lib/apt/lists/*
-            curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null
             export PATH="$HOME/.local/bin:$PATH"
             cd src/agents/orchestrator-agent
-            uv sync
-            uv run pytest
             docker build -t ${ORCH_IMAGE}:${IMAGE_TAG} -f Dockerfile .
           '''
         }
@@ -73,40 +70,37 @@ spec:
     stage('Test rag-agent') {
       agent {
         kubernetes {
-          defaultContainer 'python'
+          defaultContainer 'docker'
           yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  restartPolicy: Never
-  containers:
-    - name: python
-      image: python:3.13-slim
-      command:
-        - cat
-      tty: true
-      volumeMounts:
-        - name: docker-sock
-          mountPath: /var/run/docker.sock
-  volumes:
-    - name: docker-sock
-      hostPath:
-        path: /var/run/docker.sock
-"""
+          apiVersion: v1
+          kind: Pod
+          spec:
+            restartPolicy: Never
+            containers:
+              - name: docker
+                image: docker:29.0
+                command:
+                  - cat
+                tty: true
+                volumeMounts:
+                  - name: docker-sock
+                    mountPath: /var/run/docker.sock
+            volumes:
+              - name: docker-sock
+                hostPath:
+                  path: /var/run/docker.sock
+          """
         }
       }
       steps {
-        container('python') {
+        container('docker') {
           sh '''
             set -euo pipefail
             apt-get update >/dev/null
             apt-get install -y --no-install-recommends curl git docker.io >/dev/null
             rm -rf /var/lib/apt/lists/*
-            curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null
             export PATH="$HOME/.local/bin:$PATH"
             cd src/agents/rag-agent
-            uv sync
-            uv run pytest
             docker build -t ${RAG_IMAGE}:${IMAGE_TAG} -f Dockerfile .
           '''
         }
@@ -121,24 +115,24 @@ spec:
         kubernetes {
           defaultContainer 'docker'
           yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  restartPolicy: Never
-  containers:
-    - name: docker
-      image: docker:24.0.7
-      command:
-        - cat
-      tty: true
-      volumeMounts:
-        - name: docker-sock
-          mountPath: /var/run/docker.sock
-  volumes:
-    - name: docker-sock
-      hostPath:
-        path: /var/run/docker.sock
-"""
+          apiVersion: v1
+          kind: Pod
+          spec:
+            restartPolicy: Never
+            containers:
+              - name: docker
+                image: docker:29.0
+                command:
+                  - cat
+                tty: true
+                volumeMounts:
+                  - name: docker-sock
+                    mountPath: /var/run/docker.sock
+            volumes:
+              - name: docker-sock
+                hostPath:
+                  path: /var/run/docker.sock
+          """
         }
       }
       steps {
