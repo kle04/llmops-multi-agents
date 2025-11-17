@@ -18,9 +18,9 @@ pipeline {
         sh 'git fetch --tags --force'
                 script {
                     env.IMAGE_TAG = sh(returnStdout: true,
-              script: 'git rev-parse --short HEAD').trim()
+              script: 'git describe --tags HEAD').trim()
                     env.TAG_FROM_GIT = sh(returnStdout: true,
-              script: 'git describe --tags --exact-match || true').trim()
+              script: 'git describe --tags --exact-match').trim()
                     env.ORCH_IMAGE = "${DOCKER_CREDS_USR}/orchestrator-agent"
                     env.RAG_IMAGE  = "${DOCKER_CREDS_USR}/rag-agent"
                 }
