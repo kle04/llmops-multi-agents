@@ -55,11 +55,6 @@ pipeline {
       steps {
         container('docker') {
           sh '''
-            set -euo pipefail
-            apt-get update >/dev/null
-            apt-get install -y --no-install-recommends curl git docker.io >/dev/null
-            rm -rf /var/lib/apt/lists/*
-            export PATH="$HOME/.local/bin:$PATH"
             cd src/agents/orchestrator-agent
             docker build -t ${ORCH_IMAGE}:${IMAGE_TAG} -f Dockerfile .
           '''
@@ -95,11 +90,6 @@ pipeline {
       steps {
         container('docker') {
           sh '''
-            set -euo pipefail
-            apt-get update >/dev/null
-            apt-get install -y --no-install-recommends curl git docker.io >/dev/null
-            rm -rf /var/lib/apt/lists/*
-            export PATH="$HOME/.local/bin:$PATH"
             cd src/agents/rag-agent
             docker build -t ${RAG_IMAGE}:${IMAGE_TAG} -f Dockerfile .
           '''
