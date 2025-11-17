@@ -14,7 +14,8 @@ pipeline {
         stage('Checkout') {
             agent any
             steps {
-                checkout scm
+        checkout scm
+        sh 'git fetch --tags --force'
                 script {
                     env.IMAGE_TAG = sh(returnStdout: true,
               script: 'git rev-parse --short HEAD').trim()
