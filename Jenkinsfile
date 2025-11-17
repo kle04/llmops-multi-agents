@@ -6,7 +6,7 @@ pipeline {
     REGISTRY_URL = "docker.io"
     ORCH_IMAGE = "orchestrator-agent"
     RAG_IMAGE  = "rag-agent"
-    IMAGE_TAG  = ""
+    IMAGE_TAG  = "ci-${BUILD_NUMBER}"
     TAG_FROM_GIT = ""
   }
 
@@ -17,8 +17,6 @@ pipeline {
         checkout scm
         sh 'git fetch --tags --force'
         script {
-          env.IMAGE_TAG = sh(returnStdout: true,
-              script: "git rev-parse --short HEAD").trim()
           env.TAG_FROM_GIT = sh(returnStdout: true,
               script: 'git describe --tags --exact-match HEAD 2>/dev/null || true').trim()
           env.ORCH_IMAGE = "${DOCKER_CREDS_USR}/orchestrator-agent"
