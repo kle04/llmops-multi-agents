@@ -137,7 +137,11 @@ async def get_context(user_id: str, session_id: str):
     return context
 
 def main():
-    uvicorn.run(app, host="0.0.0.0", port=7010)
+    uvicorn.run(
+        app,
+        host=Config.ORCHESTRATOR_AGENT_HOST,
+        port=Config.ORCHESTRATOR_AGENT_PORT,
+    )
 
 if __name__ == "__main__":
     main()

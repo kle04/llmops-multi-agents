@@ -1,7 +1,22 @@
 import os
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 
 load_dotenv()
+
+def _parse_port(raw_value, default):
+    """Handle plain ints or docker/k8s style tcp://host:port strings."""
+    if raw_value in (None, ""):
+        return default
+    # Try URL-style first (e.g. tcp://34.118.230.235:7010)
+    parsed = urlparse(str(raw_value))
+    if parsed.scheme and parsed.port:
+        return parsed.port
+    # Fallback to simple int conversion
+    try:
+        return int(raw_value)
+    except (TypeError, ValueError):
+        return default
 
 class Config:
     # Google API Key
@@ -13,7 +28,7 @@ class Config:
 
     # Server
     ORCHESTRATOR_AGENT_HOST = os.getenv("ORCHESTRATOR_AGENT_HOST", "0.0.0.0")
-    ORCHESTRATOR_AGENT_PORT = int(os.getenv("ORCHESTRATOR_AGENT_PORT", 8000))
+    ORCHESTRATOR_AGENT_PORT = _parse_port(os.getenv("ORCHESTRATOR_AGENT_PORT"), 7010)
     RAG_AGENT_URL = os.getenv("RAG_AGENT_URL", "http://localhost:7005")
 
 
