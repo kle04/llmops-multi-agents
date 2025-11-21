@@ -7,7 +7,6 @@ pipeline {
     ORCH_IMAGE = "orchestrator-agent"
     RAG_IMAGE  = "rag-agent"
     IMAGE_TAG  = "ci-${BUILD_NUMBER}"
-    TAG_FROM_GIT = ""
   }
 
   stages {
@@ -17,8 +16,6 @@ pipeline {
         checkout scm
         sh 'git fetch --tags --force'
         script {
-          env.TAG_FROM_GIT = sh(returnStdout: true,
-              script: 'git describe --tags --exact-match HEAD 2>/dev/null || true').trim()
           env.ORCH_IMAGE = "${DOCKER_CREDS_USR}/orchestrator-agent"
           env.RAG_IMAGE  = "${DOCKER_CREDS_USR}/rag-agent"
         }
@@ -95,9 +92,9 @@ pipeline {
       }
     }
 
-    stage('Tag & Push images (on git tag)') {
+    stage('Tag & Push images') {
       when {
-        expression { env.TAG_FROM_GIT?.trim() }
+        buildingTag()
       }
       agent {
         kubernetes {
