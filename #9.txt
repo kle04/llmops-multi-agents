@@ -1,0 +1,738 @@
+Started by user Jenkins Admin
+Connecting to https://api.github.com using KhanhLe04/******
+Obtained Jenkinsfile from 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Agent default-7wl1r is provisioned from template default
+---
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  annotations:
+    kubernetes.jenkins.io/last-refresh: "1763743326309"
+  labels:
+    jenkins/jenkins-jenkins-agent: "true"
+    jenkins/label-digest: "500b4f18aee87616849e4f4c2435020898e34aa0"
+    jenkins/label: "jenkins-jenkins-agent"
+    kubernetes.jenkins.io/controller: "http___jenkins_jenkins_svc_cluster_local_8080x"
+  name: "default-7wl1r"
+  namespace: "jenkins"
+spec:
+  containers:
+  - args:
+    - "********"
+    - "default-7wl1r"
+    env:
+    - name: "JENKINS_SECRET"
+      value: "********"
+    - name: "JENKINS_TUNNEL"
+      value: "jenkins-agent.jenkins.svc.cluster.local:50000"
+    - name: "JENKINS_AGENT_NAME"
+      value: "default-7wl1r"
+    - name: "REMOTING_OPTS"
+      value: "-noReconnectAfter 1d"
+    - name: "JENKINS_NAME"
+      value: "default-7wl1r"
+    - name: "JENKINS_AGENT_WORKDIR"
+      value: "/home/jenkins/agent"
+    - name: "JENKINS_URL"
+      value: "http://jenkins.jenkins.svc.cluster.local:8080/"
+    image: "jenkins/inbound-agent:3345.v03dee9b_f88fc-6"
+    imagePullPolicy: "IfNotPresent"
+    name: "jnlp"
+    resources:
+      limits:
+        memory: "512Mi"
+        cpu: "512m"
+      requests:
+        memory: "512Mi"
+        cpu: "512m"
+    tty: false
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+    workingDir: "/home/jenkins/agent"
+  nodeSelector:
+    kubernetes.io/os: "linux"
+  restartPolicy: "Never"
+  serviceAccountName: "default"
+  volumes:
+  - emptyDir:
+      medium: ""
+    name: "workspace-volume"
+
+Running on default-7wl1r in /home/jenkins/agent/workspace/llmops-multi-agents_v1.0.1
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+The recommended git tool is: git
+using credential github-token
+Cloning the remote Git repository
+Cloning with configured refspecs honoured and with tags
+Cloning repository https://github.com/kle04/llmops-multi-agents.git
+ > git init /home/jenkins/agent/workspace/llmops-multi-agents_v1.0.1 # timeout=10
+Fetching upstream changes from https://github.com/kle04/llmops-multi-agents.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/kle04/llmops-multi-agents.git +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+ > git config remote.origin.url https://github.com/kle04/llmops-multi-agents.git # timeout=10
+ > git config --add remote.origin.fetch +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+Fetching with tags
+Checking out Revision 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 (v1.0.1)
+ > git config remote.origin.url https://github.com/kle04/llmops-multi-agents.git # timeout=10
+Fetching upstream changes from https://github.com/kle04/llmops-multi-agents.git
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/kle04/llmops-multi-agents.git +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 # timeout=10
+Commit message: "fix(jenkinsfile): fix trigger on tag"
+ > git rev-list --no-walk 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withCredentials
+Masking supported pattern matches of $DOCKER_CREDS or $DOCKER_CREDS_PSW
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] node
+Still waiting to schedule task
+Waiting for next available executor
+Agent default-bgl3v is provisioned from template default
+---
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  annotations:
+    kubernetes.jenkins.io/last-refresh: "1763743376226"
+  labels:
+    jenkins/jenkins-jenkins-agent: "true"
+    jenkins/label-digest: "500b4f18aee87616849e4f4c2435020898e34aa0"
+    jenkins/label: "jenkins-jenkins-agent"
+    kubernetes.jenkins.io/controller: "http___jenkins_jenkins_svc_cluster_local_8080x"
+  name: "default-bgl3v"
+  namespace: "jenkins"
+spec:
+  containers:
+  - args:
+    - "********"
+    - "default-bgl3v"
+    env:
+    - name: "JENKINS_SECRET"
+      value: "********"
+    - name: "JENKINS_TUNNEL"
+      value: "jenkins-agent.jenkins.svc.cluster.local:50000"
+    - name: "JENKINS_AGENT_NAME"
+      value: "default-bgl3v"
+    - name: "REMOTING_OPTS"
+      value: "-noReconnectAfter 1d"
+    - name: "JENKINS_NAME"
+      value: "default-bgl3v"
+    - name: "JENKINS_AGENT_WORKDIR"
+      value: "/home/jenkins/agent"
+    - name: "JENKINS_URL"
+      value: "http://jenkins.jenkins.svc.cluster.local:8080/"
+    image: "jenkins/inbound-agent:3345.v03dee9b_f88fc-6"
+    imagePullPolicy: "IfNotPresent"
+    name: "jnlp"
+    resources:
+      limits:
+        memory: "512Mi"
+        cpu: "512m"
+      requests:
+        memory: "512Mi"
+        cpu: "512m"
+    tty: false
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+    workingDir: "/home/jenkins/agent"
+  nodeSelector:
+    kubernetes.io/os: "linux"
+  restartPolicy: "Never"
+  serviceAccountName: "default"
+  volumes:
+  - emptyDir:
+      medium: ""
+    name: "workspace-volume"
+
+Running on default-bgl3v in /home/jenkins/agent/workspace/llmops-multi-agents_v1.0.1
+[Pipeline] {
+[Pipeline] checkout
+The recommended git tool is: git
+using credential github-token
+Cloning the remote Git repository
+Cloning with configured refspecs honoured and with tags
+Cloning repository https://github.com/kle04/llmops-multi-agents.git
+ > git init /home/jenkins/agent/workspace/llmops-multi-agents_v1.0.1 # timeout=10
+Fetching upstream changes from https://github.com/kle04/llmops-multi-agents.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/kle04/llmops-multi-agents.git +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+ > git config remote.origin.url https://github.com/kle04/llmops-multi-agents.git # timeout=10
+ > git config --add remote.origin.fetch +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+Fetching with tags
+Checking out Revision 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 (v1.0.1)
+ > git config remote.origin.url https://github.com/kle04/llmops-multi-agents.git # timeout=10
+Fetching upstream changes from https://github.com/kle04/llmops-multi-agents.git
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/kle04/llmops-multi-agents.git +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 # timeout=10
+Commit message: "fix(jenkinsfile): fix trigger on tag"
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] checkout
+The recommended git tool is: git
+using credential github-token
+Fetching changes from the remote Git repository
+Fetching with tags
+Checking out Revision 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 (v1.0.1)
+ > git rev-parse --resolve-git-dir /home/jenkins/agent/workspace/llmops-multi-agents_v1.0.1/.git # timeout=10
+ > git config remote.origin.url https://github.com/kle04/llmops-multi-agents.git # timeout=10
+Fetching upstream changes from https://github.com/kle04/llmops-multi-agents.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/kle04/llmops-multi-agents.git +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 # timeout=10
+Commit message: "fix(jenkinsfile): fix trigger on tag"
+[Pipeline] sh
++ git fetch --tags --force
+[Pipeline] script
+[Pipeline] {
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test orchestrator-agent)
+[Pipeline] podTemplate
+[Pipeline] {
+[Pipeline] node
+Created Pod: kubernetes jenkins/llmops-multi-agents-v1-0-1-9-0vz1r-mfn7j-wx1wm
+[PodInfo] jenkins/llmops-multi-agents-v1-0-1-9-0vz1r-mfn7j-wx1wm
+	Container [docker] waiting [ContainerCreating] No message
+	Container [jnlp] waiting [ContainerCreating] No message
+	Pod [Pending][ContainersNotReady] containers with unready status: [docker jnlp]
+Agent llmops-multi-agents-v1-0-1-9-0vz1r-mfn7j-wx1wm is provisioned from template llmops-multi-agents_v1_0_1_9-0vz1r-mfn7j
+---
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  annotations:
+    kubernetes.jenkins.io/last-refresh: "1763743419313"
+    buildUrl: "http://jenkins.jenkins.svc.cluster.local:8080/job/llmops-multi-agents/job/v1.0.1/9/"
+    runUrl: "job/llmops-multi-agents/job/v1.0.1/9/"
+  labels:
+    jenkins/jenkins-jenkins-agent: "true"
+    jenkins/label-digest: "5cf594a31f029847bc9c0e8314bf39c594e42265"
+    jenkins/label: "llmops-multi-agents_v1_0_1_9-0vz1r"
+    kubernetes.jenkins.io/controller: "http___jenkins_jenkins_svc_cluster_local_8080x"
+  name: "llmops-multi-agents-v1-0-1-9-0vz1r-mfn7j-wx1wm"
+  namespace: "jenkins"
+spec:
+  containers:
+  - command:
+    - "cat"
+    image: "docker:29.0"
+    name: "docker"
+    tty: true
+    volumeMounts:
+    - mountPath: "/var/run/docker.sock"
+      name: "docker-sock"
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - env:
+    - name: "JENKINS_SECRET"
+      value: "********"
+    - name: "JENKINS_TUNNEL"
+      value: "jenkins-agent.jenkins.svc.cluster.local:50000"
+    - name: "JENKINS_AGENT_NAME"
+      value: "llmops-multi-agents-v1-0-1-9-0vz1r-mfn7j-wx1wm"
+    - name: "REMOTING_OPTS"
+      value: "-noReconnectAfter 1d"
+    - name: "JENKINS_NAME"
+      value: "llmops-multi-agents-v1-0-1-9-0vz1r-mfn7j-wx1wm"
+    - name: "JENKINS_AGENT_WORKDIR"
+      value: "/home/jenkins/agent"
+    - name: "JENKINS_URL"
+      value: "http://jenkins.jenkins.svc.cluster.local:8080/"
+    image: "jenkins/inbound-agent:3345.v03dee9b_f88fc-1"
+    name: "jnlp"
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  nodeSelector:
+    kubernetes.io/os: "linux"
+  restartPolicy: "Never"
+  volumes:
+  - hostPath:
+      path: "/var/run/docker.sock"
+    name: "docker-sock"
+  - emptyDir:
+      medium: ""
+    name: "workspace-volume"
+
+Running on llmops-multi-agents-v1-0-1-9-0vz1r-mfn7j-wx1wm in /home/jenkins/agent/workspace/llmops-multi-agents_v1.0.1
+[Pipeline] {
+[Pipeline] checkout
+The recommended git tool is: git
+using credential github-token
+Cloning the remote Git repository
+Cloning with configured refspecs honoured and with tags
+Cloning repository https://github.com/kle04/llmops-multi-agents.git
+ > git init /home/jenkins/agent/workspace/llmops-multi-agents_v1.0.1 # timeout=10
+Fetching upstream changes from https://github.com/kle04/llmops-multi-agents.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/kle04/llmops-multi-agents.git +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+ > git config remote.origin.url https://github.com/kle04/llmops-multi-agents.git # timeout=10
+ > git config --add remote.origin.fetch +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+Fetching with tags
+Checking out Revision 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 (v1.0.1)
+Commit message: "fix(jenkinsfile): fix trigger on tag"
+ > git config remote.origin.url https://github.com/kle04/llmops-multi-agents.git # timeout=10
+Fetching upstream changes from https://github.com/kle04/llmops-multi-agents.git
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/kle04/llmops-multi-agents.git +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 # timeout=10
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] container
+[Pipeline] {
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ cd src/agents/orchestrator-agent
++ docker build -t orchestrator-agent:ci-9 -f Dockerfile .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load .dockerignore
+#1 transferring context: 121B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 557B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.13-slim
+#3 DONE 0.1s
+
+#4 [builder 1/5] FROM docker.io/library/python:3.13-slim@sha256:326df678c20c78d465db501563f3492d17c42a4afe33a1f2bf5406a1d56b0e86
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 41.15kB done
+#5 DONE 0.0s
+
+#6 [builder 2/5] WORKDIR /app
+#6 CACHED
+
+#7 [builder 4/5] RUN pip install --no-cache-dir uv==0.9.3
+#7 CACHED
+
+#8 [builder 5/5] RUN uv pip install --no-cache-dir -r pyproject.toml --target=/app/requirements
+#8 CACHED
+
+#9 [stage-1 4/5] COPY . /app
+#9 CACHED
+
+#10 [builder 3/5] COPY pyproject.toml /app/
+#10 CACHED
+
+#11 [stage-1 3/5] COPY --from=builder /app/requirements /usr/local/lib/python3.13/site-packages/
+#11 CACHED
+
+#12 [stage-1 5/5] RUN pip install --no-cache-dir uv==0.9.3
+#12 CACHED
+
+#13 exporting to image
+#13 exporting layers done
+#13 writing image sha256:ed3febf4eae3edecfd71235dc03b468bdf150abe93597d233a6714e10baf67fa done
+#13 naming to docker.io/library/orchestrator-agent:ci-9 done
+#13 DONE 0.0s
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] }
+[Pipeline] // podTemplate
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test rag-agent)
+[Pipeline] podTemplate
+[Pipeline] {
+[Pipeline] node
+Created Pod: kubernetes jenkins/llmops-multi-agents-v1-0-1-9-b5f30-m1xbl-r78pr
+[PodInfo] jenkins/llmops-multi-agents-v1-0-1-9-b5f30-m1xbl-r78pr
+	Container [docker] waiting [ContainerCreating] No message
+	Container [jnlp] waiting [ContainerCreating] No message
+	Pod [Pending][ContainersNotReady] containers with unready status: [docker jnlp]
+Agent llmops-multi-agents-v1-0-1-9-b5f30-m1xbl-r78pr is provisioned from template llmops-multi-agents_v1_0_1_9-b5f30-m1xbl
+---
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  annotations:
+    kubernetes.jenkins.io/last-refresh: "1763743437877"
+    buildUrl: "http://jenkins.jenkins.svc.cluster.local:8080/job/llmops-multi-agents/job/v1.0.1/9/"
+    runUrl: "job/llmops-multi-agents/job/v1.0.1/9/"
+  labels:
+    jenkins/jenkins-jenkins-agent: "true"
+    jenkins/label-digest: "af7f2b3be9dd97c0fe278b90faf3f863fff4979c"
+    jenkins/label: "llmops-multi-agents_v1_0_1_9-b5f30"
+    kubernetes.jenkins.io/controller: "http___jenkins_jenkins_svc_cluster_local_8080x"
+  name: "llmops-multi-agents-v1-0-1-9-b5f30-m1xbl-r78pr"
+  namespace: "jenkins"
+spec:
+  containers:
+  - command:
+    - "cat"
+    image: "docker:29.0"
+    name: "docker"
+    tty: true
+    volumeMounts:
+    - mountPath: "/var/run/docker.sock"
+      name: "docker-sock"
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - env:
+    - name: "JENKINS_SECRET"
+      value: "********"
+    - name: "JENKINS_TUNNEL"
+      value: "jenkins-agent.jenkins.svc.cluster.local:50000"
+    - name: "JENKINS_AGENT_NAME"
+      value: "llmops-multi-agents-v1-0-1-9-b5f30-m1xbl-r78pr"
+    - name: "REMOTING_OPTS"
+      value: "-noReconnectAfter 1d"
+    - name: "JENKINS_NAME"
+      value: "llmops-multi-agents-v1-0-1-9-b5f30-m1xbl-r78pr"
+    - name: "JENKINS_AGENT_WORKDIR"
+      value: "/home/jenkins/agent"
+    - name: "JENKINS_URL"
+      value: "http://jenkins.jenkins.svc.cluster.local:8080/"
+    image: "jenkins/inbound-agent:3345.v03dee9b_f88fc-1"
+    name: "jnlp"
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  nodeSelector:
+    kubernetes.io/os: "linux"
+  restartPolicy: "Never"
+  volumes:
+  - hostPath:
+      path: "/var/run/docker.sock"
+    name: "docker-sock"
+  - emptyDir:
+      medium: ""
+    name: "workspace-volume"
+
+Running on llmops-multi-agents-v1-0-1-9-b5f30-m1xbl-r78pr in /home/jenkins/agent/workspace/llmops-multi-agents_v1.0.1
+[Pipeline] {
+[Pipeline] checkout
+The recommended git tool is: git
+using credential github-token
+Cloning the remote Git repository
+Cloning with configured refspecs honoured and with tags
+Cloning repository https://github.com/kle04/llmops-multi-agents.git
+ > git init /home/jenkins/agent/workspace/llmops-multi-agents_v1.0.1 # timeout=10
+Fetching upstream changes from https://github.com/kle04/llmops-multi-agents.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/kle04/llmops-multi-agents.git +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+Fetching with tags
+Checking out Revision 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 (v1.0.1)
+ > git config remote.origin.url https://github.com/kle04/llmops-multi-agents.git # timeout=10
+ > git config --add remote.origin.fetch +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+ > git config remote.origin.url https://github.com/kle04/llmops-multi-agents.git # timeout=10
+Fetching upstream changes from https://github.com/kle04/llmops-multi-agents.git
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/kle04/llmops-multi-agents.git +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+ > git config core.sparsecheckout # timeout=10
+Commit message: "fix(jenkinsfile): fix trigger on tag"
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] container
+[Pipeline] {
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
+ > git checkout -f 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 # timeout=10
++ cd src/agents/rag-agent
++ docker build -t rag-agent:ci-9 -f Dockerfile .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 499B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load .dockerignore
+#2 transferring context: 121B 0.0s done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.13-slim
+#3 DONE 0.1s
+
+#4 [builder 1/5] FROM docker.io/library/python:3.13-slim@sha256:326df678c20c78d465db501563f3492d17c42a4afe33a1f2bf5406a1d56b0e86
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 29.10kB done
+#5 DONE 0.0s
+
+#6 [stage-1 4/5] COPY . /app
+#6 CACHED
+
+#7 [builder 4/5] RUN pip install --no-cache-dir uv==0.9.3
+#7 CACHED
+
+#8 [builder 5/5] RUN uv pip install --no-cache-dir -r pyproject.toml --target=/app/requirements
+#8 CACHED
+
+#9 [stage-1 3/5] COPY --from=builder /app/requirements /usr/local/lib/python3.13/site-packages/
+#9 CACHED
+
+#10 [builder 3/5] COPY pyproject.toml /app/
+#10 CACHED
+
+#11 [builder 2/5] WORKDIR /app
+#11 CACHED
+
+#12 [stage-1 5/5] RUN pip install --no-cache-dir uv==0.9.3
+#12 CACHED
+
+#13 exporting to image
+#13 exporting layers done
+#13 writing image sha256:63c0d79ce3a3da0ae1df0912126910ab19087e0c6802fa0b0d747772d603f8be done
+#13 naming to docker.io/library/rag-agent:ci-9 done
+#13 DONE 0.0s
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] }
+[Pipeline] // podTemplate
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Tag & Push images)
+[Pipeline] podTemplate
+[Pipeline] {
+[Pipeline] node
+Created Pod: kubernetes jenkins/llmops-multi-agents-v1-0-1-9-wp0mx-j3ckf-b91l7
+[PodInfo] jenkins/llmops-multi-agents-v1-0-1-9-wp0mx-j3ckf-b91l7
+	Container [docker] waiting [ContainerCreating] No message
+	Container [jnlp] waiting [ContainerCreating] No message
+	Pod [Pending][ContainersNotReady] containers with unready status: [docker jnlp]
+Agent llmops-multi-agents-v1-0-1-9-wp0mx-j3ckf-b91l7 is provisioned from template llmops-multi-agents_v1_0_1_9-wp0mx-j3ckf
+---
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  annotations:
+    kubernetes.jenkins.io/last-refresh: "1763743453929"
+    buildUrl: "http://jenkins.jenkins.svc.cluster.local:8080/job/llmops-multi-agents/job/v1.0.1/9/"
+    runUrl: "job/llmops-multi-agents/job/v1.0.1/9/"
+  labels:
+    jenkins/jenkins-jenkins-agent: "true"
+    jenkins/label-digest: "19f66f35311f6f94c7b09f0e2a94adff9acc40f3"
+    jenkins/label: "llmops-multi-agents_v1_0_1_9-wp0mx"
+    kubernetes.jenkins.io/controller: "http___jenkins_jenkins_svc_cluster_local_8080x"
+  name: "llmops-multi-agents-v1-0-1-9-wp0mx-j3ckf-b91l7"
+  namespace: "jenkins"
+spec:
+  containers:
+  - command:
+    - "cat"
+    image: "docker:29.0"
+    name: "docker"
+    tty: true
+    volumeMounts:
+    - mountPath: "/var/run/docker.sock"
+      name: "docker-sock"
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - env:
+    - name: "JENKINS_SECRET"
+      value: "********"
+    - name: "JENKINS_TUNNEL"
+      value: "jenkins-agent.jenkins.svc.cluster.local:50000"
+    - name: "JENKINS_AGENT_NAME"
+      value: "llmops-multi-agents-v1-0-1-9-wp0mx-j3ckf-b91l7"
+    - name: "REMOTING_OPTS"
+      value: "-noReconnectAfter 1d"
+    - name: "JENKINS_NAME"
+      value: "llmops-multi-agents-v1-0-1-9-wp0mx-j3ckf-b91l7"
+    - name: "JENKINS_AGENT_WORKDIR"
+      value: "/home/jenkins/agent"
+    - name: "JENKINS_URL"
+      value: "http://jenkins.jenkins.svc.cluster.local:8080/"
+    image: "jenkins/inbound-agent:3345.v03dee9b_f88fc-1"
+    name: "jnlp"
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  nodeSelector:
+    kubernetes.io/os: "linux"
+  restartPolicy: "Never"
+  volumes:
+  - hostPath:
+      path: "/var/run/docker.sock"
+    name: "docker-sock"
+  - emptyDir:
+      medium: ""
+    name: "workspace-volume"
+
+Running on llmops-multi-agents-v1-0-1-9-wp0mx-j3ckf-b91l7 in /home/jenkins/agent/workspace/llmops-multi-agents_v1.0.1
+[Pipeline] {
+[Pipeline] checkout
+The recommended git tool is: git
+using credential github-token
+Cloning the remote Git repository
+Cloning with configured refspecs honoured and with tags
+Cloning repository https://github.com/kle04/llmops-multi-agents.git
+ > git init /home/jenkins/agent/workspace/llmops-multi-agents_v1.0.1 # timeout=10
+Fetching upstream changes from https://github.com/kle04/llmops-multi-agents.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/kle04/llmops-multi-agents.git +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+ > git config remote.origin.url https://github.com/kle04/llmops-multi-agents.git # timeout=10
+ > git config --add remote.origin.fetch +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+Fetching with tags
+Checking out Revision 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 (v1.0.1)
+ > git config remote.origin.url https://github.com/kle04/llmops-multi-agents.git # timeout=10
+Fetching upstream changes from https://github.com/kle04/llmops-multi-agents.git
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/kle04/llmops-multi-agents.git +refs/tags/v1.0.1:refs/tags/v1.0.1 # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 5b2d5e2bdea548c202179f0c2a00d05c57abb8a5 # timeout=10
+Commit message: "fix(jenkinsfile): fix trigger on tag"
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] container
+[Pipeline] {
+[Pipeline] container
+[Pipeline] {
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] }
+[Pipeline] // podTemplate
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] cleanWs
+[WS-CLEANUP] Deleting project workspace...
+[WS-CLEANUP] Deferred wipeout is used...
+[WS-CLEANUP] done
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Also:   org.jenkinsci.plugins.workflow.actions.ErrorAction$ErrorId: 67317cd8-4d8b-489c-8481-52b5f97c6b60
+groovy.lang.MissingPropertyException: No such property: TAG_FROM_GIT for class: groovy.lang.Binding
+	at groovy.lang.Binding.getVariable(Binding.java:63)
+	at PluginClassLoader for script-security//org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SandboxInterceptor.onGetProperty(SandboxInterceptor.java:285)
+	at PluginClassLoader for script-security//org.kohsuke.groovy.sandbox.impl.Checker$7.call(Checker.java:375)
+	at PluginClassLoader for script-security//org.kohsuke.groovy.sandbox.impl.Checker.checkedGetProperty(Checker.java:379)
+	at PluginClassLoader for script-security//org.kohsuke.groovy.sandbox.impl.Checker.checkedGetProperty(Checker.java:355)
+	at PluginClassLoader for script-security//org.kohsuke.groovy.sandbox.impl.Checker.checkedGetProperty(Checker.java:355)
+	at PluginClassLoader for script-security//org.kohsuke.groovy.sandbox.impl.Checker.checkedGetProperty(Checker.java:355)
+	at PluginClassLoader for workflow-cps//com.cloudbees.groovy.cps.sandbox.SandboxInvoker.getProperty(SandboxInvoker.java:29)
+	at PluginClassLoader for workflow-cps//org.jenkinsci.plugins.workflow.cps.LoggingInvoker.getProperty(LoggingInvoker.java:139)
+	at PluginClassLoader for workflow-cps//com.cloudbees.groovy.cps.impl.PropertyAccessBlock.rawGet(PropertyAccessBlock.java:20)
+	at WorkflowScript.run(WorkflowScript:128)
+	at ___cps.transform___(Native Method)
+	at PluginClassLoader for workflow-cps//com.cloudbees.groovy.cps.impl.PropertyishBlock$ContinuationImpl.get(PropertyishBlock.java:74)
+	at PluginClassLoader for workflow-cps//com.cloudbees.groovy.cps.LValueBlock$GetAdapter.receive(LValueBlock.java:30)
+	at PluginClassLoader for workflow-cps//com.cloudbees.groovy.cps.impl.PropertyishBlock$ContinuationImpl.fixName(PropertyishBlock.java:66)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at PluginClassLoader for workflow-cps//com.cloudbees.groovy.cps.impl.ContinuationPtr$ContinuationImpl.receive(ContinuationPtr.java:71)
+	at PluginClassLoader for workflow-cps//com.cloudbees.groovy.cps.impl.ConstantBlock.eval(ConstantBlock.java:21)
+	at PluginClassLoader for workflow-cps//com.cloudbees.groovy.cps.Next.step(Next.java:84)
+	at PluginClassLoader for workflow-cps//com.cloudbees.groovy.cps.Continuable.run0(Continuable.java:142)
+	at PluginClassLoader for workflow-cps//org.jenkinsci.plugins.workflow.cps.SandboxContinuable.access$001(SandboxContinuable.java:17)
+	at PluginClassLoader for workflow-cps//org.jenkinsci.plugins.workflow.cps.SandboxContinuable.run0(SandboxContinuable.java:48)
+	at PluginClassLoader for workflow-cps//org.jenkinsci.plugins.workflow.cps.CpsThread.runNextChunk(CpsThread.java:188)
+	at PluginClassLoader for workflow-cps//org.jenkinsci.plugins.workflow.cps.CpsThreadGroup.run(CpsThreadGroup.java:464)
+	at PluginClassLoader for workflow-cps//org.jenkinsci.plugins.workflow.cps.CpsThreadGroup$2.call(CpsThreadGroup.java:372)
+	at PluginClassLoader for workflow-cps//org.jenkinsci.plugins.workflow.cps.CpsThreadGroup$2.call(CpsThreadGroup.java:302)
+	at PluginClassLoader for workflow-cps//org.jenkinsci.plugins.workflow.cps.CpsVmExecutorService.lambda$wrap$4(CpsVmExecutorService.java:143)
+	at java.base/java.util.concurrent.FutureTask.run(Unknown Source)
+	at hudson.remoting.SingleLaneExecutorService$1.run(SingleLaneExecutorService.java:139)
+	at jenkins.util.ContextResettingExecutorService$1.run(ContextResettingExecutorService.java:28)
+	at jenkins.security.ImpersonatingExecutorService$1.run(ImpersonatingExecutorService.java:68)
+	at jenkins.util.ErrorLoggingExecutorService.lambda$wrap$0(ErrorLoggingExecutorService.java:51)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Unknown Source)
+	at java.base/java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at PluginClassLoader for workflow-cps//org.jenkinsci.plugins.workflow.cps.CpsVmExecutorService$1.call(CpsVmExecutorService.java:53)
+	at PluginClassLoader for workflow-cps//org.jenkinsci.plugins.workflow.cps.CpsVmExecutorService$1.call(CpsVmExecutorService.java:50)
+	at org.codehaus.groovy.runtime.GroovyCategorySupport$ThreadCategoryInfo.use(GroovyCategorySupport.java:136)
+	at org.codehaus.groovy.runtime.GroovyCategorySupport.use(GroovyCategorySupport.java:275)
+	at PluginClassLoader for workflow-cps//org.jenkinsci.plugins.workflow.cps.CpsVmExecutorService.lambda$categoryThreadFactory$0(CpsVmExecutorService.java:50)
+	at java.base/java.lang.Thread.run(Unknown Source)
+
+GitHub has been notified of this commit’s build result
+
+Finished: FAILURE

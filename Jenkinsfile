@@ -7,6 +7,7 @@ pipeline {
     ORCH_IMAGE = "orchestrator-agent"
     RAG_IMAGE  = "rag-agent"
     IMAGE_TAG  = "ci-${BUILD_NUMBER}"
+    TAG_FROM_GIT = "${env.TAG_NAME ?: env.GIT_BRANCH}"
   }
 
   stages {
