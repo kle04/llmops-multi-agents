@@ -34,7 +34,7 @@ pipeline {
             restartPolicy: Never
             containers:
               - name: docker
-                image: docker:29.0
+                image: docker:24.0
                 command:
                   - cat
                 tty: true
@@ -69,7 +69,7 @@ pipeline {
             restartPolicy: Never
             containers:
               - name: docker
-                image: docker:29.0
+                image: docker:24.0
                 command:
                   - cat
                 tty: true
@@ -107,7 +107,7 @@ pipeline {
             restartPolicy: Never
             containers:
               - name: docker
-                image: docker:29.0
+                image: docker:24.0
                 command:
                   - cat
                 tty: true
