@@ -26,7 +26,7 @@ class OrchestratorAgent:
     
     def _init_llm(self):
         if not self.llm:
-            print("Đang khởi tạo LLM Model...")
+            logger.info("Đang khởi tạo LLM Model...")
             if Config.GOOGLE_API_KEY == "your_google_api_key":
                 raise ValueError("Vui lòng thiết lập biến GOOGLE_API_KEY trong file .env")
             try:

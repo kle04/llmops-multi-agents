@@ -9,9 +9,14 @@ from a2a.types import (
 )
 import httpx
 import asyncio
+import logging
 from uuid import uuid4
 from typing import Dict, Any
 from config import Config
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class RAGAgentA2AClient:
     def __init__(self, base_url: str = Config.RAG_AGENT_URL):
@@ -42,20 +47,21 @@ class RAGAgentA2AClient:
                 url=self.base_url,
             )
 
-            print(f"Kết nối tới Agent thành công: {self.agent_card.name}")
-            print(f"Thông tin: {self.agent_card.description}")
-            print(f"URL: {self.agent_card.url}")
+            logger.info(f"Kết nối tới Agent thành công: {self.agent_card.name}")
+            logger.info(f"Thông tin: {self.agent_card.description}")
+            logger.info(f"URL: {self.agent_card.url}")
             if hasattr(self.agent_card, 'skills') and self.agent_card.skills:
-                print(f"Các skill: {len(self.agent_card.skills)}")
+                logger.info(f"Các skill: {len(self.agent_card.skills)}")
                 for skill in self.agent_card.skills:
-                    print(f"   - {skill.name}: {skill.description}")
+                    logger.info(f"   - {skill.name}: {skill.description}")
             else:
-                print("🛠️ Không có skill cụ thể nào được liệt kê")
-            print("─" * 50)
+                logger.info("🛠️ Không có skill cụ thể nào được liệt kê")
+            logger.info("─" * 50)
 
             self._initialized = True
         except Exception as e:
             self._initialized = False
+            logger.warning(f"Lỗi khi khởi tạo A2A Client: {e}")
     
     async def close(self):
         if self.httpx_client:
@@ -76,7 +82,7 @@ class RAGAgentA2AClient:
         }
         
         if stream:
-            print(f"Stream request tới RAG Agent")
+            logger.info(f"Stream request tới RAG Agent")
             
             # Tạo streaming request
             streaming_request = SendStreamingMessageRequest(
@@ -107,7 +113,7 @@ class RAGAgentA2AClient:
             }
                     
         else:
-            print(f"Gửi message thông thường tới RAG Agent...")
+            logger.info(f"Gửi message thông thường tới RAG Agent...")
 
             # Tạo message
             request = SendMessageRequest(
