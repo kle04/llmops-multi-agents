@@ -48,8 +48,8 @@ class RAGAgent:
         """
             Khởi tạo RAG Agent
         """
-        print(f"Khởi tạo RAG Agent với LLM model: {Config.GOOGLE_LLM_MODEL} ...")
-        print(f"Khởi tạo model với API Key ...")
+        logger.info(f"Khởi tạo RAG Agent với LLM model: {Config.GOOGLE_LLM_MODEL} ...")
+        logger.debug("Khởi tạo model với API Key ...")
         
         # Kiểm tra API Key
         self.google_api_key = str(Config.GOOGLE_API_KEY)
@@ -100,6 +100,7 @@ class RAGAgent:
     def _init_embedding(self):
         model_kwargs = { "device": "cpu", "trust_remote_code": True }
         encode_kwargs = { 'normalize_embeddings': True, 'batch_size': 16 }
+        logger.debug("Đang khởi tạo Embedding Model...")
         try:
                 
             self.embeddings = HuggingFaceEmbeddings(
@@ -110,7 +111,7 @@ class RAGAgent:
             )
             logger.info(f"Khởi tạo Embedding Model {Config.EMBEDDING_MODEL} thành công")
         except Exception as e:
-            logger.error(f"Không thể khởi tạo Embedding Model {Config.EMBEDDING_MODEL}")
+            logger.exception(f"Không thể khởi tạo Embedding Model {Config.EMBEDDING_MODEL}: {e}")
             exit(1)
 
     def _create_workflow(self) -> StateGraph:
@@ -132,10 +133,11 @@ class RAGAgent:
         workflow.add_edge("error_handle", END)
 
         return workflow
-    
+
     def retrieve_documents_node(self, state: RAGState) -> RAGState:
         
         try:
+            logger.info("Bắt đầu truy xuất tài liệu cho truy vấn")
             state["step"] = "Truy xuất tài liệu"
             state["messages"] = add_messages(
                 state.get("messages", []), 
@@ -147,6 +149,7 @@ class RAGAgent:
             
             # Tạo embed cho query của người dùng
             embedded_query = self.embeddings.embed_query(state["query"])
+            logger.debug("Đã tạo embedding cho query, thực hiện tìm kiếm Qdrant")
             search_results = self.qdrant_client.search(
                 collection_name=Config.COLLECTION_NAME,
                 query_vector=embedded_query,
@@ -173,14 +176,17 @@ class RAGAgent:
 
             state["retrieved_documents"] = retrieved_documents
             state["status"] = "document_retrieved"
+            logger.info(f"Truy xuất {len(retrieved_documents)} tài liệu từ Qdrant")
             return state
         except Exception as e:
+            logger.exception(f"Lỗi truy xuất tài liệu: {e}")
             state["error"] = f"Lỗi truy xuất tài liệu: {str(e)}"
             state["status"] = "error"
             return state
 
     def filter_documents_node(self, state: RAGState) -> RAGState:
         try:
+            logger.info(f"Lọc tài liệu, tổng số đã truy xuất: {len(state.get('retrieved_documents', []))}")
             state["step"] = "Lọc document loại bỏ tài liệu điểm thấp"
             state["messages"] = add_messages(
                 state.get("messages", []), 
@@ -190,14 +196,17 @@ class RAGAgent:
             
             state["relevant_documents"] = relevant_documents
             state["status"] = "filtered_documents"
+            logger.info(f"Số tài liệu liên quan sau lọc: {len(relevant_documents)}")
             return state
         except Exception as e:
+            logger.exception(f"Lỗi filter tài liệu: {e}")
             state["error"] = f"Lỗi filter tài liệu: {str(e)}"
             state["status"] = "error"
             return state
         
     def aggregate_context_node(self, state: RAGState) -> RAGState:
         try:
+            logger.info("Đang tổng hợp context từ tài liệu liên quan")
             state["step"] = "Tổng hợp tài liệu"
             state["messages"] = add_messages(
                 state.get("messages", []), 
@@ -208,17 +217,20 @@ class RAGAgent:
             state["context"] = context
             state["sources"] = list(set([doc["source"] for doc in state["relevant_documents"]]))
             state["status"] = "context_aggregated"
+            logger.debug(f"Độ dài context tổng hợp: {len(context)} ký tự")
 
             
             return state
         
         except Exception as e:
+            logger.exception(f"Lỗi tổng hợp context từ tài liệu: {e}")
             state["error"] = f"Lỗi tổng hợp context từ tài liệu: {str(e)}"
             state["status"] = "error"
             return state
         
     def generate_answer_node(self, state: RAGState) -> RAGState:
         try:
+            logger.info("Bắt đầu tạo câu trả lời từ LLM")
             state["step"] = "Tạo câu trả lời, hoàn thành"
             state["messages"] = add_messages(
                 state.get("messages", []), 
@@ -259,17 +271,20 @@ class RAGAgent:
             state["answer"] = answer
             state["status"] = "completed"
             state["processing_time"] = 0
+            logger.info("Tạo câu trả lời thành công")
             state["messages"] = add_messages(
                 state.get("messages", []), 
                 [AIMessage(content=answer)])
             return state
         except Exception as e:
+            logger.exception(f"Lỗi tạo câu trả lời: {e}")
             state["error"] = f"Lỗi tạo câu trả lời: {str(e)}"
             state["status"] = "error"
             return state
         
     def error_handle_node(self, state: RAGState) -> RAGState:
-        message = f"Lỗi khi xử lý câu hỏi: {state.get('error', "Lỗi không xác định")}"
+        message = f"Lỗi khi xử lý câu hỏi: {state.get('error', 'Lỗi không xác định')}"
+        logger.error(message)
         state["messages"] = add_messages(
             state.get("messages", []), 
             [AIMessage(content=message)]
@@ -295,9 +310,11 @@ class RAGAgent:
         }
 
         try:
+            logger.info("Nhận yêu cầu invoke RAG Agent")
             start_time = datetime.now()
             final_state = self.compiled_workflow.invoke(init_state)
             processing_time = (datetime.now() - start_time).total_seconds()
+            logger.info(f"Hoàn thành xử lý truy vấn, thời gian {processing_time:.2f}s, trạng thái: {final_state.get('status', 'unknown')}")
 
             return {
                 "answer": final_state.get("answer", ""),
@@ -309,6 +326,7 @@ class RAGAgent:
             }
         
         except Exception as e:
+            logger.exception(f"Lỗi xử lý invoke: {e}")
             return {
                 "answer": f"Lỗi xử lý: {str(e)}",
                 "sources": [],
@@ -320,7 +338,7 @@ class RAGAgent:
 
     def filter_documents(self, query: str, docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         relevant_docs = []
-        print(f"Filtering {len(docs)} documents with LLM grading...")
+        logger.info(f"Filtering {len(docs)} documents với LLM grading")
         
         for doc in docs:
             # Documents đã được filter theo score ở Qdrant level
@@ -340,23 +358,24 @@ class RAGAgent:
                 grade = response.content.strip().upper()
 
                 if grade == "YES":
-                    print(f"✅ Document từ {doc['source']}, chunk {doc['chunk_index']} được chấp nhận (score: {doc['score']:.3f})")
+                    logger.info(f"Document từ {doc['source']}, chunk {doc['chunk_index']} được chấp nhận (score: {doc['score']:.3f})")
                     relevant_docs.append(doc)
                 elif grade == "NO":
-                    print(f"❌ Document từ {doc['source']}, chunk {doc['chunk_index']} không được chấp nhận (score: {doc['score']:.3f})")
+                    logger.info(f"Document từ {doc['source']}, chunk {doc['chunk_index']} không được chấp nhận (score: {doc['score']:.3f})")
                 else:
-                    print(f"⚠️ LLM trả lời không rõ ràng: '{grade}', giữ document dựa trên score")
+                    logger.warning(f"LLM trả lời không rõ ràng: '{grade}', giữ document dựa trên score")
                     relevant_docs.append(doc)
                     
             except Exception as e:
-                print(f"⚠️ LLM grading failed: {e}, giữ document dựa trên similarity score")
+                logger.exception(f"LLM grading failed: {e}, giữ document dựa trên similarity score")
                 relevant_docs.append(doc)
         
-        print(f"📊 Filtering complete: {len(relevant_docs)}/{len(docs)} documents passed LLM grading")
+        logger.info(f"Filtering complete: {len(relevant_docs)}/{len(docs)} documents passed LLM grading")
         return relevant_docs
     
     def aggregate_context(self, docs: List[Dict[str, Any]]) -> str:
         if not docs:
+            logger.warning("Không có tài liệu để tổng hợp context")
             return ""
         context_parts = []
         for doc in docs:
@@ -365,6 +384,7 @@ class RAGAgent:
             context_parts.append(content)
         
         context = "\n" + ("="*50 + "\n").join(context_parts)
+        logger.debug(f"Tổng hợp context với {len(docs)} tài liệu")
         return context
     
     def health_check(self) -> Dict[str, Any]:
