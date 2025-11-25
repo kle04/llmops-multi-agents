@@ -8,6 +8,7 @@ from agent import OrchestratorAgent
 from config import Config
 import uvicorn
 from redis_memory import RedisManager, ChatHistoryStore, LangChainHistoryStore
+from postgres_memory import PostgresManager, PostgresChatHistoryStore
 from langchain_core.messages import BaseMessage
 
 class ChatRequest(BaseModel):
@@ -24,17 +25,22 @@ class ChatResponse(BaseModel):
 
 agent = OrchestratorAgent()
 redis_manager = RedisManager()
+postgres_manager = PostgresManager()
 chat_store: Optional[ChatHistoryStore] = None
 langchain_store: Optional[LangChainHistoryStore] = None
+postgres_store: Optional[PostgresChatHistoryStore] = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await agent.initialize()
     await redis_manager.initialize()
+    await postgres_manager.initialize()
     global chat_store
     chat_store = ChatHistoryStore(redis_manager)
     global langchain_store
     langchain_store = LangChainHistoryStore(redis_manager)
+    global postgres_store
+    postgres_store = PostgresChatHistoryStore(postgres_manager)
     yield
 
 
@@ -54,8 +60,9 @@ async def health():
     # include redis health if available
     try:    
         redis_health = await redis_manager.health_check() if redis_manager else {"connected": False}
+        postgres_health = await postgres_manager.health_check() if postgres_manager else {"connected": False}
         agent_health = await agent.health_check() if agent else {"status": "unhealthy"}
-        return {"status": "healthy", "redis": redis_health, "agent": agent_health}
+        return {"status": "healthy", "redis": redis_health, "postgres": postgres_health, "agent": agent_health}
     except Exception as e:
         return {"status": "unhealthy", "redis": {"connected": False}, "agent": {"status": "unhealthy", "error": str(e)}}
 
@@ -70,6 +77,10 @@ async def chat(req: ChatRequest):
     # Append user message to chat history
     if chat_store and redis_manager.is_ready():
         await chat_store.append_message(user_id, session_id, role="user", content=req.message)
+    
+    # Append to Postgres (Long-term)
+    if postgres_store:
+        await postgres_store.append_message(user_id, session_id, role="user", content=req.message)
     if langchain_store and redis_manager.is_ready():
         await langchain_store.append_turn(user_id, session_id, turn_type="human", content=req.message)
         context = await langchain_store.get_history_context(user_id, session_id)
@@ -82,6 +93,17 @@ async def chat(req: ChatRequest):
     if chat_store and redis_manager.is_ready():
         sources = result.get("sources") or []
         await chat_store.append_message(
+            user_id,
+            session_id,
+            role="assistant",
+            content=response_text or "",
+            agent_used=result.get("selected_agent") or "Orchestrator",
+            source=sources if isinstance(sources, list) else [],
+        )
+    
+    # Append assistant message to Postgres (Long-term)
+    if postgres_store:
+        await postgres_store.append_message(
             user_id,
             session_id,
             role="assistant",
@@ -102,13 +124,13 @@ async def chat(req: ChatRequest):
 
 @app.get("/history/{user_id}/{session_id}")
 async def get_history(user_id: str, session_id: str):
-    if not chat_store or not redis_manager.is_ready():
-        return {"error": "Redis not available", "messages": [], "created_at": None, "last_updated": None}
-    chat = await chat_store.load(user_id, session_id)
+    if not postgres_store or not postgres_manager.is_ready():
+        return {"error": "Postgres not available", "messages": [], "created_at": None, "last_updated": None}
+    chat = await postgres_store.load_session_history(user_id, session_id)
     return {
         "messages": chat.messages,
-        "created_at": chat.created_at.isoformat(),
-        "last_updated": chat.last_updated.isoformat(),
+        "created_at": chat.created_at.isoformat() if chat.created_at else None,
+        "last_updated": chat.last_updated.isoformat() if chat.last_updated else None,
     }
 
 @app.get("/history/langchain/{user_id}/{session_id}")
@@ -122,9 +144,9 @@ async def get_history(user_id: str, session_id: str):
 
 @app.get("/sessions/{user_id}")
 async def get_user_sessions(user_id: str):
-    if not chat_store or not redis_manager.is_ready():
-        return {"error": "Cannot get user session !"}
-    sessions = await chat_store.list_sessions(user_id)
+    if not postgres_store or not postgres_manager.is_ready():
+        return {"error": "Postgres not available", "sessions": []}
+    sessions = await postgres_store.list_sessions(user_id)
     return {
         "sessions": sessions
     }

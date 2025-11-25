@@ -19,6 +19,7 @@ dependencies = [
     "fastapi>=0.118.0",
     "redis>=6.3.0",
     "httpx>=0.25",
+    "asyncpg>=0.29.0",
 ]
 
 [tool.uv.workspace]

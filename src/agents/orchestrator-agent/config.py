@@ -38,7 +38,14 @@ class Config:
     REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
     REDIS_DB = os.getenv("REDIS_DB", 0)
 
+    # POSTGRES
+    POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+    POSTGRES_PORT = _parse_port(os.getenv("POSTGRES_PORT"), 5432)
+    POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
+    POSTGRES_DB = os.getenv("POSTGRES_DB", "llmops")
+
     # Short-term memory settings
     HISTORY_LIMIT = int(os.getenv("HISTORY_LIMIT", 50))
-    REDIS_TTL_SECONDS = int(os.getenv("REDIS_TTL_SECONDS", 86400))  # 1 day
+    REDIS_TTL_SECONDS = int(os.getenv("REDIS_TTL_SECONDS", 604800))  # 7 days
     MAX_MESSAGE_CHARS = int(os.getenv("MAX_MESSAGE_CHARS", 2000))
