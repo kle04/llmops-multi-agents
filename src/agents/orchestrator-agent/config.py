@@ -8,11 +8,9 @@ def _parse_port(raw_value, default):
     """Handle plain ints or docker/k8s style tcp://host:port strings."""
     if raw_value in (None, ""):
         return default
-    # Try URL-style first (e.g. tcp://34.118.230.235:7010)
     parsed = urlparse(str(raw_value))
     if parsed.scheme and parsed.port:
         return parsed.port
-    # Fallback to simple int conversion
     try:
         return int(raw_value)
     except (TypeError, ValueError):
@@ -43,7 +41,7 @@ class Config:
     POSTGRES_PORT = _parse_port(os.getenv("POSTGRES_PORT"), 5432)
     POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
-    POSTGRES_DB = os.getenv("POSTGRES_DB", "llmops")
+    POSTGRES_DB = os.getenv("POSTGRES_DB", "chatbotdb")
 
     # Short-term memory settings
     HISTORY_LIMIT = int(os.getenv("HISTORY_LIMIT", 50))

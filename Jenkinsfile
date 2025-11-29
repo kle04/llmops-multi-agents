@@ -24,72 +24,20 @@ pipeline {
     }
 
     stage('Test orchestrator-agent') {
-      agent {
-        kubernetes {
-          defaultContainer 'docker'
-          yaml """
-          apiVersion: v1
-          kind: Pod
-          spec:
-            restartPolicy: Never
-            containers:
-              - name: docker
-                image: docker:24.0
-                command:
-                  - cat
-                tty: true
-                volumeMounts:
-                  - name: docker-sock
-                    mountPath: /var/run/docker.sock
-            volumes:
-              - name: docker-sock
-                hostPath:
-                  path: /var/run/docker.sock
-          """
-        }
-      }
       steps {
-        container('docker') {
-          sh '''
-            cd src/agents/orchestrator-agent
-            docker build -t ${ORCH_IMAGE}:${IMAGE_TAG} -f Dockerfile .
-          '''
-        }
+        sh '''
+          cd src/agents/orchestrator-agent
+          docker build -t ${ORCH_IMAGE}:${IMAGE_TAG} -f Dockerfile .
+        '''
       }
     }
 
     stage('Test rag-agent') {
-      agent {
-        kubernetes {
-          defaultContainer 'docker'
-          yaml """
-          apiVersion: v1
-          kind: Pod
-          spec:
-            restartPolicy: Never
-            containers:
-              - name: docker
-                image: docker:24.0
-                command:
-                  - cat
-                tty: true
-                volumeMounts:
-                  - name: docker-sock
-                    mountPath: /var/run/docker.sock
-            volumes:
-              - name: docker-sock
-                hostPath:
-                  path: /var/run/docker.sock
-          """
-        }
-      }
       steps {
-        container('docker') {
-          sh '''
-            cd src/agents/rag-agent
-            docker build -t ${RAG_IMAGE}:${IMAGE_TAG} -f Dockerfile .
-          '''
-        }
+        sh '''
+          cd src/agents/rag-agent
+          docker build -t ${RAG_IMAGE}:${IMAGE_TAG} -f Dockerfile .
+        '''
       }
     }
 
@@ -97,41 +45,15 @@ pipeline {
       when {
         buildingTag()
       }
-      agent {
-        kubernetes {
-          defaultContainer 'docker'
-          yaml """
-          apiVersion: v1
-          kind: Pod
-          spec:
-            restartPolicy: Never
-            containers:
-              - name: docker
-                image: docker:24.0
-                command:
-                  - cat
-                tty: true
-                volumeMounts:
-                  - name: docker-sock
-                    mountPath: /var/run/docker.sock
-            volumes:
-              - name: docker-sock
-                hostPath:
-                  path: /var/run/docker.sock
-          """
-        }
-      }
       steps {
-        container('docker') {
-          sh """
-            echo ${DOCKER_CREDS_PSW} | docker login ${REGISTRY_URL} \
-              -u ${DOCKER_CREDS_USR} --password-stdin
-            docker tag ${ORCH_IMAGE}:${IMAGE_TAG} ${DOCKER_CREDS_USR}/${ORCH_IMAGE}:${TAG_FROM_GIT}
-            docker tag ${RAG_IMAGE}:${IMAGE_TAG} ${DOCKER_CREDS_USR}/${RAG_IMAGE}:${TAG_FROM_GIT}
-            docker push ${DOCKER_CREDS_USR}/${ORCH_IMAGE}:${TAG_FROM_GIT}
-            docker push ${DOCKER_CREDS_USR}/${RAG_IMAGE}:${TAG_FROM_GIT}
-          """
-        }
+        sh """
+          echo ${DOCKER_CREDS_PSW} | docker login ${REGISTRY_URL} \
+            -u ${DOCKER_CREDS_USR} --password-stdin
+          docker tag ${ORCH_IMAGE}:${IMAGE_TAG} ${DOCKER_CREDS_USR}/${ORCH_IMAGE}:${TAG_FROM_GIT}
+          docker tag ${RAG_IMAGE}:${IMAGE_TAG} ${DOCKER_CREDS_USR}/${RAG_IMAGE}:${TAG_FROM_GIT}
+          docker push ${DOCKER_CREDS_USR}/${ORCH_IMAGE}:${TAG_FROM_GIT}
+          docker push ${DOCKER_CREDS_USR}/${RAG_IMAGE}:${TAG_FROM_GIT}
+        """
       }
     }
   }
