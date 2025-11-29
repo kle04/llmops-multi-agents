@@ -53,6 +53,10 @@ pipeline {
           docker tag ${RAG_IMAGE}:${IMAGE_TAG} ${DOCKER_CREDS_USR}/${RAG_IMAGE}:${TAG_FROM_GIT}
           docker push ${DOCKER_CREDS_USR}/${ORCH_IMAGE}:${TAG_FROM_GIT}
           docker push ${DOCKER_CREDS_USR}/${RAG_IMAGE}:${TAG_FROM_GIT}
+          docker rmi ${ORCH_IMAGE}:${IMAGE_TAG}
+          docker rmi ${RAG_IMAGE}:${IMAGE_TAG}
+          docker rmi ${DOCKER_CREDS_USR}/${ORCH_IMAGE}:${TAG_FROM_GIT}
+          docker rmi ${DOCKER_CREDS_USR}/${RAG_IMAGE}:${TAG_FROM_GIT}
         """
       }
     }
