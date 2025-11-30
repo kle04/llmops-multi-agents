@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     DOCKER_CREDS     = credentials('docker-registry-creds')
-    GITHUB_TOKEN     = credentials('github-token')
+    GITHUB_TOKEN     = credentials('github-pat')
     TELEGRAM_TOKEN   = credentials('telegram-bot-token')
     TELEGRAM_CHAT_ID = "1006808421"
 
