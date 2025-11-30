@@ -15,7 +15,7 @@ pipeline {
     TAG_FROM_GIT = "${env.TAG_NAME ?: env.GIT_BRANCH}"
 
     MANIFEST_REPO = "https://github.com/KhanhLe04/manifest-llmops-multi-agents.git"
-    BRANCH_NAME   = "bot/ci-${BUILD_NUMBER}"
+    BRANCH_NAME   = "bot/ci-${TAG_FROM_GIT}"
   }
 
   stages {
@@ -94,8 +94,8 @@ pipeline {
 
           git checkout -b ${BRANCH_NAME}
 
-          sed -i 's|^\s*tag:.*|  tag: "'${TAG_FROM_GIT}'"|' charts/orchestrator-agent/values.yaml
-          sed -i 's|^\s*tag:.*|  tag: "'${TAG_FROM_GIT}'"|' charts/rag-agent/values.yaml
+          sed -i 's|  tag:.*|  tag: "'${TAG_FROM_GIT}'"|' charts/orchestrator-agent/values.yaml
+          sed -i 's|  tag:.*|  tag: "'${TAG_FROM_GIT}'"|' charts/rag-agent/values.yaml
 
           git config user.name "jenkins-bot"
           git config user.email "ci-bot@example.com"
