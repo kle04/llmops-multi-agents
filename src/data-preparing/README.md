@@ -1,357 +1,145 @@
-# 📚 Data Preparing - Hệ Thống Xử Lý Dữ Liệu Mental Health RAG
+# Data Preparation Pipeline for Mental Health RAG System: A Technical Analysis
 
-## 🎯 Tổng Quan
+## Abstract
 
-Module `data-preparing` là thành phần cốt lõi của hệ thống LLMOps Multi-Agent, chuyên xử lý và chuẩn bị dữ liệu cho domain **tư vấn sức khỏe tâm lý học sinh sinh viên**. Module này thực hiện toàn bộ pipeline từ việc xử lý tài liệu PDF gốc đến việc lưu trữ embeddings trong vector database.
+This document presents a comprehensive technical analysis of the data preparation pipeline designed for a Retrieval-Augmented Generation (RAG) system focused on mental health counseling for students. The pipeline automates the ingestion, processing, vectorization, and storage of unstructured PDF documents. Key features include specialized text preprocessing for Vietnamese content, robust chunking strategies preserving semantic context, and an optimized vector storage schema using Qdrant.
 
-## 🏗️ Kiến Trúc Hệ Thống
+## 1. Introduction
 
-```
-data-preparing/
-├── 📄 config.py              # Cấu hình toàn bộ hệ thống
-├── 🚀 ingest_data.py          # Pipeline chính xử lý dữ liệu
-├── 📊 pyproject.toml          # Dependencies và metadata
-├── 🛠️  utils/                 # Các module tiện ích
-│   ├── pdf_processor.py       # Xử lý PDF và chunking
-│   ├── embedding_manager.py   # Quản lý embedding models
-│   └── qdrant_manager.py      # Quản lý vector database
-├── 🧪 benchmarks/             # Đánh giá embedding models
-│   └── embedding/
-│       ├── hit_at_k_benchmark.py      # Benchmark retrieval
-│       ├── sts_correlation_benchmark.py # Benchmark semantic similarity
-│       └── results/                   # Kết quả benchmark
-└── 📁 data/                   # Thư mục chứa PDF nguồn
-```
+The effectiveness of a RAG system heavily relies on the quality of its knowledge base. For a domain as sensitive as mental health, ensuring data accuracy, context preservation, and efficient retrieval is paramount. This data preparation phase serves as the foundation for the RAG agent, transforming raw PDF consultation materials into high-dimensional vector representations suitable for semantic search.
 
-## ⚙️ Cấu Hình Hệ Thống (`config.py`)
+## 2. Methodology
 
-### 🔧 Cấu Hình Cơ Bản
+The data preparation process is modularized into three core components: Document Processing, Embedding Generation, and Vector Storage management.
 
-```python
-class Config:
-    # Vector Database
-    QDRANT_URL = "http://localhost:6333"
-    COLLECTION_NAME = "mental_health_advisor"
-    
-    # Embedding Model - Tối ưu cho tiếng Việt
-    EMBEDDING_MODEL = "intfloat/multilingual-e5-base"
-    
-    # Chunking Strategy - Tối ưu cho nội dung tâm lý
-    CHUNK_SIZE = 800           # Kích thước chunk phù hợp
-    CHUNK_OVERLAP = 150        # Overlap để bảo toàn ngữ cảnh
-    
-    # Retrieval Settings
-    TOP_K_DOCUMENTS = 3        # Số document trả về
-    SIMILARITY_THRESHOLD = 0.65 # Ngưỡng độ tương đồng
-```
+### 2.1. Document Processing and Chunking (`PDFProcessor`)
 
-### 🎛️ Tùy Chọn Nâng Cao
+The `PDFProcessor` module is responsible for transforming raw PDF files into structured text chunks.
 
-- **CHUNK_STRATEGY**: `"recursive"` - Chiến lược chia chunk thông minh
-- **OVERLAP_METHOD**: `"sentence"` - Overlap theo ranh giới câu
-- **NORMALIZE_EMBEDDINGS**: Chuẩn hóa vector embeddings
-- **EMBEDDING_BATCH_SIZE**: Kích thước batch cho embedding (tối ưu cho Vietnamese models)
+- **Text Extraction**: Utilizes `PyPDF2` to extract text from PDF pages.
+- **Vietnamese Text Normalization**: A specialized `clean_vietnamese_text` method is implemented to handle encoding issues common in Vietnamese PDFs. It performs:
+  - Removal of null and control characters.
+  - Normalization of whitespace and newlines.
+  - Standardization of Vietnamese punctuation (e.g., spacing around commas, dots).
+  - Removal of headers/footers and page numbers (e.g., "Trang 1", "Page 1") to prevent irrelevant metadata from polluting the context.
+- **Section Extraction**: The system attempts to identify document structure by extracting section headers (e.g., "CHƯƠNG 1", "Phần I", "1. Introduction") using regex patterns. This metadata is attached to chunks to provide context.
+- **Chunking Strategy**: The `RecursiveCharacterTextSplitter` from LangChain is employed with a hierarchical list of separators (`\n\n\n`, `\n\n`, `\n`, `. `, etc.). This ensures that text is split at semantically meaningful boundaries (paragraphs, sentences) rather than arbitrary character counts.
+  - _Configuration_: `CHUNK_SIZE` and `CHUNK_OVERLAP` are configurable (defined in `Config`), allowing for tuning based on the embedding model's context window.
 
-## 🔄 Pipeline Xử Lý Dữ Liệu (`ingest_data.py`)
+### 2.2. Vectorization and Embedding (`EmbeddingManager`)
 
-### 📋 Quy Trình Chính
+The `EmbeddingManager` handles the conversion of text chunks into vector representations.
 
-```python
-class MentalHealthDataIngestion:
-    def __init__(self):
-        self.pdf_processor = PDFProcessor()
-        self.embedding_manager = EmbeddingManager()
-        self.qdrant_manager = QdrantManager()
-```
+- **Model Selection**: The system uses `SentenceTransformer` models, specifically chosen for their performance on Vietnamese text or multilingual capabilities (configured via `Config.EMBEDDING_MODEL`).
+- **Preprocessing**: Before embedding, text undergoes cleaning to remove non-printable characters and normalize whitespace. Crucially, a truncation mechanism is implemented to handle texts exceeding the model's maximum context length (typically 512 tokens), ensuring robust processing without errors.
+- **Batch Processing**: To optimize throughput, embeddings are generated in batches (`Config.EMBEDDING_BATCH_SIZE`). The system includes error handling and fallback mechanisms:
+  - If a batch fails, it retries with a smaller batch size (down to 1).
+  - Invalid or empty texts are filtered out to prevent model errors.
+- **Quality Assurance**: A `test_embedding_quality` method is included to validate the model's performance on domain-specific queries (e.g., "triệu chứng trầm cảm") against sample documents, ensuring the semantic similarity logic holds.
 
-### 🚀 Các Bước Thực Hiện
+### 2.3. Vector Storage (`QdrantManager`)
 
-1. **📖 Phân Tích PDF** (`analyze_pdf_content`)
-   - Kiểm tra khả năng đọc file
-   - Đánh giá độ dài nội dung
-   - Validation cơ bản
+The `QdrantManager` orchestrates interactions with the Qdrant vector database.
 
-2. **🔄 Xử Lý PDF** (`process_pdfs`)
-   - Trích xuất text từ PDF
-   - Chia thành chunks thông minh
-   - Tạo metadata đơn giản và hiệu quả
+- **Collection Configuration**: Collections are created with specific optimizations for retrieval accuracy and performance:
+  - **Distance Metric**: Cosine similarity is used, which is standard for semantic text retrieval.
+  - **HNSW Index**: Hierarchical Navigable Small World (HNSW) parameters (`m=16`, `ef_construct=100`) are tuned to balance indexing speed, memory usage, and search recall.
+  - **On-Disk Storage**: Vectors can be configured to be stored on disk (`on_disk=True`) to reduce RAM usage for large datasets.
+- **Metadata Storage**: Each vector is stored with a rich payload containing:
+  - `content`: The actual text chunk.
+  - `source`: Filename of the source PDF.
+  - `chunk_index`: Order of the chunk in the document.
+  - `section`: Extracted section header.
+  - `doc_id`: Unique identifier for the source document.
+- **Search Capabilities**: The manager supports semantic search with filtering capabilities (by source or section) and configurable score thresholds to filter out irrelevant results.
 
-3. **💾 Lưu Trữ Vector DB** (`store_in_vector_db`)
-   - Tạo embeddings cho từng chunk
-   - Lưu vào Qdrant với metadata
-   - Thống kê và báo cáo
+## 3. System Architecture
 
-### 📊 Metadata Structure (Đã Tối Ưu)
+The `ingest_data.py` script acts as the orchestrator, tying these components together in a linear pipeline:
 
-```python
-{
-    "content": "Nội dung chunk",
-    "source": "tên_file.pdf",
-    "chunk_index": 0,
-    "doc_id": "uuid-generated-id",
-    "section": "Chương 1: Giới thiệu"
-}
-```
+```mermaid
+graph LR
+    Start([Start]) --> Prereq{Check Prerequisites}
+    Prereq -- Fail --> End([Exit])
+    Prereq -- Pass --> FindPDF[Find PDF Files]
 
-**✅ Loại bỏ các metadata thừa**: `content_type`, `char_count`, `word_count`, `chunk_id`, `total_chunks`, `domain`, `contains_crisis_keywords`, `contains_student_keywords`, `priority_level`, `tags`
+    FindPDF --> Found{Files Found?}
+    Found -- No --> End
+    Found -- Yes --> Analyze[Analyze Content]
 
-## 📄 PDF Processor (`utils/pdf_processor.py`)
+    Analyze --> Readable{Readable?}
+    Readable -- No --> End
+    Readable -- Yes --> Process[Process PDFs]
 
-### 🎯 Tính Năng Chính
+    subgraph "Document Processing"
+        Process --> Extract[Extract Text]
+        Extract --> Clean[Clean Vietnamese Text]
+        Clean --> Sections[Extract Sections]
+        Sections --> Chunk[Chunk Text]
+    end
 
-#### 📖 Trích Xuất Text
-- **Encoding UTF-8**: Xử lý hoàn hảo tiếng Việt
-- **Page Markers**: Thêm `---PAGE_x---` để theo dõi trang
-- **Error Handling**: Xử lý robust các lỗi PDF
+    Chunk --> Embed[Create Embeddings]
 
-#### ✂️ Chunking Thông Minh
-```python
-separators = [
-    "\n\n\n",  # Section breaks
-    "\n\n",    # Paragraph breaks  
-    "\n",      # Line breaks
-    ". ",      # Sentence ends
-    "! ",      # Exclamation
-    "? ",      # Question
-    "; ",      # Semicolon
-    ", ",      # Comma
-    " "        # Space
-]
+    subgraph "Vectorization"
+        Embed --> Preprocess[Preprocess Text]
+        Preprocess --> GenEmbed[Generate Embeddings]
+        GenEmbed --> CheckEmbed{Success?}
+        CheckEmbed -- No --> Retry[Retry]
+        Retry --> GenEmbed
+        CheckEmbed -- Yes --> ReturnEmbed[Return Embeddings]
+    end
+
+    ReturnEmbed --> Store[Store in Vector DB]
+
+    subgraph "Storage"
+        Store --> CreateCol[Create/Check Collection]
+        CreateCol --> Upsert[Upsert Vectors]
+    end
+
+    Upsert --> Report[Reporting]
+    Report --> End
+
+    style Start fill:#f9f,stroke:#333,stroke-width:2px
+    style End fill:#f9f,stroke:#333,stroke-width:2px
+    style Prereq fill:#ff9,stroke:#333,stroke-width:2px
+    style Found fill:#ff9,stroke:#333,stroke-width:2px
+    style Readable fill:#ff9,stroke:#333,stroke-width:2px
+    style CheckEmbed fill:#ff9,stroke:#333,stroke-width:2px
 ```
 
-#### 🧹 Text Cleaning
-- **Vietnamese Text Normalization**: Chuẩn hóa ký tự tiếng Việt
-- **Page Number Separation**: Tách số trang khỏi nội dung chính
-- **Section Extraction**: Trích xuất tiêu đề section tự động
+1.  **Prerequisite Check**: Verifies Qdrant connectivity and embedding model health.
+2.  **Discovery**: Scans specified paths for PDF files.
+3.  **Analysis**: Performs a dry-run analysis to ensure PDFs are readable before processing.
+4.  **Processing**:
+    - `PDFProcessor` converts PDFs -> Documents (Chunks).
+    - `EmbeddingManager` converts Documents -> Embeddings.
+    - `QdrantManager` uploads Embeddings -> Vector DB.
+5.  **Reporting**: Provides detailed statistics on processed files, generated chunks, and database status.
 
-#### 🏷️ Metadata Generation
-```python
-def create_chunks(self, documents: List[Document]) -> List[Dict]:
-    doc_id = str(uuid.uuid4())  # Unique document ID
-    
-    for chunk in chunks:
-        content, page_info = self.separate_page_numbers(chunk.page_content)
-        section = self.extract_section_from_content(content)
-        
-        chunk_dict = {
-            "content": content,
-            "source": source_name,
-            "chunk_index": chunk_index,
-            "doc_id": doc_id,
-            "section": section
-        }
-```
+## 4. Conclusion
 
-## 🧮 Embedding Manager (`utils/embedding_manager.py`)
+This data preparation pipeline represents a robust, production-ready solution for the Mental Health RAG system. By integrating domain-specific preprocessing for Vietnamese text, fault-tolerant batch processing for embeddings, and optimized vector storage configurations, it ensures that the downstream RAG agent has access to a high-quality, semantically rich knowledge base. The modular design allows for easy upgrades to individual components (e.g., swapping embedding models or changing chunking strategies) without disrupting the overall workflow.
 
-### 🎯 Tính Năng Chính
+## 5. Usage Instructions
 
-#### 🤖 Model Loading với Error Handling
-```python
-try:
-    self.model = SentenceTransformer(Config.EMBEDDING_MODEL)
-except ValueError as ve:
-    if "trust_remote_code" in str(ve):
-        # Auto-retry với trust_remote_code=True
-        self.model = SentenceTransformer(
-            Config.EMBEDDING_MODEL, 
-            trust_remote_code=True
-        )
-```
+To run the data ingestion pipeline, follow these steps:
 
-#### 🔄 Batch Processing
-- **Progressive Batch Size Reduction**: Tự động giảm batch size khi gặp lỗi
-- **Memory Management**: Tối ưu sử dụng GPU/CPU memory
-- **Error Recovery**: Xử lý robust các lỗi encoding
-
-#### 📊 Text Preprocessing
-```python
-def preprocess_text(self, text: str) -> str:
-    # Loại bỏ control characters
-    text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', text)
-    
-    # Normalize whitespace
-    text = re.sub(r'\s+', ' ', text).strip()
-    
-    # Truncate tại sentence boundary
-    if len(text) > self.max_length:
-        text = self.truncate_at_sentence_boundary(text)
-    
-    return text
-```
-
-## 🗄️ Qdrant Manager (`utils/qdrant_manager.py`)
-
-### 🎯 Tính Năng Chính
-
-#### 🔗 Connection Management
-- **Health Check**: Kiểm tra kết nối và collection status
-- **Auto Collection Creation**: Tự động tạo collection nếu chưa tồn tại
-- **Error Handling**: Xử lý robust các lỗi kết nối
-
-#### 💾 Document Storage
-```python
-def add_documents(self, chunks: List[Dict], embeddings: List[List[float]]):
-    points = []
-    for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
-        payload = {
-            "content": chunk["content"],
-            "source": chunk["source"], 
-            "chunk_index": chunk["chunk_index"],
-            "doc_id": chunk["doc_id"],
-            "section": chunk["section"]
-        }
-        
-        point = PointStruct(
-            id=str(uuid.uuid4()),
-            vector=embedding,
-            payload=payload
-        )
-        points.append(point)
-```
-
-#### 🔍 Search Capabilities
-- **Semantic Search**: Tìm kiếm dựa trên độ tương đồng vector
-- **Filtered Search**: Tìm kiếm theo source, section, doc_id
-- **Hybrid Search**: Kết hợp semantic + metadata filtering
-
-## 🧪 Benchmarking System
-
-### 📊 Hit@K Benchmark
-**Mục đích**: Đánh giá khả năng retrieval của embedding models
-
-**Dataset**: BEIR ViHealthQA - Chuyên biệt cho domain y tế tiếng Việt
-
-**Metrics**:
-- **Hit@1**: Accuracy ở top-1 result
-- **Hit@4**: Accuracy ở top-4 results  
-- **Hit@10**: Accuracy ở top-10 results
-
-### 📈 STS Correlation Benchmark
-**Mục đích**: Đánh giá độ tương đồng ngữ nghĩa
-
-**Dataset**: ViSTS (Vietnamese Semantic Textual Similarity)
-
-**Metrics**:
-- **Pearson Correlation**: Tương quan tuyến tính
-- **Spearman Correlation**: Tương quan thứ hạng
-
-### 🏆 Model Recommendations
-
-| Model | Use Case | Performance | Speed |
-|-------|----------|-------------|-------|
-| `intfloat/multilingual-e5-base` | **Production** | ⭐⭐⭐⭐ | 🚀🚀🚀 |
-| `keepitreal/vietnamese-sbert` | **Vietnamese Specialized** | ⭐⭐⭐⭐⭐ | 🚀🚀 |
-| `Alibaba-NLP/gte-multilingual-base` | **High Accuracy** | ⭐⭐⭐⭐⭐ | 🚀🚀 |
-| `intfloat/multilingual-e5-large-instruct` | **Best Overall** | ⭐⭐⭐⭐⭐ | 🚀 |
-
-## 🚀 Cách Sử Dụng
-
-### 📦 Cài Đặt Dependencies
+1.  **Prerequisites**: Ensure you have `uv` installed and the Qdrant service is running.
+2.  **Environment**: The script uses `uv` for dependency management.
+3.  **Run Script**: Execute the following command from the `src/data-preparing` directory:
 
 ```bash
-cd src/data-preparing
-pip install uv
-uv sync
+uv venv
+source .venv/bin/activate
+uv run ingest_data.py
 ```
 
-### 🔄 Chạy Data Ingestion
+This command will automatically handle dependency installation and execute the ingestion script using the default configuration (processing PDFs in the `data` directory).
 
-```bash
-# Phân tích PDF (không lưu vào DB)
-python ingest_data.py --analyze-only --data-dir ./data
+### Additional Options
 
-# Xử lý và lưu vào vector DB
-python ingest_data.py --data-dir ./data
-
-# Xử lý với custom collection
-python ingest_data.py --data-dir ./data --collection-name my_collection
-```
-
-### 🧪 Chạy Benchmarks
-
-```bash
-cd benchmarks/embedding
-
-# Hit@K Benchmark
-uv run hit_at_k_benchmark.py
-
-# STS Correlation Benchmark  
-uv run sts_correlation_benchmark.py
-```
-
-## 📊 Monitoring và Logging
-
-### 📈 Processing Stats
-```python
-{
-    "total_chunks": 1250,
-    "total_characters": 2500000,
-    "sections": {
-        "Chương 1": 45,
-        "Chương 2": 38,
-        # ...
-    },
-    "sources": ["file1.pdf", "file2.pdf"],
-    "doc_ids": ["uuid1", "uuid2"]
-}
-```
-
-### 🔍 Health Checks
-- **Qdrant Connection**: Kiểm tra kết nối vector DB
-- **Embedding Model**: Validate model loading
-- **Collection Status**: Kiểm tra collection và index
-
-## 🛠️ Troubleshooting
-
-### ❌ Lỗi Thường Gặp
-
-1. **"index out of range in self"**
-   - **Nguyên nhân**: Text quá dài hoặc có ký tự đặc biệt
-   - **Giải pháp**: Text preprocessing và batch size reduction
-
-2. **"trust_remote_code=True required"**
-   - **Nguyên nhân**: Model yêu cầu trust remote code
-   - **Giải pháp**: Auto-retry với trust_remote_code=True
-
-3. **Qdrant Connection Failed**
-   - **Nguyên nhân**: Qdrant server chưa khởi động
-   - **Giải pháp**: `docker run -p 6333:6333 qdrant/qdrant`
-
-### 🔧 Performance Tuning
-
-1. **Tăng tốc Embedding**:
-   - Giảm `EMBEDDING_BATCH_SIZE` nếu gặp OOM
-   - Sử dụng GPU nếu có sẵn
-   - Chọn model nhỏ hơn cho production
-
-2. **Tối ưu Chunking**:
-   - Điều chỉnh `CHUNK_SIZE` theo domain
-   - Tăng `CHUNK_OVERLAP` để bảo toàn context
-   - Sử dụng separators phù hợp với tiếng Việt
-
-3. **Vector DB Performance**:
-   - Tăng `TOP_K_DOCUMENTS` cho recall cao hơn
-   - Điều chỉnh `SIMILARITY_THRESHOLD` theo use case
-   - Sử dụng filtered search khi có thể
-
-## 🔮 Roadmap
-
-- [ ] **Multi-modal Support**: Xử lý hình ảnh trong PDF
-- [ ] **Advanced Chunking**: Semantic chunking với LLM
-- [ ] **Real-time Updates**: Incremental data ingestion
-- [ ] **Quality Metrics**: Tự động đánh giá chất lượng chunks
-- [ ] **A/B Testing**: So sánh performance các embedding models
-
----
-
-## 📞 Liên Hệ Hỗ Trợ
-
-Nếu gặp vấn đề khi sử dụng hệ thống xử lý dữ liệu, vui lòng:
-
-1. Kiểm tra logs chi tiết
-2. Xem phần Troubleshooting
-3. Chạy health checks
-4. Liên hệ team phát triển với thông tin lỗi cụ thể
-
-**🎯 Hệ thống Data Preparing được thiết kế để xử lý robust, scalable và tối ưu cho domain tư vấn sức khỏe tâm lý tiếng Việt!**
+- **Specify PDF/Folder**: `uv run ingest_data.py path/to/file.pdf` or `uv run ingest_data.py path/to/folder/`
+- **Clear Existing Collection**: `uv run ingest_data.py --clear`
+- **Force Reprocess**: `uv run ingest_data.py --force`
+- **Analyze Only**: `uv run ingest_data.py --analyze`
+- **Check Prerequisites**: `uv run ingest_data.py --check`
