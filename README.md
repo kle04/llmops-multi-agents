@@ -40,12 +40,16 @@ The system is built on a modern, cloud-native stack designed for scalability and
 | :--- | :--- | :--- |
 | **Source Code** | GitHub | Version Control |
 | **CI/CD** | Jenkins | Automated Testing & Deployment |
+| **GitOps** | ArgoCD | Continuous Deployment & Git-based Configuration |
 | **API Framework** | FastAPI | High-performance Async APIs |
 | **Containerization** | Docker | Application Packaging |
 | **Orchestration** | Kubernetes (K8s), Helm | Container Management & Scaling |
-| **IaC** | Terraform | Infrastructure Provisioning (AWS/GCP) |
+| **K8s Management** | Rancher | Kubernetes Cluster Management & UI |
+| **Security** | Sealed Secret | Encrypted Secret Management |
 | **Monitoring** | Prometheus, Grafana, Loki | Metrics, Visualization, and Logging |
 | **Ingress** | Nginx | Load Balancing & Traffic Routing |
+| **Database, cache** | Redis, PostgreSQL | Short and long term memory storage |
+| **AI Protocol** | A2A Protocol | Agent-to-Agent communication, easy to scale |
 
 ## 3. Project Structure
 
@@ -60,3 +64,7 @@ llmops-multi-agents/
 │   └── evaluation               # Evaluation for Multi-agent system
 └── README.md                # Project overview (this file)
 ```
+
+## 4. Manifest Repository
+
+Manifest Repository for GitOps can be found here: **[Manifest Repo](https://github.com/KhanhLe04/manifest-llmops-multi-agents)**
