@@ -14,6 +14,7 @@ from pydantic import BaseModel
 from config import Config
 from datetime import datetime
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -246,6 +247,11 @@ class RAGAgent:
                 Câu hỏi hoặc vấn đề người dùng đặt ra:
                 {state["query"]}
 
+                **QUY TẮC QUAN TRỌNG VỀ ĐỊNH DẠNG PHẢN HỒI:**
+                - TUYỆT ĐỐI KHÔNG bắt đầu câu trả lời bằng các lời chào như: "Chào bạn", "Xin chào bạn", "Rất vui được trò chuyện với bạn", "Xin chào bạn, tôi được hiểu rằng...", "Rất vui được gặp bạn", hoặc bất kỳ lời chào nào khác.
+                - BẮT ĐẦU TRỰC TIẾP với nội dung trả lời câu hỏi của người dùng.
+                - CHỈ sử dụng lời chào nếu người dùng CHỦ ĐỘNG chào hỏi trước (ví dụ: "Xin chào", "Chào bạn"), và trong trường hợp đó, chỉ đáp lại ngắn gọn rồi chuyển sang trả lời câu hỏi.
+
                 Yêu cầu phản hồi:
                 - Giải thích rõ ràng, dễ hiểu, tránh ngôn ngữ học thuật phức tạp.
                 - Cung cấp hướng dẫn cụ thể để giúp họ hiểu, đối diện và cải thiện vấn đề sức khỏe tinh thần.
@@ -253,19 +259,21 @@ class RAGAgent:
                 - Nếu câu hỏi có dấu hiệu khẩn cấp (liên quan đến tự hại, tự tử, bạo lực, khủng hoảng cảm xúc), hãy ưu tiên **an toàn**:
                     > "Nếu em đang trong tình trạng khủng hoảng hoặc có ý định làm hại bản thân, hãy liên hệ ngay với người thân, bạn bè hoặc chuyên gia tâm lý tại trường. Em không đơn độc và có người sẵn sàng giúp đỡ."
 
-                3. Khi trả lời, luôn giữ thái độ nhân văn, tôn trọng và mang tính hỗ trợ. 
+                Khi trả lời, luôn giữ thái độ nhân văn, tôn trọng và mang tính hỗ trợ. 
                 - Không đưa ra chẩn đoán y khoa hay kết luận bệnh lý.
                 - Nếu thiếu thông tin, hãy nói rõ rằng cần thêm dữ liệu hoặc nên tham khảo chuyên gia.
+                - KHÔNG trích dẫn nguồn hay viết bất kỳ thứ gì liên quan tới nội dung trích dẫn nguồn như: "Bạn có thể tham khảo tài liệu ...".
 
                 Định dạng phản hồi:
                 - Giải thích thân thiện, rõ ràng, có thể chia nhỏ từng ý.
                 - Trình bày tự nhiên, gần gũi với học sinh – sinh viên Việt Nam.
-                - *LƯU Ý*: KHÔNG trích dẫn nguồn hay viết bất kỳ thứ gì liên quan tới nội dung trích dẫn nguồn như: "Bạn có thể tham khảo tài liệu ...".
-                - *LƯU Ý*: KHÔNG nên lúc nào cũng bắt đầu câu trả lời bằng những lời chào như "Xin chào bạn, tôi được hiểu rằng ...", "Rất vui được gặp bạn".
+                - BẮT ĐẦU TRỰC TIẾP với nội dung, không có lời chào mở đầu.
             """
 
             response = self.llm.invoke(prompt)
             answer = response.content if hasattr(response, 'content') else str(response)
+            
+            answer = self._remove_greetings(answer)
 
             state["answer"] = answer
             state["status"] = "completed"
@@ -385,6 +393,31 @@ class RAGAgent:
         context = "\n" + ("="*50 + "\n").join(context_parts)
         logger.debug(f"Tổng hợp context với {len(docs)} tài liệu")
         return context
+    
+    def _remove_greetings(self, text: str) -> str:
+        """Remove common greeting phrases from the beginning of the response."""
+        if not text:
+            return text
+        
+        text = text.strip()
+        
+        greeting_patterns = [
+            r"^(Chào bạn[,\s]*)",
+            r"^(Xin chào bạn[,\s]*)",
+            r"^(Rất vui được trò chuyện với bạn[,\s]*)",
+            r"^(Rất vui được gặp bạn[,\s]*)",
+            r"^(Xin chào bạn, tôi được hiểu rằng[,\s]*)",
+            r"^(Chào bạn, tôi được hiểu rằng[,\s]*)",
+            r"^(Xin chào, tôi được hiểu rằng[,\s]*)",
+            r"^(Chào, tôi được hiểu rằng[,\s]*)",
+            r"^(Xin chào bạn, tôi có thể giúp[,\s]*)",
+            r"^(Chào bạn, tôi có thể giúp[,\s]*)",
+        ]
+        
+        for pattern in greeting_patterns:
+            text = re.sub(pattern, "", text, flags=re.IGNORECASE)
+        
+        return text.strip()
     
     def health_check(self) -> Dict[str, Any]:
         try:

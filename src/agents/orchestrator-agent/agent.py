@@ -1,7 +1,7 @@
 from a2a.types import A2A
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
-from langchain.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from config import Config
 from typing import Dict, Any, Optional, List
 from langchain.schema import HumanMessage, AIMessage, SystemMessage
@@ -63,105 +63,229 @@ class OrchestratorAgent:
         
 
     def _setup_prompt(self):
-        input_vars = ["user_message", "chat_history"]
-        self.prompt_template = PromptTemplate(
-            input_variables=input_vars,
-            template=f"""{ROOT_INSTRUCTION}
-                [Thông tin cung cấp]
-                - Lịch sử hội thoại gần đây (nếu có): 
-                {{chat_history}}
-                - Câu hỏi hiện tại của người dùng:
-                {{user_message}}
-
-                [Nhiệm vụ]
-                1. Đánh giá xem người dùng đang hỏi mới hay đang nối tiếp ý trước dựa trên lịch sử hội thoại gần đây (lịch sử sẽ được lưu theo dạng từ cũ nhất tới mới nhất). 
-                - Nếu họ nhắc lại, điều chỉnh ngữ cảnh từ cuộc trò chuyện nhưng tránh lặp nguyên văn câu trả lời cũ; giải thích thêm hoặc cung cấp góc nhìn khác.
-                - Nếu câu hỏi chỉ xây dựng trên câu hỏi cũ nhưng cần thêm thông tin mới, hãy ưu tiên bổ sung nội dung liên quan.
-                2. Nếu câu hỏi thuộc dạng chitchat đơn giản hoặc chỉ cần động viên, hãy trả lời trực tiếp và đảm bảo hướng tới mục tiêu hỗ trợ tinh thần.
-                3. Nếu câu hỏi đòi hỏi kiến thức chuyên sâu hoặc cần trích dẫn tài liệu (ví dụ: kỹ thuật chăm sóc sức khỏe tinh thần, khuyến nghị chuyên môn), hãy chọn RAG Agent để lấy thông tin chính xác hơn.
-                4. LUÔN LUÔN Trả về JSON với cấu trúc:
-                {{{{
-                    "selected_agent": "RAG Agent" hoặc "null"
-                    "response": "Câu trả lời cuối cùng dành cho người dùng",
-                    "sources": ["nguồn 1", "nguồn 2", ...] hoặc []
-                }}}}
-
-                [Lưu ý quan trọng]
-                - KHÔNG bắt đầu câu trả lời bằng những lời chào như "Xin chào bạn, tôi được hiểu rằng ...", "Rất vui được gặp bạn" (Trừ khi các câu hỏi của người dùng có mục đích để chào hỏi).
-                - Lịch sử hội thoại sẽ là các cặp thông tin như "type": "ai nếu như là tin nhắn của AI, human nếu như là tin nhắn của con người", "content": "Nội dung của tin nhắn đó". Hãy tổng hợp các context của lịch sử hội thoại này, và dùng nó hỗ trợ trả lời câu hỏi sắp tới
-                - Khi cần gọi RAG Agent, đặt "selected_agent": "RAG Agent"
-                - Tránh lặp lại nguyên văn phản hồi cũ; hãy diễn giải lại, mở rộng hoặc bổ trợ thông tin mới phù hợp ngữ cảnh.
-                - Khi phát hiện tín hiệu nguy cấp (tự hại, bạo lực...), hãy khuyến khích người dùng kết nối ngay với người thân, thầy cô hoặc chuyên gia tâm lý.
-                - Nếu lịch sử đã trả lời câu hỏi tương tự, hãy dựa vào ý chính để trả lời lại nhưng nhớ cập nhật/điều chỉnh (không copy nguyên văn).
-            """
-        )
+        """Setup prompt template. For Gemini models that don't support SystemMessage, 
+        we prepend system instructions to the first HumanMessage only when there's no history."""
+        self.prompt_template = ChatPromptTemplate.from_messages([
+            MessagesPlaceholder(variable_name="chat_history"),
+            HumanMessage(content="{user_message}")
+        ])
 
     
 
          
 
-    async def process_message(self, message: str, history: List[Dict[str, str]] = None) -> Dict[str, Any]:
-        # Ensure components are initialized
+    def _convert_history_to_messages(self, history: Optional[List[Dict[str, str]]]) -> List[BaseMessage]:
+        """Convert history dicts to LangChain BaseMessage objects."""
+        if not history:
+            return []
+        
+        messages = []
+        for item in history:
+            if not isinstance(item, dict):
+                continue
+            
+            role = (item.get("type") or "").lower()
+            content = item.get("content", "")
+            
+            if not content:
+                continue
+            
+            if role in ("human", "user"):
+                messages.append(HumanMessage(content=content))
+            elif role in ("ai", "assistant"):
+                messages.append(AIMessage(content=content))
+        
+        return messages
+
+    def _trim_messages_if_needed(self, messages: List[BaseMessage], max_tokens: int = 4000) -> List[BaseMessage]:
+        """Trim messages to fit within token limit if needed."""
+        if not messages or not self.llm:
+            return messages
+        
+        try:
+            def token_counter(msgs: List[BaseMessage]) -> int:
+                """Count tokens in messages using LLM's token counter."""
+                if hasattr(self.llm, "get_num_tokens"):
+                    return sum(self.llm.get_num_tokens(msg.content) for msg in msgs if hasattr(msg, "content"))
+                return len(str(msgs)) // 4
+            
+            trimmed = trim_messages(
+                messages,
+                max_tokens=max_tokens,
+                strategy="last",
+                token_counter=token_counter
+            )
+            return trimmed
+        except Exception as e:
+            logger.warning(f"Failed to trim messages: {e}, using original messages")
+            return messages
+
+    def _build_system_instruction(self) -> str:
+        """Build system instruction text for Gemini models that don't support SystemMessage."""
+        return f"""{ROOT_INSTRUCTION}
+
+        [Nhiệm vụ]
+        1. Đánh giá xem người dùng đang hỏi mới hay đang nối tiếp ý trước dựa trên lịch sử hội thoại gần đây (nếu có).
+        2. Nếu câu hỏi thuộc dạng chitchat đơn giản hoặc chỉ cần động viên, hãy trả lời trực tiếp.
+        3. Nếu câu hỏi đòi hỏi kiến thức chuyên sâu về tâm lý, sức khỏe tinh thần, stress, lo âu, trầm cảm, hoặc cần trích dẫn tài liệu chuyên môn, hãy chọn RAG Agent.
+
+        [QUAN TRỌNG - ĐỊNH DẠNG PHẢN HỒI BẮT BUỘC]
+        BẠN PHẢI TRẢ LỜI BẰNG JSON VÀ CHỈ JSON, KHÔNG CÓ VĂN BẢN NÀO KHÁC TRƯỚC HOẶC SAU JSON.
+
+        Cấu trúc JSON bắt buộc:
+        {{
+            "selected_agent": "RAG Agent" hoặc null,
+            "response": "Câu trả lời cuối cùng dành cho người dùng",
+            "sources": []
+        }}
+
+        Ví dụ cho câu hỏi về stress:
+        {{"selected_agent": "RAG Agent", "response": "", "sources": []}}
+
+        Ví dụ cho câu hỏi chitchat:
+        {{"selected_agent": null, "response": "Câu trả lời chitchat", "sources": []}}
+
+        [Lưu ý]
+        - KHÔNG thêm bất kỳ văn bản nào trước hoặc sau JSON.
+        - KHÔNG giải thích về JSON, chỉ trả về JSON thuần túy.
+        - Khi cần RAG Agent, đặt "selected_agent": "RAG Agent" (chính xác chuỗi này).
+        - Khi không cần RAG Agent, đặt "selected_agent": null.
+        """
+
+    async def process_message(self, message: str, history: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
+        """Process user message with chat history context."""
         if not self._initialized:
             await self.initialize()
-        formatted_messages = self.prompt_template.format(
-            user_message=message,
-            chat_history=history or None
-        )
+        
+        history_messages = self._convert_history_to_messages(history)
+        history_messages = self._trim_messages_if_needed(history_messages)
+        
         try:
+            formatted_messages = self.prompt_template.format_messages(
+                user_message=message,
+                chat_history=history_messages
+            )
+            
+            system_instruction = self._build_system_instruction()
+            current_message = formatted_messages[-1]
+            if isinstance(current_message, HumanMessage):
+                if not history_messages:
+                    current_message.content = f"{system_instruction}\n\nCâu hỏi hiện tại của người dùng: {message}"
+                else:
+                    current_message.content = f"{system_instruction}\n\n{message}"
+            
             result = await self.llm.ainvoke(formatted_messages)
             content = getattr(result, "content", str(result))
-            try:
-                match = re.search(r"\{[\s\S]*\}", content)
-                if match:
-                    decision = json.loads(match.group(0))
-                    # Nếu chọn RAG Agent, gọi A2A server để lấy câu trả lời
-                    if isinstance(decision, dict) and decision.get("selected_agent") == "RAG Agent":
-                        # ensure A2A client initialized
-                        if not self.a2a_client._initialized:
-                            return {
-                                "selected_agent": None,
-                                "response": decision.get("response", ""),
-                                "sources": None,
-                            }
-                        else:
-                            rag_result = await self.a2a_client.send_message(message, stream=False)
-                            return {
-                                "selected_agent": "RAG Agent",
-                                "response": rag_result.get("content", ""),
-                                "sources": rag_result.get("sources", []),
-                            }
-                    elif isinstance(decision, dict) and decision.get("selected_agent") is None:
-                        return {
-                            "selected_agent": None,
-                            "response": decision.get("response", ""),
-                            "sources": None,
-                        }
-                    return decision
-            except Exception as e:
-                return {"selected_agent": None, "direct_response": "Xin lỗi, hiện tôi không thể xử lý yêu cầu.", "error": str(e)}
+            
+            logger.debug(f"LLM response content: {content[:200]}...")
+            
+            return await self._parse_and_route_decision(content, message)
+            
         except Exception as e:
-            return {"selected_agent": None, "direct_response": "Xin lỗi, hiện tôi không thể xử lý yêu cầu.", "error": str(e)}
+            logger.exception(f"Error processing message: {e}")
+            return {
+                "selected_agent": None,
+                "response": "Xin lỗi, hiện tôi không thể xử lý yêu cầu.",
+                "sources": None,
+                "error": str(e)
+            }
+
+    async def _parse_and_route_decision(self, content: str, original_message: str) -> Dict[str, Any]:
+        """Parse LLM response and route to appropriate agent."""
+        try:
+            content = content.strip()
+            
+            match = re.search(r"\{[\s\S]*\}", content)
+            if not match:
+                logger.warning(f"No JSON found in LLM response. Content: {content[:200]}")
+                return {
+                    "selected_agent": None,
+                    "response": content,
+                    "sources": None
+                }
+            
+            json_str = match.group(0)
+            decision = json.loads(json_str)
+            
+            if not isinstance(decision, dict):
+                logger.warning(f"Parsed JSON is not a dict: {type(decision)}")
+                return {
+                    "selected_agent": None,
+                    "response": content,
+                    "sources": None
+                }
+            
+            selected_agent = decision.get("selected_agent")
+            logger.info(f"Parsed decision - selected_agent: {selected_agent}, has response: {bool(decision.get('response'))}")
+            
+            if selected_agent == "RAG Agent":
+                logger.info("Routing to RAG Agent")
+                return await self._handle_rag_agent_request(original_message, decision)
+            else:
+                logger.info("Handling directly with Orchestrator")
+                return {
+                    "selected_agent": None,
+                    "response": decision.get("response", ""),
+                    "sources": None
+                }
+                
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse JSON from LLM response: {e}")
+            logger.error(f"Content that failed to parse: {content[:500]}")
+            return {
+                "selected_agent": None,
+                "response": content,
+                "sources": None,
+                "error": "Failed to parse decision"
+            }
+        except Exception as e:
+            logger.exception(f"Error parsing decision: {e}")
+            return {
+                "selected_agent": None,
+                "response": "Xin lỗi, hiện tôi không thể xử lý yêu cầu.",
+                "sources": None,
+                "error": str(e)
+            }
+
+    async def _handle_rag_agent_request(self, message: str, decision: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle request routing to RAG Agent."""
+        if not self.a2a_client or not self.a2a_client._initialized:
+            logger.warning("A2A client not initialized, falling back to direct response")
+            return {
+                "selected_agent": None,
+                "response": decision.get("response", ""),
+                "sources": None
+            }
+        
+        try:
+            rag_result = await self.a2a_client.send_message(message, stream=False)
+            return {
+                "selected_agent": "RAG Agent",
+                "response": rag_result.get("content", ""),
+                "sources": rag_result.get("sources", [])
+            }
+        except Exception as e:
+            logger.error(f"RAG Agent request failed: {e}, falling back to direct response")
+            return {
+                "selected_agent": None,
+                "response": decision.get("response", ""),
+                "sources": None,
+                "error": str(e)
+            }
         
     async def health_check(self) -> Dict[str, Any]:
+        """Check health status of all components."""
         try:
             await self.initialize()
+            
             if not self._initialized:
-                if not self.llm:
-                    logger.error("LLM model chưa được khởi tạo")
-                    llm_status = "unhealthy"
-                               
-                if not self.a2a_client:
-                    logger.warning("A2A Client chưa được khởi tạo hoặc không cấu hình")
-                    a2a_status = "unhealthy"
-                else:
-                    health = await self.a2a_client.health_check()
-                    a2a_status = health
+                status = "unhealthy"
+                llm_status = "unhealthy" if not self.llm else "healthy"
+                a2a_status = "unhealthy" if not self.a2a_client else await self.a2a_client.health_check()
             else:
                 status = "healthy"
                 llm_status = "healthy"
-                a2a_status = await self.a2a_client.health_check() 
-            
+                a2a_status = await self.a2a_client.health_check() if self.a2a_client else "unhealthy"
 
             return {
                 "status": status,

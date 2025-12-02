@@ -123,7 +123,8 @@ async def chat(req: ChatRequest):
 
 
 @app.get("/history/{user_id}/{session_id}")
-async def get_history(user_id: str, session_id: str):
+async def get_postgres_history(user_id: str, session_id: str):
+    """Get full conversation history from Postgres (long-term storage)."""
     if not postgres_store or not postgres_manager.is_ready():
         return {"error": "Postgres not available", "messages": [], "created_at": None, "last_updated": None}
     chat = await postgres_store.load_session_history(user_id, session_id)
@@ -133,30 +134,30 @@ async def get_history(user_id: str, session_id: str):
         "last_updated": chat.last_updated.isoformat() if chat.last_updated else None,
     }
 
-@app.get("/history/langchain/{user_id}/{session_id}")
-async def get_history(user_id: str, session_id: str):
+@app.get("/history/redis/{user_id}/{session_id}")
+async def get_redis_history(user_id: str, session_id: str, limit: Optional[int] = None):
+    """Get conversation history from Redis (short-term storage).
+    
+    Args:
+        limit: Optional limit on number of recent turns to return (default: all)
+    """
     if not langchain_store or not redis_manager.is_ready():
-        return {"error": "Redis not available"}
-    chat = await langchain_store.load(user_id, session_id)
-    return {
-        "messages": chat
-    }
+        return {"error": "Redis not available", "messages": []}
+    
+    if limit and limit > 0:
+        messages = await langchain_store.get_history_context(user_id, session_id, limit=limit)
+    else:
+        messages = await langchain_store.get(user_id, session_id)
+    
+    return {"messages": messages}
 
 @app.get("/sessions/{user_id}")
 async def get_user_sessions(user_id: str):
+    """List all session IDs for a given user."""
     if not postgres_store or not postgres_manager.is_ready():
         return {"error": "Postgres not available", "sessions": []}
     sessions = await postgres_store.list_sessions(user_id)
-    return {
-        "sessions": sessions
-    }
-
-@app.get("/context/{user_id}/{session_id}")
-async def get_context(user_id: str, session_id: str):
-    if not langchain_store or not redis_manager.is_ready():
-        return {"error": "Cannot get user session !"}
-    context = await langchain_store.get_history_context(user_id, session_id)
-    return context
+    return {"sessions": sessions}
 
 def main():
     uvicorn.run(
