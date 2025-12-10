@@ -10,7 +10,7 @@ class Config:
     COLLECTION_NAME = os.getenv("QDRANT_COLLECTION", "mental_health_advisor")
     
     # Embedding Model - Optimized for Vietnamese + Mental Health Terms
-    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "Qwen/Qwen3-Embedding-0.6B")
+    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")
     
     # Chunking Strategy - Optimized for Medical/Psychological Content
     CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "800"))
