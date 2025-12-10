@@ -26,8 +26,9 @@ class MentalHealthDataIngestion:
         print(f"   Collection: {Config.COLLECTION_NAME}")
         
         # Khởi tạo các components
-        self.pdf_processor = PDFProcessor()
+        # Khởi tạo các components
         self.embedding_manager = EmbeddingManager()
+        self.pdf_processor = PDFProcessor(embedding_manager=self.embedding_manager)
         self.qdrant_manager = QdrantManager()
         
         print("✅ Pipeline đã sẵn sàng!")

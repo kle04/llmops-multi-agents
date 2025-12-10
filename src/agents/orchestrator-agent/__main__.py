@@ -52,9 +52,6 @@ app = FastAPI(
 )
 
 
-
-
-
 @app.get("/health")
 async def health():
     # include redis health if available

@@ -15,7 +15,7 @@ class Config:
     QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
     COLLECTION_NAME = os.getenv("COLLECTION_NAME", "mental_health_advisor")
     TOP_K_DOCUMENTS = os.getenv("TOP_K_DOCUMENTS",5)
-    SIMILARITY_THRESHOLD = os.getenv("SIMILARITY_THRESHOLD",0.7)
+    SIMILARITY_THRESHOLD = os.getenv("SIMILARITY_THRESHOLD",0.4)
 
     RAG_AGENT_URL = os.getenv("RAG_AGENT_URL", "http://localhost:7005")
 
@@ -23,4 +23,4 @@ class Config:
     PORT = int(os.getenv("PORT", 7005))
     
     # Hugging Face Embeddings
-    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")
+    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "Qwen/Qwen3-Embedding-0.6B")

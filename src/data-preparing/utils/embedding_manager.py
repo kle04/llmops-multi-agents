@@ -21,15 +21,8 @@ class EmbeddingManager:
         # Load model
         try:
             print(f"   Loading {Config.EMBEDDING_MODEL}...")
-            # Some models require trust_remote_code=True
-            try:
-                self.model = SentenceTransformer(Config.EMBEDDING_MODEL)
-            except ValueError as ve:
-                if "trust_remote_code" in str(ve):
-                    print(f"   ⚠️  Model requires trust_remote_code=True, retrying...")
-                    self.model = SentenceTransformer(Config.EMBEDDING_MODEL, trust_remote_code=True)
-                else:
-                    raise ve
+            # Always use trust_remote_code=True for modern models (like Qwen)
+            self.model = SentenceTransformer(Config.EMBEDDING_MODEL, trust_remote_code=True)
             self.model_name = Config.EMBEDDING_MODEL
             
             # Get embedding dimension với text tiếng Việt
