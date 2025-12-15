@@ -23,4 +23,4 @@ class Config:
     PORT = int(os.getenv("PORT", 7005))
     
     # Hugging Face Embeddings
-    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "Qwen/Qwen3-Embedding-0.6B")
+    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")

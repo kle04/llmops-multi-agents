@@ -13,6 +13,7 @@ import glob
 from datetime import datetime
 
 from utils.pdf_processor import PDFProcessor
+from utils.markdown_processor import MarkdownProcessor
 from utils.embedding_manager import EmbeddingManager
 from utils.qdrant_manager import QdrantManager
 from config import Config
@@ -29,6 +30,7 @@ class MentalHealthDataIngestion:
         # Khởi tạo các components
         self.embedding_manager = EmbeddingManager()
         self.pdf_processor = PDFProcessor(embedding_manager=self.embedding_manager)
+        self.markdown_processor = MarkdownProcessor(embedding_manager=self.embedding_manager)
         self.qdrant_manager = QdrantManager()
         
         print("✅ Pipeline đã sẵn sàng!")
@@ -68,11 +70,11 @@ class MentalHealthDataIngestion:
         
         return True
     
-    def find_pdf_files(self, paths: List[str]) -> List[str]:
+    def find_files(self, paths: List[str]) -> List[str]:
         """
-        Tìm tất cả file PDF từ paths (có thể là file hoặc folder)
+        Tìm tất cả file PDF và Markdown từ paths (có thể là file hoặc folder)
         """
-        pdf_files = []
+        found_files = []
         
         if not paths:
             # Mặc định tìm trong thư mục data
@@ -81,50 +83,59 @@ class MentalHealthDataIngestion:
         for path in paths:
             path = Path(path)
             
-            if path.is_file() and path.suffix.lower() == '.pdf':
-                pdf_files.append(str(path))
-                print(f"✅ Tìm thấy file: {path}")
+            if path.is_file():
+                if path.suffix.lower() in ['.pdf', '.md']:
+                    found_files.append(str(path))
+                    print(f"✅ Tìm thấy file: {path}")
             elif path.is_dir():
-                # Tìm tất cả PDF trong folder
-                pattern = str(path / "**" / "*.pdf")
-                found_files = glob.glob(pattern, recursive=True)
-                if found_files:
-                    pdf_files.extend(found_files)
-                    print(f"✅ Tìm thấy {len(found_files)} PDF files trong {path}")
-                    for f in found_files:
-                        print(f"   - {Path(f).name}")
-                else:
-                    print(f"⚠️  Không tìm thấy PDF nào trong: {path}")
+                # Tìm tất cả PDF và Markdown trong folder
+                for ext in ["*.pdf", "*.md"]:
+                    pattern = str(path / "**" / ext)
+                    matched = glob.glob(pattern, recursive=True)
+                    if matched:
+                        found_files.extend(matched)
+                        print(f"✅ Tìm thấy {len(matched)} file {ext} trong {path}")
+                        for f in matched:
+                            print(f"   - {Path(f).name}")
             else:
                 print(f"⚠️  Đường dẫn không tồn tại: {path}")
         
-        return pdf_files
+        if not found_files:
+             print(f"⚠️  Không tìm thấy file nào trong các đường dẫn đã cho.")
+
+        return found_files
     
-    def analyze_pdf_content(self, pdf_files: List[str]) -> Dict:
+    def analyze_file_content(self, file_paths: List[str]) -> Dict:
         """
-        Phân tích cơ bản nội dung PDF
+        Phân tích cơ bản nội dung file
         """
-        print(f"\n📊 Kiểm tra {len(pdf_files)} PDF files...")
+        print(f"\n📊 Kiểm tra {len(file_paths)} files...")
         
         analysis = {
-            "total_files": len(pdf_files),
+            "total_files": len(file_paths),
             "successfully_analyzed": 0,
             "files_analysis": []
         }
         
-        for pdf_file in pdf_files:
+        for file_path in file_paths:
             try:
-                print(f"\n🔍 Kiểm tra: {Path(pdf_file).name}")
+                print(f"\n🔍 Kiểm tra: {Path(file_path).name}")
+                ext = Path(file_path).suffix.lower()
+                text_sample = ""
                 
-                # Trích xuất text để kiểm tra khả năng đọc
-                text_sample = self.pdf_processor.extract_text_from_pdf(pdf_file)
-                
+                if ext == '.pdf':
+                    # Trích xuất text để kiểm tra khả năng đọc
+                    text_sample = self.pdf_processor.extract_text_from_pdf(file_path)
+                elif ext == '.md':
+                     with open(file_path, 'r', encoding='utf-8') as f:
+                        text_sample = f.read()
+
                 if not text_sample:
                     print("   ❌ Không trích xuất được text")
                     continue
                 
                 file_analysis = {
-                    "file": Path(pdf_file).name,
+                    "file": Path(file_path).name,
                     "text_length": len(text_sample),
                     "readable": True
                 }
@@ -142,30 +153,36 @@ class MentalHealthDataIngestion:
         
         return analysis
     
-    def process_pdfs(self, pdf_files: List[str], force_reprocess: bool = False) -> List[dict]:
+    def process_files(self, file_paths: List[str], force_reprocess: bool = False) -> List[dict]:
         """
-        Xử lý danh sách PDF files
+        Xử lý danh sách files
         """
-        if not pdf_files:
-            print("❌ Không có file PDF nào để xử lý!")
+        if not file_paths:
+            print("❌ Không có file nào để xử lý!")
             return []
         
-        print(f"\n📄 Bắt đầu xử lý {len(pdf_files)} PDF files...")
+        print(f"\n📄 Bắt đầu xử lý {len(file_paths)} files...")
         
         all_documents = []
         success_count = 0
         
-        for i, pdf_file in enumerate(pdf_files, 1):
+        for i, file_path in enumerate(file_paths, 1):
             try:
-                print(f"\n📖 [{i}/{len(pdf_files)}] Xử lý: {Path(pdf_file).name}")
+                print(f"\n📖 [{i}/{len(file_paths)}] Xử lý: {Path(file_path).name}")
                 
                 # Kiểm tra file tồn tại
-                if not os.path.exists(pdf_file):
-                    print(f"   ❌ File không tồn tại: {pdf_file}")
+                if not os.path.exists(file_path):
+                    print(f"   ❌ File không tồn tại: {file_path}")
                     continue
                 
-                # Xử lý PDF
-                documents = self.pdf_processor.process_pdf(pdf_file)
+                # Xử lý file dựa trên extension
+                ext = Path(file_path).suffix.lower()
+                documents = []
+                
+                if ext == '.pdf':
+                    documents = self.pdf_processor.process_pdf(file_path)
+                elif ext == '.md':
+                    documents = self.markdown_processor.process_markdown(file_path)
                 
                 if documents:
                     all_documents.extend(documents)
@@ -175,7 +192,7 @@ class MentalHealthDataIngestion:
                     # Thống kê sections
                     sections = {}
                     for doc in documents:
-                        section = doc["section"]
+                        section = doc.get("section", "unknown")
                         sections[section] = sections.get(section, 0) + 1
                     
                     print(f"   📊 Sections:")
@@ -185,11 +202,11 @@ class MentalHealthDataIngestion:
                     print(f"   ⚠️  Không tạo được chunk nào")
                     
             except Exception as e:
-                print(f"   ❌ Lỗi xử lý {pdf_file}: {e}")
+                print(f"   ❌ Lỗi xử lý {file_path}: {e}")
                 continue
         
         print(f"\n📊 Kết quả xử lý:")
-        print(f"   - Thành công: {success_count}/{len(pdf_files)} files")
+        print(f"   - Thành công: {success_count}/{len(file_paths)} files")
         print(f"   - Tổng chunks: {len(all_documents)}")
         
         return all_documents
@@ -266,7 +283,7 @@ class MentalHealthDataIngestion:
             print(f"❌ Lỗi lưu vào Qdrant: {e}")
             return False
     
-    def run_ingestion(self, pdf_paths: List[str] = None, clear_existing: bool = False, 
+    def run_ingestion(self, paths: List[str] = None, clear_existing: bool = False, 
                      force_reprocess: bool = False, analyze_only: bool = False):
         """
         Chạy toàn bộ pipeline ingestion
@@ -280,34 +297,34 @@ class MentalHealthDataIngestion:
             print("❌ Không đáp ứng điều kiện tiên quyết!")
             return False
         
-        # Bước 2: Tìm PDF files
-        print(f"\n📁 Tìm PDF files...")
-        if pdf_paths is None:
-            pdf_paths = ["data"]  # Mặc định
+        # Bước 2: Tìm files
+        print(f"\n📁 Tìm files...")
+        if paths is None:
+            paths = ["data"]  # Mặc định
         
-        pdf_files = self.find_pdf_files(pdf_paths)
+        files = self.find_files(paths)
         
-        if not pdf_files:
-            print("❌ Không tìm thấy PDF files nào!")
-            print("💡 Hãy đặt PDF files vào thư mục data/")
+        if not files:
+            print("❌ Không tìm thấy file nào!")
+            print("💡 Hãy đặt file vào thư mục data/")
             return False
         
-        print(f"\n✅ Sẽ xử lý {len(pdf_files)} PDF files")
+        print(f"\n✅ Sẽ xử lý {len(files)} files")
         
         # Bước 3: Phân tích nội dung
-        analysis = self.analyze_pdf_content(pdf_files)
+        analysis = self.analyze_file_content(files)
         
         if analyze_only:
             print(f"\n📊 KIỂM TRA HOÀN TẤT!")
             return True
         
         if analysis["successfully_analyzed"] == 0:
-            print("⚠️  Không đọc được PDF nào!")
-            print("💡 Hãy kiểm tra lại các file PDF")
+            print("⚠️  Không đọc được file nào!")
+            print("💡 Hãy kiểm tra lại các file")
             return False
         
-        # Bước 4: Xử lý PDFs
-        documents = self.process_pdfs(pdf_files, force_reprocess)
+        # Bước 4: Xử lý files
+        documents = self.process_files(files, force_reprocess)
         
         if not documents:
             print("❌ Không có documents để xử lý!")
@@ -326,7 +343,7 @@ class MentalHealthDataIngestion:
         if success:
             print(f"\n🎉 HOÀN THÀNH DATA INGESTION!")
             print(f"📊 Thống kê cuối:")
-            print(f"   - PDF files: {len(pdf_files)}")
+            print(f"   - Files: {len(files)}")
             print(f"   - Documents: {len(documents_with_embeddings)}")
             print(f"   - Collection: {Config.COLLECTION_NAME}")
             print(f"   - Embedding model: {Config.EMBEDDING_MODEL}")
@@ -412,7 +429,7 @@ Ví dụ sử dụng:
     
     # Chạy ingestion
     success = pipeline.run_ingestion(
-        pdf_paths=pdf_paths,
+        paths=pdf_paths,
         clear_existing=args.clear,
         force_reprocess=args.force,
         analyze_only=args.analyze
