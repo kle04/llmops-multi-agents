@@ -64,8 +64,10 @@ class EmbeddingManager:
         # Normalize whitespace
         cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
         
-        # Truncate text nếu quá dài (Vietnamese model có thể có giới hạn)
-        max_chars = 512  # Conservative limit cho Vietnamese model
+        # Truncate text nếu quá dài
+        # multilingual-e5-base supports ~512 tokens ≈ 2000-2500 chars for Vietnamese
+        # Using 2000 as safe limit to avoid truncation of 800-1000 char chunks
+        max_chars = 2000  # Safe limit for multilingual-e5-base model
         if len(cleaned_text) > max_chars:
             # Cắt ở boundary của câu để giữ ngữ nghĩa
             sentences = cleaned_text.split('. ')

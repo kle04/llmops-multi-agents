@@ -127,7 +127,7 @@ class MentalHealthDataIngestion:
                     # Trích xuất text để kiểm tra khả năng đọc
                     text_sample = self.pdf_processor.extract_text_from_pdf(file_path)
                 elif ext == '.md':
-                     with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, 'r', encoding='utf-8') as f:
                         text_sample = f.read()
 
                 if not text_sample:
@@ -189,15 +189,25 @@ class MentalHealthDataIngestion:
                     success_count += 1
                     print(f"   ✅ Tạo được {len(documents)} chunks")
                     
-                    # Thống kê sections
+                    # Thống kê sections với thông tin chi tiết hơn
                     sections = {}
+                    section_levels = {}
                     for doc in documents:
                         section = doc.get("section", "unknown")
                         sections[section] = sections.get(section, 0) + 1
+                        # Track section levels for markdown files
+                        if ext == '.md' and "section_level" in doc:
+                            level = doc.get("section_level", 0)
+                            section_levels[section] = level
                     
-                    print(f"   📊 Sections:")
-                    for section, count in sections.items():
-                        print(f"      - {section}: {count}")
+                    print(f"   📊 Sections ({len(sections)} unique):")
+                    # Sort by count descending, then by name
+                    sorted_sections = sorted(sections.items(), key=lambda x: (-x[1], x[0]))
+                    for section, count in sorted_sections[:10]:  # Show top 10
+                        level_info = f" (Level {section_levels.get(section, '?')})" if ext == '.md' else ""
+                        print(f"      - {section}{level_info}: {count} chunks")
+                    if len(sections) > 10:
+                        print(f"      ... và {len(sections) - 10} sections khác")
                 else:
                     print(f"   ⚠️  Không tạo được chunk nào")
                     

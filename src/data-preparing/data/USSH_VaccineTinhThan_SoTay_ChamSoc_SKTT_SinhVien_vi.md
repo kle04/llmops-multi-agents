@@ -1,35 +1,4 @@
 # NỘI DUNG
-
-## 1. Đại dịch Covid-19 và Sức khỏe tâm thần:
-
-"Biết để hiểu" và "Một số yếu tố nguy cơ"
-
-### "BIẾT ĐỂ HIỂU"
-
-Bệnh viêm đường hô hấp cấp COVID-19 xuất hiện từ tháng 12 năm 2019 ở Vũ Hán, Trung Quốc. WHO đã công bố tình trạng y tế khẩn cấp toàn cầu, yêu cầu chính phủ và các tổ chức trên toàn thế giới tích cực chung tay tham gia vào nỗ lực kiềm chế dịch bệnh.
-
-"Kể từ đầu dịch đến nay Việt Nam có 10.778.154 ca nhiễm, đứng thứ 12/227 quốc gia và vùng lãnh thổ, trong khi với tỷ lệ số ca nhiễm/1 triệu dân, Việt Nam đứng thứ 112/227 quốc gia và vùng lãnh thổ (bình quân cứ 1 triệu người có 108.730 ca nhiễm)" - theo Bản tin cập nhật Covid-19 tính đến ngày 30/7/2022 của Bộ Y tế Cục y tế dự phòng. 
-
-...Và con số này hiện đang tiếp tục gia tăng tại Việt Nam và các nước trên Thế giới.
-
-Trong nghiên cứu của Lê Thị Thanh Xuân và đồng nghiệp (2020) thực hiện vào tháng 4/2020 khi dịch bệnh lần đầu tiên bùng phát tại Việt Nam khảo sát trên 1.423 người, kết quả cho thấy có 233 người (16,4%) bị tổn thương tâm lý ở cấp độ thấp; 76 người (5,3%) ở cấp độ trung bình và 77 người (5,4%) ở cấp độ cao. ...Ở nhiều quốc gia như Trung Quốc, Tây Ban Nha, Ý, Iran, Thổ Nhĩ Kỳ, Nepal, Đan Mạch, Hoa Kỳ (Xiong và cộng sự, 2020) cho thấy tỷ lệ dân số có các triệu chứng tâm lý tương đối cao dao động tùy theo các quốc gia. Cụ thể như lo âu (từ 6,33% đến 50,9%), trầm cảm (từ 14,6% đến 48,3%), rối loạn cảm xúc (từ 7% đến 53,8%), đau khổ (từ 34,43% đến 38%), và căng thẳng (từ 8,1% đến 81,9%).
-
-Tính chất nguy hiểm của dịch bệnh vốn đã đặt cá nhân rơi vào tình trạng dễ bị tổn thương do thiếu cảm giác an toàn về sức khỏe thể chất.
-
-Những thiếu hụt về đời sống tinh thần, thiếu kết nối xã hội do thực hiện dãn cách xã hội trong thời gian liên tục, kéo dài; việc tiếp xúc thường xuyên với các thông tin tiêu cực về dịch bệnh, không rõ ràng trên mạng xã hội; sự thay đổi về lối sống, hình thức học tập... ít nhiều đã ảnh hưởng rất lớn đến đời sống tinh thần của sinh viên, làm gia tăng các vấn đề về sức khỏe tâm thần ở đối tượng này.
-
-Trước những tác động đến từ dịch bệnh, bản thân mỗi SV không chỉ cần tự trang bị những kiến thức về y tế nhằm bảo vệ sức khỏe thể chất mà cần có những hiểu biết và kỹ năng để ứng phó với những vấn đề về sức khỏe tâm thần trong các tình huống khó khăn.
-
-### "MỘT SỐ YẾU TỐ NGUY CƠ"
-
-**Một số yếu tố nguy cơ đối với sức khỏe tinh thần trong mùa dịch Covid-19**
-- Liên tục tiếp xúc với các thông tin tiêu cực trên mạng xã hội và các kênh không chính thống;
-- Nguy cơ bản thân hay người thân bị lây nhiễm bệnh; chứng kiến các trường hợp nhiễm, hay nghi nhiễm gần nơi mình sống;
-- Thiếu tương tác với xung quanh trong thời gian dãn cách; Không được đến trường lớp, khu vui chơi;
-- Thay đổi lịch trình sinh hoạt; Không thể thực hiện các hoạt động yêu thích hay thói quen hằng ngày nơi công cộng hoặc đông người;
-- Nguy cơ bị kỳ thị vì nghi nhiễm bệnh;
-- Học online kéo dài; thay đổi hình thức học tập; phương pháp học tập....
-
 ## 2. Sức khỏe tâm thần của sinh viên:
 
 "Những vấn đề thường gặp và gợi ý cách ứng phó"
@@ -46,57 +15,18 @@ Trước những tác động đến từ dịch bệnh, bản thân mỗi SV kh
 ### Stress
 
 **Stress là gì?**
-
 Stress là một phần của cuộc sống. Trong tình huống bình thường, stress có thể thúc đẩy mọi người hành động hoặc chuẩn bị tốt hơn trong các sự kiện quan trọng. 
-
 Trong tình huống nguy hiểm, stress báo hiệu để cơ thể chuẩn bị đối mặt với mối đe dọa. 
-
 Yếu tố gây stress có thể xảy ra một lần hoặc trong một khoảng thời gian ngắn, hoặc nó cũng có thể xảy ra lặp đi lặp lại trong một thời gian dài. 
-
 Mỗi người trong chúng ta đều có thể trải qua stress trong một thời điểm nào đó. Nhưng không phải stress nào cũng tiêu cực. 
-
 Tuy nhiên, khi stress quá mức và kéo dài vượt khỏi khả năng tự điều tiết của bản thân thì Stress có thể góp phần gây ra các vấn đề sức khỏe thể chất như bệnh tim, tăng huyết áp, tiểu đường và các vấn đề về sức khỏe tâm thần, các rối loạn như trầm cảm hoặc lo âu.
 
 **Biểu hiện của Stress**
+1. Những biểu hiện về cảm xúc: Cảm thấy khó chịu, Cảm thấy lo lắng hoặc căng thẳng, Cảm thấy buồn bã, Cảm thấy chán nản, thờ ơ, Cảm thấy đánh mất giá trị
+2. Những triệu chứng về thể chất: Đau nhức đầu, Căng hoặc đau cơ bắp, Đau bụng, Đổ mồ hôi
+3. Những triệu chứng về hành vi: Cảm thấy chóng mặt, Rối loạn tiêu hóa, Khó thở hoặc đau ngực, Khô miệng; Ngứa trên cơ thể, Có vấn đề về tình dục, Nổi cáu, bực bội hoặc nóng tính, Sử dụng các chất kích thích như rượu hoặc thuốc lá, Xáo trộn các sinh hoạt hàng ngày như ăn uống hoặc giấc ngủ, Bỏ qua những hành vi thông thường, mất tập trung, Trở nên vô lý trong những quyết định của mình, Hay quên hoặc trở nên vụng về, Luôn vội vàng và hấp tấp, Ăn quá nhiều hoặc ăn quá ít
 
-1. Những biểu hiện về cảm xúc
-    - Cảm thấy khó chịu
-    - Cảm thấy lo lắng hoặc căng
-    thẳng
-    - Cảm thấy buồn bã
-    - Cảm thấy chán nản, thờ ơ
-    - Cảm thấy đánh mất giá trị
-2. Những triệu chứng về thể chất
-    - Đau nhức đầu
-    - Căng hoặc đau cơ bắp
-    - Đau bụng
-    - Đổ mồ hôi
-    
-    ---
-    
-    ---
-    
-    - Cảm thấy chóng mặt
-    - Rối loạn tiêu hóa
-    - Khó thở hoặc đau ngực
-    - Khô miệng; Ngứa trên cơ thể
-    - Có vấn đề về tình dục.
-3. Những biểu hiện về hành vi
-    - Nổi cáu, bực bội hoặc nóng tính
-    - Sử dụng các chất kích thích như rượu hoặc thuốc lá
-    - Xáo trộn các sinh hoạt hàng ngày như ăn uống hoặc giấc ngủ
-    - Bỏ qua những hành vi thông thường, mất tập trung
-    - Trở nên vô lý trong những quyết định của mình
-    - Hay quên hoặc trở nên vụng về
-    - Luôn vội vàng và hấp tấp
-    - Ăn quá nhiều hoặc ăn quá ít
-
-**Nguyên nhân gây Stress**
-
-- Môi trường bên ngoài (thời tiết, tiếng ồn, giao thông, bụi và sự ô nhiễm...)
-- Những căng thẳng từ xã hội và gia đình (công việc, học tập, tài chính, mất mát người thân, mâu thuẫn trong gia đình, bạn bè…)
-- Suy nghĩ, niềm tin về bản thân (suy nghĩ tiêu cực, bi quan, thiếu tự tin vào bản thân...)
-- Các vấn đề về thể chất (thay đổi cơ thể, ốm đau, không đủ chất dinh dưỡng…)
+**Nguyên nhân gây Stress**: Môi trường bên ngoài (thời tiết, tiếng ồn, giao thông, bụi và sự ô nhiễm...), Những căng thẳng từ xã hội và gia đình (công việc, học tập, tài chính, mất mát người thân, mâu thuẫn trong gia đình, bạn bè…), Suy nghĩ, niềm tin về bản thân (suy nghĩ tiêu cực, bi quan, thiếu tự tin vào bản thân...), Các vấn đề về thể chất (thay đổi cơ thể, ốm đau, không đủ chất dinh dưỡng…)
 
 ### Lo âu
 
