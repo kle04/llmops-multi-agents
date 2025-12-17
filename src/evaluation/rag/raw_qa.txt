@@ -1,167 +1,72 @@
-
 Q1: Stress có thể biểu hiện như thế nào về mặt cảm xúc?
 A1: Stress thường biểu hiện rõ rệt qua những thay đổi về mặt cảm xúc. Người đang chịu căng thẳng có thể cảm thấy khó chịu, bực bội hoặc dễ cáu gắt mà không rõ lý do. Họ thường xuyên lo lắng, bất an, luôn trong trạng thái căng thẳng. Nhiều người rơi vào cảm giác buồn bã, chán nản, mất hứng thú với những điều từng yêu thích. Ở mức độ cao hơn, stress còn khiến họ cảm thấy thờ ơ với mọi thứ xung quanh, mất niềm tin vào bản thân và cảm giác như đánh mất giá trị của chính mình.
-(Trang 10 - USSH)
 
-Q2: Stress ảnh hưởng như thế nào đến hành vi?  
+Q2: Stress ảnh hưởng như thế nào đến hành vi?
 A2: Stress có thể tác động mạnh mẽ đến hành vi của con người, khiến họ thay đổi cách ứng xử trong cuộc sống hằng ngày. Một người đang chịu căng thẳng thường dễ nổi cáu, bực bội hoặc trở nên nóng nảy hơn bình thường. Họ có xu hướng tìm đến các chất kích thích như rượu, thuốc lá để giải tỏa tạm thời. Các thói quen sinh hoạt cũng dễ bị xáo trộn — ăn uống thất thường, mất ngủ hoặc ngủ quá nhiều. Ngoài ra, stress còn khiến con người mất tập trung, hay quên, đưa ra những quyết định thiếu lý trí, hành động vội vàng, hấp tấp, thậm chí trở nên vụng về trong công việc và cuộc sống.
-(Trang 11 - USSH)
 
 Q3: Stress có phải lúc nào cũng xấu không?
 A3: Stress không phải lúc nào cũng là điều tiêu cực. Thực tế, mỗi người đều có thể trải qua stress ở một thời điểm nào đó trong cuộc sống — đôi khi chỉ trong thời gian ngắn, đôi khi kéo dài hoặc lặp đi lặp lại. Ở mức độ vừa phải, stress có thể đóng vai trò tích cực, giúp con người có thêm động lực, tập trung và thích nghi tốt hơn với thử thách. Tuy nhiên, khi stress trở nên quá mức và kéo dài vượt quá khả năng kiểm soát của bản thân, nó sẽ gây ra những tác động tiêu cực đến sức khỏe. Cụ thể, stress mãn tính có thể dẫn đến các bệnh lý như tim mạch, tăng huyết áp, tiểu đường, cũng như các rối loạn tâm lý như lo âu hoặc trầm cảm.
-(Trang 10 - USSH)
 
 Q4: Khi bị stress, cơ thể thường có phản ứng ra sao?
 A4: Khi bị stress, cơ thể thường xuất hiện nhiều phản ứng về thể chất do hệ thần kinh và nội tiết hoạt động quá mức. Một người đang căng thẳng có thể bị đau đầu, căng hoặc đau mỏi cơ bắp, đặc biệt ở vùng vai, cổ và lưng. Họ cũng có thể gặp các triệu chứng như đau bụng, rối loạn tiêu hóa, đổ mồ hôi nhiều, chóng mặt hoặc cảm giác khó thở, đau tức ngực. Ngoài ra, stress còn có thể gây khô miệng, ngứa ngáy trên cơ thể và ảnh hưởng đến đời sống tình dục. Những phản ứng này là cách cơ thể phản ứng lại với áp lực, nhưng nếu kéo dài, chúng có thể gây ra nhiều vấn đề nghiêm trọng cho sức khỏe.
-(Trang 11 - USSH)
 
-Q5: Sinh viên thường bị stress trong những tình huống nào?
-A5: Có nhiều yếu tố có thể gây ra stress cho sinh viên, đến từ cả môi trường bên ngoài, các mối quan hệ xã hội, cũng như từ chính bản thân. Môi trường bên ngoài như thời tiết khắc nghiệt, tiếng ồn, tình trạng giao thông đông đúc, bụi bẩn và ô nhiễm đều có thể tạo áp lực tinh thần. Những căng thẳng từ xã hội và gia đình — chẳng hạn như áp lực học tập, công việc, tài chính, mất mát người thân hoặc mâu thuẫn với gia đình, bạn bè — cũng là nguồn stress phổ biến. Bên cạnh đó, suy nghĩ và niềm tin về bản thân như tư duy tiêu cực, bi quan hay thiếu tự tin sẽ làm tăng mức độ căng thẳng. Cuối cùng, các vấn đề về thể chất như thay đổi cơ thể, ốm đau hoặc chế độ dinh dưỡng không đầy đủ cũng góp phần gây ra stress.
-(Trang 11 - USSH)
+Q5: Nguyên nhân gây stress bao gồm những gì?
+A5: Nguyên nhân gây stress bao gồm: Môi trường bên ngoài như thời tiết, tiếng ồn, giao thông, bụi và sự ô nhiễm; Những căng thẳng từ xã hội và gia đình như công việc, học tập, tài chính, mất mát người thân, mâu thuẫn trong gia đình, bạn bè; Suy nghĩ, niềm tin về bản thân như suy nghĩ tiêu cực, bi quan, thiếu tự tin vào bản thân; Các vấn đề về thể chất như thay đổi cơ thể, ốm đau, không đủ chất dinh dưỡng.
 
-Q6: Làm thế nào để phòng ngừa và kiểm soát stress hiệu quả?
-A6: Stress có thể được phòng ngừa và kiểm soát bằng nhiều phương pháp kết hợp giữa chăm sóc bản thân và quản lý cảm xúc. Một số biện pháp hiệu quả bao gồm: chậm lại, thư giãn và hít thở sâu; duy trì thói quen tập thể dục và rèn luyện thể thao; ăn uống hợp lý và chăm sóc sức khỏe; quản lý thời gian hiệu quả và đảm bảo giấc ngủ cân bằng. Bên cạnh đó, xây dựng mạng lưới quan hệ xã hội hỗ trợ, thảo luận và tìm giải pháp cho các vấn đề gặp phải, học các kỹ thuật thư giãn như hít thở sâu, thở hình vuông, yoga hoặc thiền, và tạo danh sách các hoạt động giúp cải thiện tâm trạng cũng rất hữu ích. Cuối cùng, khi stress trở nên quá mức, tìm đến sự trợ giúp của các chuyên gia tâm lý sẽ giúp kiểm soát căng thẳng một cách hiệu quả hơn.
-(Trang 24 - các mục từ 1 đến 10 của các trang tiếp theo - ussh)
-Q7: Lo âu là gì?
-A7: Lo âu là phản ứng tâm lý xuất hiện khi chúng ta đối mặt với những tình huống căng thẳng trong cuộc sống, như áp lực học tập, kỳ vọng từ gia đình, đổ vỡ trong các mối quan hệ, mất mát người thân, khó khăn về tài chính, vấn đề sức khỏe, mất ngủ hay những chấn thương tinh thần và thể chất. Nó thường khiến con người cảm thấy bất an, lo lắng và căng thẳng kéo dài.
-(trang 12 - ussh)
-Q8:  Lo âu có thể xuất phát từ đâu?
-A8:  Lo âu thường bắt nguồn từ những suy nghĩ tiêu cực hoặc những niềm tin không hợp lý mà chúng ta hình thành về bản thân, người khác hoặc thế giới xung quanh. Những cách nhìn nhận này có thể khiến con người dễ cảm thấy lo lắng, bất an và căng thẳng hơn trước các tình huống trong cuộc sống.
-(trang 12 - ussh)
-Q9: Người bị lo âu thường có những biểu hiện tâm lý nào?
-A9: Những người trải qua lo âu thường gặp phải các biểu hiện tâm lý như căng thẳng liên tục, cảm giác lo lắng hoặc sợ hãi, dễ hoảng sợ, thậm chí có cảm giác hão huyền hoặc mất kiểm soát. Một số người còn lo sợ bản thân sắp “mất trí”, sắp chết hoặc không thể tự chủ được hành vi và cảm xúc của mình.
-(trang 12 - ussh)
-Q10: Khi bị lo âu, cơ thể thường phản ứng ra sao?
-A10: Khi trải qua lo âu, cơ thể thường xuất hiện nhiều phản ứng rõ rệt. Người bệnh có thể bị chân tay run rẩy, vã mồ hôi, tim đập nhanh, nhức đầu, chóng mặt hoặc căng mỏi cơ. Ngoài ra, họ cũng có thể gặp các triệu chứng về tiêu hóa như buồn nôn, đau dạ dày, cảm giác tê bì, kiến bò trên da, và thậm chí khó thở. Những phản ứng này là biểu hiện của cơ thể khi đang trong trạng thái cảnh giác cao độ trước căng thẳng.
-(trang 12 - ussh)
-Q11: Lo âu ảnh hưởng như thế nào đến cuộc sống của sinh viên?
-A11: Lo âu có thể tác động tiêu cực đến nhiều khía cạnh trong cuộc sống của sinh viên, bao gồm học tập, công việc, các mối quan hệ gia đình và xã hội. Nó khiến sinh viên khó tập trung, giảm hiệu quả học tập, gặp khó khăn trong giao tiếp, thậm chí cản trở việc tham gia các hoạt động hàng ngày, từ đó ảnh hưởng đến chất lượng cuộc sống tổng thể.
-(trang 12 - ussh)
-Q12: Khi nào nên tìm gặp chuyên gia nếu gặp phải lo âu?
-A12: Bạn nên gặp chuyên gia khi cảm giác lo âu trở nên kéo dài, quá mức hoặc gây ảnh hưởng rõ rệt đến học tập, công việc, đời sống hằng ngày và các mối quan hệ xã hội. Ngoài ra, nếu lo âu kèm theo các triệu chứng nghiêm trọng như mất ngủ liên tục, ăn uống thất thường, suy nghĩ tiêu cực, khó kiểm soát cảm xúc, hoặc xuất hiện các ý nghĩ tự hại, việc tìm đến chuyên gia tâm lý, bác sĩ tâm thần hoặc tư vấn học đường là rất cần thiết để được đánh giá và hỗ trợ kịp thời.
-(trang 12 - ussh)
+Q6: Lo âu là gì và nguyên nhân gây lo âu?
+A6: Lo âu là hệ quả khi chúng ta trải qua các sự kiện căng thẳng trong cuộc sống, như áp lực học tập, kỳ vọng từ gia đình, tan vỡ trong các mối quan hệ, mất mát người thân, mất ngủ, khó khăn về tài chính, ốm đau, bệnh tật, chấn thương. Lo âu có thể xuất phát từ những suy nghĩ tiêu cực hay niềm tin không hợp lý.
 
-Q13: Sinh viên có thể làm gì để giảm bớt lo âu?
-A13: Khi cảm thấy lo âu, sinh viên có thể áp dụng nhiều phương pháp để cân bằng cảm xúc và duy trì sức khỏe tinh thần. Họ có thể bắt đầu bằng cách chậm lại, thư giãn và hít thở sâu, đồng thời duy trì thói quen tập thể dục hoặc tham gia các hoạt động thể thao để giải tỏa căng thẳng. Chăm sóc bản thân thông qua chế độ ăn uống hợp lý, ngủ đủ giấc và quản lý thời gian khoa học cũng giúp giảm áp lực. Xây dựng mạng lưới quan hệ xã hội hỗ trợ, chia sẻ và thảo luận các giải pháp với người tin cậy sẽ tạo cảm giác an tâm. Ngoài ra, học các kỹ thuật thư giãn như thiền, yoga, hít thở sâu hay thở hình vuông, lập danh sách những hoạt động giúp cải thiện tâm trạng và dần thay đổi những suy nghĩ tiêu cực sẽ rất hiệu quả. Trong những trường hợp lo âu kéo dài hoặc nghiêm trọng, tìm đến sự trợ giúp của chuyên gia tâm lý là bước quan trọng để được hỗ trợ kịp thời. 
-(Trang 24 - các mục từ 1 đến 10 của các trang tiếp theo - ussh)
+Q7: Nhận diện lo âu qua các triệu chứng tâm lý và thực thể?
+A7: Triệu chứng tâm lý của lo âu bao gồm: Căng thẳng, Lo lắng, Sợ sệt, Cảm giác hão huyền, Sợ sắp bị điên, Sợ sắp chết, Sợ mất tự chủ. Triệu chứng thực thể bao gồm: Chân tay run rẩy, Vã mồ hôi, Tim đập nhanh, Nhức đầu, Chóng mặt, Căng mỏi cơ, Nôn, khó thở, Cảm giác tê bì, Đau dạ dày, Cảm giác kiến bò. Lo âu gây ảnh hưởng đến cuộc sống, gia đình, xã hội và cản trở công việc, cuộc sống của bạn. Khi lo âu ảnh hưởng tiêu cực đến cuộc sống, gia đình và công việc thì cần được tham vấn, trị liệu bởi chuyên gia tâm lý học đường, chuyên gia tâm lý lâm sàng hoặc bác sĩ tâm thần.
 
-Q14: Trầm cảm là gì? 
-A14:  Trầm cảm là một rối loạn cảm xúc phổ biến nhưng nghiêm trọng, ảnh hưởng sâu sắc đến cách một người cảm nhận, suy nghĩ và thực hiện các hoạt động hàng ngày. Nó có thể gây ra các triệu chứng làm gián đoạn giấc ngủ, thay đổi khẩu vị, giảm hứng thú trong học tập hoặc công việc, và khiến người bệnh khó duy trì các hoạt động bình thường trong đời sống hằng ngày.
-(trang 13 - ussh)
-Q15: Khi nào một người được xem là mắc trầm cảm?
-A15: Một người được xem là mắc trầm cảm khi các triệu chứng của rối loạn cảm xúc kéo dài ít nhất hai tuần liên tục. Trong thời gian này, những thay đổi về tâm trạng, suy nghĩ và hành vi phải đủ rõ ràng để ảnh hưởng đáng kể đến khả năng sinh hoạt, học tập hoặc làm việc hàng ngày.
-(trang 13 - ussh) 
-Q16:  Người bị trầm cảm thường có những biểu hiện cảm xúc như thế nào?
-A16: Người mắc trầm cảm thường trải qua nhiều biến đổi tiêu cực về cảm xúc. Họ có thể cảm thấy buồn bã, chán nản kéo dài, mất đi sự quan tâm và hứng thú với những hoạt động từng mang lại niềm vui. Ngoài ra, họ thường có xu hướng bi quan, cảm thấy mình vô dụng hoặc không có giá trị, từ đó dẫn đến sự mất động lực và thu mình trong cuộc sống hàng ngày.
-(trang 13 - ussh) 
-Q17: Trầm cảm ảnh hưởng như thế nào đến suy nghĩ và hành vi của một người?
-A17: Trầm cảm có thể tác động mạnh mẽ đến cả suy nghĩ lẫn hành vi. Người mắc trầm cảm thường mang trong mình cảm giác tội lỗi, tự ti hoặc có những suy nghĩ tiêu cực về bản thân. Họ dễ mất tập trung, trí nhớ suy giảm và khó đưa ra quyết định. Bên cạnh đó, người trầm cảm có thể trở nên nhạy cảm, dễ khóc, và trong những trường hợp nghiêm trọng, có thể xuất hiện ý nghĩ về cái chết hoặc hành vi tự tử.
-(trang 13 - ussh) 
+Q8: Trầm cảm là gì và các biểu hiện của trầm cảm?
+A8: Trầm cảm là một rối loạn cảm xúc phổ biến nhưng nghiêm trọng. Nó gây ra các triệu chứng ảnh hưởng nghiêm trọng đến cách bạn cảm nhận, suy nghĩ và xử lý các hoạt động hàng ngày, chẳng hạn như ngủ, ăn hoặc học tập, làm việc. Để chẩn đoán là mắc bệnh trầm cảm, các triệu chứng phải có mặt ít nhất hai tuần. Biểu hiện về cảm xúc và động cơ: Chán nản kéo dài, Mất quan tâm, hứng thú, Bi quan, Cảm giác mình vô dụng, Cảm giác mình không có giá trị. Biểu hiện về tâm trí: Cảm thấy tội lỗi/có thái độ tiêu cực về bản thân, Khả năng tập trung/trí nhớ kém, Có ý nghĩ về cái chết hoặc tự tử, Hay khóc. Biểu hiện về cơ thể: Chậm chạp hoặc ủ rủ, Mệt mỏi/thiếu lực, Rối loạn giấc ngủ, Rối loạn ăn uống, Khó thực hiện được các công việc hàng ngày, Thu mình, tách khỏi cuộc sống xã hội và bạn bè.
 
-Q18: Người trầm cảm thường có những dấu hiệu thể chất nào?
-A18: Người mắc trầm cảm thường xuất hiện các thay đổi rõ rệt về cơ thể. Họ có thể cảm thấy chậm chạp, ủ rũ, mệt mỏi hoặc thiếu năng lượng để thực hiện các hoạt động hàng ngày. Các rối loạn về giấc ngủ, như khó ngủ hoặc ngủ quá nhiều, cũng rất phổ biến. Bên cạnh đó, trầm cảm có thể gây thay đổi khẩu vị, dẫn đến sụt cân hoặc tăng cân không kiểm soát.
-(trang 13 - ussh)
-Q19: Trầm cảm ảnh hưởng như thế nào đến khả năng sinh hoạt và các mối quan hệ xã hội của người bệnh?
-A19: Trầm cảm khiến người bệnh gặp nhiều khó khăn trong việc duy trì các hoạt động hàng ngày. Họ thường thiếu năng lượng, mất động lực nên khó hoàn thành công việc hoặc học tập như trước. Cuộc sống trở nên nặng nề, mọi việc dù nhỏ cũng trở thành thử thách. Ngoài ra, người trầm cảm có xu hướng thu mình, tránh giao tiếp và tách khỏi bạn bè, gia đình cũng như các hoạt động xã hội, khiến tình trạng cô đơn và buồn bã càng trở nên trầm trọng hơn.
-(trang 13 - ussh)
-Q20: Trầm cảm có thể được điều trị và phục hồi không?
-A20: Trầm cảm là một vấn đề sức khỏe có thể xảy ra với bất cứ ai, nhưng hoàn toàn có thể được điều trị. Quá trình điều trị thường cần vài tuần mới thấy được tiến triển rõ rệt, bao gồm cải thiện tâm trạng, năng lượng và khả năng sinh hoạt hàng ngày. Tuy nhiên, trầm cảm có thể tái phát nếu sức khỏe thể chất, điều kiện sống hoặc môi trường xung quanh không thuận lợi, vì vậy việc duy trì lối sống lành mạnh và hỗ trợ tâm lý liên tục là rất quan trọng.
-(trang 13 - ussh)
+Q9: Mệt mỏi khi nào cần can thiệp trị liệu?
+A9: Mệt mỏi sẽ là vấn đề cần can thiệp trị liệu khi: Mệt mỏi kéo dài, liên tục mà không xác định được nguyên nhân; Ảnh hưởng đến hoạt động chức năng cuộc sống như gia đình, công việc, học tập, chất lượng các mối quan hệ. Nhận diện chứng mệt mỏi: Lúc nào cũng mệt mỏi; Dễ mệt mỏi hơn so với người khác; Sau khi nghỉ ngơi vẫn cảm thấy mệt mỏi, không lại sức; Mệt mỏi đã ảnh hưởng xấu đến học tập, công việc, cuộc sống và quan hệ gia đình, bạn bè, xã hội. Khi không thể kiểm soát được tình trạng mệt mỏi, bạn cần liên hệ chuyên gia tâm lý học đường, chuyên gia tâm lý lâm sàng hoặc bác sĩ tâm thần để kịp thời hỗ trợ.
 
-Q21: Mệt mỏi là gì?
-A21: Mệt mỏi là cảm giác kiệt sức, thiếu năng lượng kéo dài và lặp đi lặp lại mà không xác định được nguyên nhân rõ ràng. Tình trạng này không chỉ ảnh hưởng đến khả năng học tập và làm việc mà còn tác động tiêu cực đến các mối quan hệ, đời sống gia đình và chất lượng cuộc sống nói chung.
-(trang 14 - ussh) 
-Q22: Mệt mỏi có thể xảy ra với ai?
-A22: Thực tế, mệt mỏi có thể xuất hiện ở bất kỳ ai và vào bất kỳ thời điểm nào trong cuộc sống. Ai trong chúng ta cũng có thể trải qua những giai đoạn cảm thấy kiệt sức, chán nản hoặc mất động lực. Tuy nhiên, mệt mỏi chỉ trở thành vấn đề cần được can thiệp khi nó kéo dài, ảnh hưởng đến học tập, công việc hoặc các mối quan hệ. 
-(trang 14 - ussh) 
-Q23: Mệt mỏi có thể bắt nguồn từ những nguyên nhân nào?
-A23: Mệt mỏi có thể bắt nguồn từ nhiều nguyên nhân khác nhau, bao gồm cả yếu tố thể chất lẫn tinh thần. Việc ngủ không đủ giấc hoặc ngủ không sâu khiến cơ thể không được phục hồi năng lượng, dẫn đến cảm giác uể oải kéo dài. Một số bệnh lý như huyết áp cao, tiểu đường hoặc thiếu máu cũng có thể khiến cơ thể luôn trong trạng thái suy nhược và dễ mệt mỏi. Bên cạnh đó, căng thẳng, lo âu hay trầm cảm kéo dài là những nguyên nhân tâm lý phổ biến khiến con người mất dần năng lượng sống. Ngoài ra, lối sống và thói quen sinh hoạt không lành mạnh như làm việc quá sức, ít vận động, chế độ ăn uống thiếu khoa học hoặc tình trạng béo phì cũng góp phần khiến cơ thể rơi vào trạng thái mệt mỏi. 
-(trang 14 - ussh)
-Q24: Mệt mỏi có ảnh hưởng đến sức khỏe tâm lý không?
-A24: Mệt mỏi kéo dài không chỉ ảnh hưởng đến sức khỏe thể chất mà còn tác động tiêu cực đến tinh thần, khiến bạn dễ cáu gắt, mất tập trung, giảm động lực và dễ rơi vào trạng thái lo âu hoặc trầm cảm. Nếu không được nghỉ ngơi và chăm sóc đúng cách, mệt mỏi có thể trở thành vòng luẩn quẩn, làm suy giảm cả hiệu suất học tập, công việc và chất lượng cuộc sống.
-(trang 14 - ussh)
-Q25: Sinh viên thường mệt mỏi vì những lý do gì?
-A25: Sinh viên thường mệt mỏi do nhiều nguyên nhân khác nhau, phổ biến nhất là thiếu ngủ, áp lực học tập và thi cử, cùng với thói quen sinh hoạt không điều độ. Ngoài ra, lo âu về tương lai, căng thẳng trong các mối quan hệ, hoặc thiếu cân bằng giữa học tập và giải trí cũng góp phần khiến sinh viên dễ rơi vào trạng thái kiệt sức, mất năng lượng và giảm hứng thú trong cuộc sống.
-(trang 14 - ussh)
-Q26: Khi nào nên đi khám nếu cảm thấy mệt mỏi?
-A26: Nếu bạn mệt mỏi liên tục, không thể kiểm soát được tình trạng, cảm thấy mất năng lượng, hoặc nghi ngờ có vấn đề về thể chất hay tâm lý, bạn nên liên hệ chuyên gia tâm lý học đường, tâm lý lâm sàng hoặc bác sĩ tâm thần để được hỗ trợ kịp thời.
-(trang 14 - ussh)
-Q27: Có những cách nào giúp giảm bớt cảm giác mệt mỏi?
-A27: Có nhiều cách để giảm bớt cảm giác mệt mỏi và lấy lại năng lượng cho cơ thể và tinh thần. Bạn có thể chậm lại, thư giãn và hít thở sâu, duy trì thói quen tập thể dục hoặc tham gia các hoạt động thể thao, chăm sóc bản thân bằng chế độ ăn uống hợp lý và đảm bảo giấc ngủ đầy đủ. Quản lý thời gian hiệu quả, xây dựng mạng lưới quan hệ xã hội hỗ trợ và thảo luận các giải pháp với người tin cậy cũng giúp giảm căng thẳng. Ngoài ra, học các kỹ thuật thư giãn như thiền, yoga, hít thở sâu hay thở hình vuông, tạo danh sách các hoạt động giúp cải thiện tâm trạng, thách thức các suy nghĩ tiêu cực và tìm đến sự trợ giúp của chuyên gia khi cần thiết sẽ giúp bạn kiểm soát mệt mỏi một cách hiệu quả.
-(Trang 24 - các mục từ 1 đến 10 của các trang tiếp theo - ussh)
+Q10: Vấn đề về giấc ngủ có những biểu hiện và nguyên nhân nào?
+A10: Các vấn đề về giấc ngủ bao gồm có khó ngủ, khó ngủ lâu hoặc thức giấc. Những vấn đề thường gặp: Ngủ không đủ, mệt mỏi thường trực; Không ngon giấc, thức giấc giữa đêm; Gặp khó khăn để giữ tỉnh táo khi ngồi yên, xem tivi hoặc đọc sách báo; Buồn ngủ hoặc cảm thấy mệt mỏi khi lái xe, khi đang ngồi học ở trường; Khó tập trung khi học tập, làm việc; Ngoại hình trông thiếu sức sống; Khó kiểm soát được cảm xúc của mình. Nguyên nhân: Nguyên nhân thực thể như tiêu hóa kém, đau cơ thể, bệnh tật; Nguyên nhân tâm lý tình cảm như Stress, lo âu, buồn chán, trầm cảm, tức giận; Nguyên nhân do cách sống như sử dụng các chất gây kích thích, hoạt động thể lực mạnh trước khi ngủ, làm đêm ngủ ngày; Nguyên nhân do môi trường như ồn ào, quá sáng trong phòng ngủ, ô nhiễm không khí, quá đông người.
 
-Q28: Nguyên nhân nào thường gây mất ngủ ở sinh viên?
-A28: Mất ngủ ở sinh viên thường xuất phát từ nhiều nguyên nhân khác nhau. Về thể chất, các vấn đề như tiêu hóa kém, đau nhức cơ thể hoặc bệnh tật đều có thể ảnh hưởng đến giấc ngủ. Về tâm lý và cảm xúc, stress, lo âu, buồn chán, trầm cảm hay tức giận là những yếu tố phổ biến. Lối sống cũng đóng vai trò quan trọng, chẳng hạn như sử dụng chất kích thích, tập luyện thể lực quá mạnh trước khi đi ngủ, hoặc làm việc đêm ngủ ngày. Ngoài ra, môi trường ngủ không thuận lợi như phòng ồn ào, quá sáng, ô nhiễm không khí hay quá đông người cũng có thể khiến sinh viên khó đi vào giấc ngủ và duy trì giấc ngủ sâu.
-(trang 16 - ussh)
+Q11: Tự sát có những nguyên nhân nào?
+A11: Nguyên nhân sinh học: Mức Serotonin trong não thấp là một trong những nguyên nhân làm tăng khả năng tự tử. Về mặt di truyền, những gia đình có cha mẹ, người thân tự sát và cố gắng tự sát thường có tỷ lệ tự sát cao hơn những gia đình bình thường. Nguyên nhân tâm lý: Trầm cảm và vô vọng đóng vai trò quan trọng và là một trong những nguyên nhân hàng đầu dẫn đến tự tử ở trẻ em và thanh thiếu niên. Thay đổi cảm xúc một cách liên tục, cảm giác không thuộc về và cảm thấy bản thân trở thành gánh nặng. Sự tuyệt vọng, lo lắng, xấu hổ, thường xuyên tức giận có thể chính là những dấu hiệu mạnh mẽ dẫn đến việc tự tử. Nguyên nhân xã hội: Bản thân không có khả năng hòa nhập vào xã hội, thiếu hoặc mất đi những mối quan hệ từ đó đã làm mất đi một trong những hệ thống hỗ trợ cần thiết. Những yếu tố khác như gia đình căng thẳng, gãy vỡ, thiếu kết nối, sự thay đổi của xã hội cũng là những yếu tố quan trọng gây nên tự tử. Nguyên nhân khác: Lạm dụng rượu và chất kích thích, Đại dịch Covid-19.
 
-Q29: Ngủ ít có hại hơn ngủ nhiều không, và điều gì quan trọng hơn về giấc ngủ?
-A29: Ngủ ít hay nhiều không phải yếu tố quan trọng nhất. Điều quan trọng hơn là chất lượng giấc ngủ, tức là giấc ngủ có giúp cơ thể và tinh thần được phục hồi hay không. Một giấc ngủ đủ sâu, đều đặn và đúng nhịp sẽ mang lại lợi ích cho sức khỏe thể chất và tinh thần, trong khi giấc ngủ chập chờn, không nghỉ ngơi đủ có thể gây hại, dù thời lượng ngủ dài hay ngắn.
-(trang 16 - ussh)
+Q12: Làm thế nào để nhận diện dấu hiệu tự sát qua lời nói và hành động?
+A12: Những câu nói cảnh báo: Nói về sự trống rỗng, mất đi sự hứng thú với mọi việc xung quanh như "Sẽ không còn làm phiền ai nữa đâu...". Những câu nói bi quan về cuộc đời như "Chả còn gì quan trọng cả…" "Thôi, mọi việc đều vô ích thôi …". Nói bóng gió những lời yêu thương hay chào tạm biệt những người thân yêu. Những câu nói về ý định kết thúc mạng sống như "Tôi ước mình chưa được sinh ra" "giá như tôi chết", "nếu tôi chết đi". Những hành động cảnh báo: Hành động sắp xếp mọi đồ vật cá nhân theo thứ tự, Viết nhật ký sẽ cho người thân, người quen, đồ vật, Tự nhiên dọn dẹp phòng ốc sạch sẽ, Hành động như để trả ơn bố mẹ, Mua và tích trữ các đồ vật phục vụ mục đích tự sát, Thay đổi những thói quen bình thường, bao gồm ăn uống, giấc ngủ, Luôn tự khép mình khỏi xã hội và muốn ở một mình.
 
+Q13: 10 cách ứng phó với các vấn đề sức khỏe tâm thần là gì?
+A13: 1. Chậm lại, thư giãn, hít thở sâu - Luyện tập hít thở sâu, co – giãn cơ thư giãn giúp giảm căng cơ, giảm lo lắng, căng thẳng, mệt mỏi và dễ cân bằng lại cảm xúc. 2. Duy trì, rèn luyện tập thể dục, thể thao - Tập thể dục giúp cải thiện tâm trạng, giảm lo âu, cải thiện giấc ngủ và tăng cường sức khỏe thể chất. 3. Chăm sóc bản thân, ăn uống hợp lý - Chế độ ăn cân bằng, uống đủ nước, tránh ăn quá no buổi tối, hạn chế đồ cay nóng, thức uống chứa cồn, chất kích thích. 4. Quản lý thời gian hiệu quả - Đảm bảo cân bằng giấc ngủ, phân chia thời gian hợp lý, dừng sử dụng thiết bị điện tử ít nhất 30 phút đến 1 tiếng trước khi ngủ. 5. Xây dựng mạng lưới quan hệ xã hội hỗ trợ - Tâm sự với bạn bè, người thân, thầy cô giáo, thiết lập các mối quan hệ xã hội lành mạnh. 6. Thảo luận giải pháp - Nhận diện vấn đề, gọi tên cảm xúc, thảo luận cùng ai đó đưa ra các ý tưởng về giải pháp. 7. Học một số kỹ thuật thư giãn - Bài tập hít thở sâu, Thở hình vuông, Bài tập yoga, thiền. 8. Tạo danh sách các hoạt động giúp cải thiện tâm trạng. 9. Bắt đầu thách thức với những suy nghĩ tiêu cực, không có lợi - Tư duy phản biện, Thay đổi suy nghĩ, Mở rộng vấn đề, khả năng của bản thân. 10. Tìm đến sự trợ giúp của chuyên gia - Nếu các vấn đề khó khăn tâm lý kéo dài, bạn không thể kiểm soát được tình trạng, bạn nên liên hệ và tìm kiếm sự trợ giúp từ những người có chuyên môn trong lĩnh vực chăm sóc sức khỏe tinh thần.
 
-Q30:  Những dấu hiệu nào cho thấy bạn đang gặp vấn đề về giấc ngủ?
-A30: Khi gặp vấn đề về giấc ngủ, bạn có thể nhận thấy cơ thể luôn thiếu năng lượng, cảm giác mệt mỏi thường trực, hoặc khó ngủ sâu, thức giấc giữa đêm. Những dấu hiệu khác bao gồm khó giữ tỉnh táo khi ngồi yên, đọc sách hay xem tivi, buồn ngủ hoặc mệt mỏi khi lái xe hoặc học tập. Bạn cũng có thể cảm thấy khó tập trung, ngoại hình kém sức sống và gặp khó khăn trong việc kiểm soát cảm xúc. Những biểu hiện này cảnh báo cơ thể và tinh thần đang bị ảnh hưởng, cần được nghỉ ngơi, chăm sóc và điều chỉnh thói quen sinh hoạt hợp lý.
-(trang 15 - ussh)
-Q31: Những biểu hiện thường gặp khi bị thiếu ngủ là gì?
-A31: Khi bị thiếu ngủ, bạn có thể xuất hiện nhiều biểu hiện rõ rệt như buồn ngủ vào ban ngày, mệt mỏi, khó tập trung, trí nhớ suy giảm và khó ra quyết định. Ngoài ra, tình trạng này còn khiến bạn dễ khó chịu, bực mình và làm tăng nguy cơ tai nạn hoặc chấn thương do phản xạ và khả năng phán đoán giảm. Những dấu hiệu này cho thấy cơ thể và não bộ đang không được nghỉ ngơi đầy đủ, cần được điều chỉnh kịp thời.
-(trang 15 - ussh)
-Q32: Mất ngủ gây ảnh hưởng như thế nào đến cuộc sống và học tập của sinh viên?
-A32: Mất ngủ khiến sinh viên giảm khả năng tập trung, ghi nhớ kém, và khó duy trì hiệu quả học tập. Về mặt cảm xúc, việc thiếu ngủ thường dẫn đến cáu gắt, mệt mỏi, dễ mất kiểm soát cảm xúc, từ đó ảnh hưởng đến các mối quan hệ xã hội. Nếu tình trạng này kéo dài, nó còn có thể làm tăng nguy cơ mắc các rối loạn tâm lý như stress, lo âu hoặc trầm cảm, tác động tiêu cực đến cả sức khỏe tinh thần lẫn thể chất.
-(trang 15 - ussh)
-Q33: Tự sát được hiểu là gì?
-A33: Tự sát là hành vi cố ý chấm dứt sự sống của chính mình, thường xuất phát từ những khủng hoảng tâm lý kéo dài, cảm giác tuyệt vọng, mất niềm tin hoặc cảm giác cuộc sống không còn ý nghĩa. Đây là một vấn đề nghiêm trọng về sức khỏe tâm thần, cần được nhận biết sớm và có sự hỗ trợ kịp thời từ gia đình, bạn bè và chuyên gia tâm lý.
-(trang 19 - ussh)
-Q34: Những yếu tố sinh học nào có thể làm tăng nguy cơ dẫn đến hành vi tự sát?
-A34: Về phương diện sinh học, sự suy giảm nồng độ serotonin trong não được xem là một trong những nguyên nhân quan trọng làm tăng khả năng tự sát, bởi serotonin có vai trò điều hòa cảm xúc và kiểm soát xung động. Ngoài ra, yếu tố di truyền cũng có ảnh hưởng đáng kể,  những người có cha mẹ hoặc người thân từng tự sát hay có hành vi tự sát thường có nguy cơ cao hơn so với người bình thường.
-(trang 17 - ussh)
-Q35: Những yếu tố tâm lý nào có thể dẫn đến hành vi tự sát ở sinh viên và thanh thiếu niên?
-A35:  Về mặt tâm lý, trầm cảm và cảm giác tuyệt vọng là hai yếu tố hàng đầu làm tăng nguy cơ tự sát ở sinh viên và thanh thiếu niên. Người rơi vào trạng thái này thường thay đổi cảm xúc thất thường, cảm thấy mình không thuộc về ai, trở thành gánh nặng cho người khác, hoặc mất dần niềm tin vào cuộc sống. Bên cạnh đó, những cảm xúc tiêu cực như lo lắng, xấu hổ, tức giận thường xuyên hay nỗi buồn sâu sắc kéo dài cũng là những dấu hiệu cảnh báo mạnh mẽ của hành vi tự sát tiềm ẩn.
-(trang 17 - ussh)
-Q36: Những tác động từ môi trường xã hội và các mối quan hệ có thể ảnh hưởng như thế nào đến nguy cơ tự sát?
-A36: Môi trường xã hội và các mối quan hệ đóng vai trò rất quan trọng trong sức khỏe tinh thần của mỗi người. Khi một cá nhân khó hòa nhập với xã hội, hoặc thiếu đi các mối quan hệ gắn bó, đồng cảm, họ dễ rơi vào trạng thái cô lập và tuyệt vọng. Việc mất đi sự kết nối đồng nghĩa với thiếu vắng hệ thống hỗ trợ tinh thần cần thiết, khiến họ dễ tổn thương hơn trước áp lực cuộc sống. Ngoài ra, những yếu tố như gia đình căng thẳng, tan vỡ, thiếu quan tâm, hay những thay đổi lớn trong xã hội cũng có thể làm tăng nguy cơ dẫn đến hành vi tự sát.
-(trang 18 - ussh)
+Q14: Đặc điểm tâm lý của học sinh tiểu học là gì?
+A14: Đối với nhóm học sinh tiểu học (6-11 tuổi) có những đặc điểm tâm lý đặc trưng sau: Vẫn còn ham chơi, khó khăn khi chấp hành kỷ luật trên lớp; Hiếu động, thích các trò chơi vận động, đóng vai; Hồn nhiên, ngây thơ, trong sáng; Dễ xúc động, khả năng kiềm chế cảm xúc thấp; Ham học hỏi, tò mò, hiếu kỳ, thích tìm hiểu; Sợ sệt, rụt rè trước giáo viên và tuyệt đối coi trọng ý kiến của thầy cô; Tính cách dần hình thành, chưa ổn định; Nhạy cảm với cách ứng xử của người lớn; Thiếu tự chủ, hay bắt chước; Dễ sang chấn tâm lý khi bị xâm khích, bạo lực.
 
-Q37: Làm thế nào để nhận diện hành vi tự gây tổn thương ở sinh viên và thanh thiếu niên?
-A37: Hành vi tự gây tổn thương (Self-harm) thường biểu hiện qua những hành động cố ý làm đau bản thân mà không nhằm mục đích tự sát. Một số dấu hiệu phổ biến bao gồm: cắt hoặc rọc da, tự đánh bản thân, cào xước đến chảy máu, tự cắn, hoặc dùng vật nhọn đâm vào da, móng tay. Ngoài ra, người có hành vi này có thể xăm mình, đốt da, nhổ tóc, chà xát mạnh vào da hay cố tình làm vết thương không lành lại. Việc nhận diện sớm những dấu hiệu này là vô cùng quan trọng để có thể can thiệp và hỗ trợ kịp thời, giúp họ tránh rơi vào tình trạng tổn thương nghiêm trọng hơn cả về thể chất lẫn tinh thần.
-(trang 19 - ussh)
+Q15: Đặc điểm tâm lý của học sinh THCS là gì?
+A15: Đối với nhóm học sinh THCS (11-15 tuổi) có những đặc điểm tâm lý đặc trưng sau: Muốn làm người lớn - Độc lập trong tư duy và hành động, Có quan điểm và lập luận riêng; Muốn được đối xử bình đẳng - Ghét sự so sánh, phê phán trực tiếp; Thường phóng đại năng lực của mình - Bướng bỉnh, Tỏ ra bất cần; Hành động bồng bột, hiếu thắng - Thích thể hiện cá tính; Có nhu cầu lớn trong giao tiếp - Không muốn bị can thiệp, thấy bị xúc phạm sẽ có chống đối lại, Mong được công nhận, muốn được tôn trọng; Có nhu cầu giới tính - Quan tâm hơn đến ngoại hình; Những vấn đề về cảm xúc - Dễ xúc động, vui buồn chuyển hoá nhanh, Tình cảm bồng bột, hăng say, Phản ứng mãnh liệt với đánh giá không công bằng.
 
-Q38: Làm sao để nhận biết một người đang có dấu hiệu hoặc ý định tự sát qua lời nói và cách thể hiện?
-A38: Người có ý định tự sát thường để lộ những dấu hiệu cảnh báo qua lời nói và hành vi. Họ có thể nói những câu bi quan, tuyệt vọng về cuộc sống, hoặc ngụ ý tạm biệt, bày tỏ tình cảm bất thường với người thân như một cách chia ly. Một số người còn thể hiện rõ ý định kết thúc mạng sống qua những câu nói như: “Chẳng còn gì quan trọng nữa”, “Thôi, mọi việc đều vô ích rồi”, “Giá mà tôi chưa từng được sinh ra”, hay “Nếu tôi chết đi thì...”. Ngoài ra, họ có thể nói về cảm giác trống rỗng, mất hứng thú với mọi thứ, và đôi khi buông những câu như “Sẽ không còn làm phiền ai nữa đâu...”.  Những lời nói tưởng chừng vô tình ấy thực chất là tín hiệu cầu cứu, cho thấy họ đang trải qua đau khổ sâu sắc và cần được lắng nghe, hỗ trợ kịp thời.
-(trang 20 - ussh)
-Q39: Làm thế nào để nhận biết một người có thể đang có ý định tự sát qua hành vi của họ?
-A39: Người có ý định tự sát thường thể hiện qua nhiều hành vi khác thường mà nếu quan sát kỹ, ta có thể nhận ra. Họ có thể bắt đầu sắp xếp lại đồ đạc cá nhân, dọn dẹp phòng ốc một cách ngăn nắp bất thường như để “chuẩn bị” cho việc ra đi. Một số người viết nhật ký, thư từ hoặc gửi lại đồ vật, lời nhắn cho người thân như một cách nói lời tạm biệt. Họ cũng có thể mua hoặc tích trữ những vật dụng phục vụ cho việc tự sát. Ngoài ra, sự thay đổi trong các thói quen hằng ngày như ăn uống thất thường, mất ngủ, hoặc ngủ quá nhiều, cùng với xu hướng tự tách mình khỏi xã hội, muốn ở một mình, là những tín hiệu đáng lo ngại. Đôi khi, họ còn có những hành động như thể đang “đền ơn” hay “chuẩn bị kết thúc” một điều gì đó trong cuộc sống, chẳng hạn như chăm sóc cha mẹ, làm việc tốt bất thường. Tất cả những biểu hiện này đều là dấu hiệu cảnh báo sớm cần được quan tâm và can thiệp kịp thời.
-(trang 21 - ussh)
-Q40: Liệu một người từng có ý định tự sát có thể hồi phục và sống tích cực trở lại không?
-A40: Nhiều người từng có ý định tự sát đã hồi phục nhờ nhận được sự hỗ trợ kịp thời và đúng cách. Khi được trị liệu tâm lý, sử dụng thuốc theo hướng dẫn (nếu cần), và đặc biệt là có sự thấu hiểu, yêu thương từ gia đình, bạn bè, họ dần lấy lại niềm tin, cảm giác được kết nối và ý nghĩa sống. Quá trình này không diễn ra trong ngày một ngày hai, nhưng với sự đồng hành kiên nhẫn và môi trường tích cực, người từng có ý định tự sát hoàn toàn có thể vượt qua khủng hoảng, sống mạnh mẽ và tìm lại hạnh phúc cho mình.
-(Trang 24 - các mục từ 1 đến 10 của các trang tiếp theo - ussh)
-Q41: Khi nào một người cần tìm đến sự giúp đỡ chuyên nghiệp khi có ý nghĩ tự sát?
-A41: Khi bạn hoặc ai đó bắt đầu có những suy nghĩ về cái chết, cảm thấy tuyệt vọng, bế tắc, mất ý nghĩa sống, hoặc có hành vi chuẩn bị cho việc tự sát (như viết thư tuyệt mệnh, sắp xếp đồ đạc, rút khỏi các mối quan hệ), đó là lúc cần tìm đến sự giúp đỡ chuyên nghiệp ngay lập tức. Hãy liên hệ với chuyên gia tâm lý, bác sĩ tâm thần, hoặc đường dây nóng hỗ trợ khẩn cấp. Việc chia sẻ sớm và nhận hỗ trợ đúng lúc có thể cứu sống một mạng người và mở ra cơ hội hồi phục, tìm lại hy vọng trong cuộc sống.
-(trang 19 - ussh)
-Q42: Làm thế nào để giúp đỡ một người đang có ý định tự sát?
-A42:  Hãy bắt đầu bằng việc lắng nghe họ với sự cảm thông và không phán xét. Đôi khi, điều họ cần nhất là cảm giác được thấu hiểu. Bạn nên khuyến khích họ nói ra cảm xúc, chia sẻ với người thân, bạn bè tin cậy hoặc chuyên gia tâm lý. Tuyệt đối không xem nhẹ hay chế giễu những lời họ nói về cái chết. Nếu nhận thấy nguy cơ tự sát cấp bách, hãy báo ngay cho gia đình, giáo viên, hoặc cơ quan y tế gần nhất để được can thiệp kịp thời. Việc bạn quan tâm và hành động đúng lúc có thể cứu họ khỏi một quyết định mãi mãi.
-(Trang 24 - các mục từ 1 đến 10 của các trang tiếp theo - ussh)
+Q16: Đặc điểm tâm lý của học sinh THPT là gì?
+A16: Đối với nhóm học sinh THPT (16-18 tuổi) có những đặc điểm tâm lý đặc trưng sau: Cảm nhận rõ nét tính người lớn của chính bản thân; Ý thức được trách nhiệm bản thân với những người xung quanh; Hình thành nếp sống, thói quen mang dấu ấn gia đình; Cảm xúc dần ổn định, cân bằng; Trong giao tiếp ưa thích khái quát vấn đề, có xu hướng cường điệu khi đánh giá; Bạn bè luôn đóng vai trò quan trọng, không thể thiếu trong cuộc sống; Có nhu cầu cao tham gia các hoạt động tập thể; Quan hệ với gia đình từ chỗ dựa dẫm, phụ thuộc sang bình đẳng, tự lập; Hình thành kế hoạch cuộc đời qua việc tìm hiểu về nghề nghiệp, xây dựng khát vọng cuộc sống.
 
-Q43: Có phải người nói về tự sát thật ra không muốn chết? 
-A43: Không hoàn toàn như vậy. Phần lớn những người nói về tự sát không thực sự muốn kết thúc cuộc sống, mà họ muốn chấm dứt nỗi đau đang phải chịu đựng. Họ thường gửi đi những tín hiệu gián tiếp như: “Giá mà mình biến mất”, “Ước gì có thể ngủ mãi”, hay “Mọi người sẽ tốt hơn nếu không có mình”. Những lời này không nên xem nhẹ, vì đó là lời kêu cứu thể hiện họ đang tuyệt vọng và cần được quan tâm, lắng nghe và hỗ trợ kịp thời. (trang 22 - ussh)
+Q17: Các bước thực hiện quy trình tư vấn tâm lý cho học sinh là gì?
+A17: Khi học sinh có nhu cầu, hoặc đang cần được tư vấn tâm lý để vượt qua những vấn đề các em đang gặp phải, giáo viên làm nhiệm vụ tư vấn tâm lý cần thực hiện các bước sau: Bước 1: Xây dựng quan hệ và sự tin tưởng giữa giáo viên và học sinh - Đây là giai đoạn giáo viên xây dựng mối quan hệ mật thiết và lòng tin tưởng của học sinh đối với mình, qua đó các em dễ dàng bộc lộ, chia sẻ những vấn đề của bản thân và mong muốn sự trợ giúp của giáo viên. Bước 2: Tổng hợp thông tin, làm rõ vấn đề - Ở bước này, giáo viên và học sinh cùng nhau làm rõ vấn đề mà các em đang gặp phải. Bước 3: Lựa chọn giải pháp và xây dựng kế hoạch thực hiện - Sau khi làm rõ vấn đề của học sinh, giáo viên cùng với học sinh tìm kiếm các giải pháp để vượt qua những khó khăn tâm lý mà học sinh mắc phải. Bước 4: Triển khai và thực hiện giải quyết vấn đề - Đây là giai đoạn học sinh phải hành động để thay đổi thực trạng. Bước 5: Lượng giá và kết thúc - Trong quá trình tư vấn, giáo viên cần lượng giá những kết quả đạt được sau mỗi giai đoạn. Bước 6: Theo dõi sau khi kết thúc - Sau khi quá trình tư vấn kết thúc, giáo viên tư vấn vẫn cần theo dõi, hỗ trợ học sinh khi cần thiết để đảm bảo tính duy trì kết quả đạt được.
 
+Q18: Kỹ năng lắng nghe trong tư vấn tâm lý là gì?
+A18: Kỹ năng lắng nghe (KNLN) cho phép chuyển thông điệp đến học sinh là chúng ta đang lắng nghe và quan tâm đến câu chuyện (khó khăn/vấn đề) của các em; lắng nghe những sự kiện, xúc cảm, nhận thức, niềm tin, và quan điểm của các em. KNLN là nói tới lắng nghe tích cực - lắng nghe tích cực là lắng nghe không chỉ là bằng giác quan mà bằng cả trí tuệ và cảm xúc của người nghe nhằm đáp ứng được bằng lời hay những thông tin không lời đến người nghe. Giáo viên cần: Nói tối thiểu; Không ngắt lời học sinh; Không vội vàng đưa ra lời khuyên; Nghe chính xác nội dung những điều mà học sinh trình bày; Nghe chính xác những cảm giác về điều học sinh nói; Có khả năng đưa ra những tín hiệu cho học sinh rằng bạn đang lắng nghe như gật đầu, ừ, ừm; Hỏi những câu hỏi rõ ràng; Không hỏi những câu không liên quan đến vấn đề của người nói.
 
+Q19: Kỹ năng đặt câu hỏi trong tư vấn tâm lý như thế nào?
+A19: Nếu những cử chỉ phi ngôn ngữ trong KNLN gửi đến học sinh một thông điệp về một môi trường an toàn thì kỹ năng đặt câu hỏi sẽ chuyển đến học sinh một thông điệp khác: Giáo viên đang lắng nghe học sinh. Những câu hỏi thường đặt trong tư vấn tâm lý là những câu mời học sinh thể hiện bản thân, bao gồm: Những câu gợi mở, những câu khuyến khích và những câu hỏi mở/những câu hỏi đóng. Những câu có thể sử dụng để gợi mở là: "Em nói em có chuyện muốn chia sẻ với cô, em có thể nói cho cô biết cụ thể hơn được không?"; "Em muốn được chia sẻ về mối quan hệ tình cảm của mình, mối quan hệ cụ thể mà em đang muốn nói đến là gì?"; "Sáng nay em có vẻ buồn, em có muốn nói về điều đó không?". Những lưu ý khi sử dụng câu hỏi: Tránh đặt câu hỏi mở cho những học sinh dễ bị tổn thương khi mối quan hệ tư vấn tâm lý chưa hoàn toàn bền vững; Cần lựa chọn thông tin để hỏi, không tản mát; Hạn chế đặt câu hỏi "Tại sao?"; Không đặt câu hỏi dồn dập theo kiểu chất vấn; Không đặt câu hỏi lòng vòng, khó hiểu; Không đặt câu hỏi theo kiểu chụp mũ, mớm cung.
 
+Q20: Kỹ năng phản hồi trong tư vấn tâm lý có những hình thức nào?
+A20: Kỹ năng phản hồi (KNPH) giúp thúc đẩy quá trình khai thác những sự kiện, cảm xúc, suy nghĩ của học sinh. Có 3 hình thức phản hồi: phản hồi nội dung, phản hồi cảm xúc và phản hồi ý nghĩa. Phản hồi nội dung - chính là việc tóm tắt câu chuyện của học sinh, là lắng nghe kỹ câu chuyện của học sinh trước khi tóm tắt; dùng ngôn ngữ của giáo viên để tóm gọn lại những gì học sinh đã nói với thái độ không đánh giá. Phản hồi cảm xúc - Đây là một trong những kỹ năng khó trong quá trình tư vấn tâm lý học đường. Giáo viên phải sử dụng ngôn ngữ của mình để nói về những cảm xúc mà học sinh đề cập đến trong câu chuyện của các em một cách trực tiếp hay gián tiếp. Phản hồi ý nghĩa - Được tiến hành sau khi phản hồi nội dung và phản hồi cảm xúc. Mục tiêu của phản hồi ý nghĩa là hiểu được ý nghĩa của những sự kiện, những vấn đề đối với từng học sinh cụ thể; hiểu được quan điểm, cách nhìn nhận của học sinh về bản thân, về người khác, và về cuộc sống.
 
+Q21: Quy tắc đạo đức trong hỗ trợ và tư vấn tâm lý là gì?
+A21: Khi giáo viên hỗ trợ, tư vấn tâm lý cho học sinh khi các em gặp khủng hoảng cần phải hành động dựa trên các nguyên tắc sau: An toàn - Tránh để học sinh bị tổn thương nặng hơn vì hành động của mình; Nhân phẩm - Đối xử tôn trọng với học sinh, phù hợp với đặc điểm văn hóa, xã hội và tôn giáo của các em; Quyền lợi - Đảm bảo mọi học sinh đều được giúp đỡ một cách công bằng, không phân biệt; Giúp học sinh đảm bảo các quyền lợi của mình và tiếp cận được các nguồn lực hỗ trợ có uy tín và an toàn; Giáo viên chỉ hành động vì lợi ích tốt nhất của học sinh. Những việc nên làm: Trung thực và đáng tin cậy; Tôn trọng quyền quyết định của học sinh; Nhận thức và không để thành kiến của mình xen vào câu chuyện; Tôn trọng quyền riêng tư và giữ bí mật chuyện cá nhân của học sinh. Những việc không nên làm: Không khai thác mối quan hệ ở vai trò của một người giúp đỡ; Không đòi hỏi bất kỳ khoản tiền hay ân huệ nào từ học sinh đang gặp khủng hoảng; Không đưa ra những lời hứa không thực hiện được; Không ép buộc, làm phiền hoặc thúc ép học sinh phải nói ra vấn đề của mình; Không phóng đại khả năng của mình; Không chia sẻ câu chuyện của học sinh cho người khác; Không đánh giá học sinh qua hành động hay cảm xúc của các em.
 
+Q22: Nhận diện vấn đề lo âu ở học sinh như thế nào?
+A22: Học sinh có vấn đề về lo âu có thể có các biểu hiện sau đây: Hay khóc; Sợ đi học; Sợ một số tình huống (hoàn cảnh), sợ súc vật, sợ nơi nào đó không kể trường học; Sợ mình sẽ nghĩ hoặc làm một điều gì xấu; Nghĩ rằng mình phải hoàn hảo; Nghĩ rằng không ai yêu mến mình; Cảm thấy mình vô dụng hoặc kém cỏi; Bồn chồn, căng thẳng; Quá sợ hãi hoặc quá lo âu; Cảm thấy rất có lỗi; Thẹn thùng, dễ bị ngượng ngùng; Nghĩ đến việc tự tử; Không có nhiều sinh lực. Nếu có từ 6 dấu hiệu trở lên xuất hiện ở mức thường xuyên gây khó chịu và ảnh hưởng đến các hoạt động, mối quan hệ của cá nhân học sinh thì cần được giới thiệu để đánh giá sâu hơn.
 
+Q23: Nhận diện vấn đề trầm cảm ở học sinh như thế nào?
+A23: Học sinh có vấn đề về trầm cảm có thể có các biểu hiện sau đây: Thích ở một mình hơn có người bên cạnh; Từ chối nói chuyện với mọi người; Ít cởi mở, giữ kín mọi chuyện trong lòng; Quá rụt rè, nhút nhát; Không có nhiều sinh lực; Buồn rầu hoặc trầm cảm; Không hoà mình với mọi người. Nếu có từ 4 dấu hiệu trở lên xuất hiện ở mức thường xuyên gây khó chịu và ảnh hưởng đến các hoạt động, mối quan hệ của cá nhân học sinh thì cần được giới thiệu để đánh giá sâu hơn.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Q24: Sơ cứu tâm lý PFA-S là gì và sử dụng khi nào?
+A24: Sơ cứu tâm lý cho học sinh (PFA-S) là một cách tiếp cận nhân đạo, hỗ trợ để giúp đỡ học sinh, giáo viên và nhân viên nhà trường đang gặp phải những khó khăn tâm lý sau một sự kiện căng thẳng hoặc khủng hoảng. PFA-S giúp giảm bớt sự đau khổ ban đầu do sự kiện căng thẳng gây ra, thúc đẩy các chức năng thích ứng và khả năng phục hồi, và giúp đỡ những người cần hỗ trợ tiếp theo. PFA-S nên được sử dụng khi học sinh gặp phải các sự kiện căng thẳng hoặc khủng hoảng như: Thiên tai, tai nạn, bạo lực học đường, mất mát người thân, chấn thương tâm lý, hoặc các sự kiện gây sốc khác. Các hoạt động chính của PFA-S: Quan sát - Quan sát tình huống và xác định những người cần hỗ trợ; Lắng nghe - Lắng nghe những gì học sinh cần và muốn chia sẻ; Kết nối - Kết nối học sinh với các nguồn hỗ trợ và dịch vụ cần thiết.
 

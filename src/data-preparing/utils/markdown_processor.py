@@ -261,7 +261,22 @@ class MarkdownProcessor:
                 if not content or len(content) < 20:  # Skip very short sections
                     continue
                 
-                # Clean the content now (after header extraction)
+                # Remove section metadata markers (e.g., "**Section:** ...") from content
+                # These are metadata, not part of the actual content
+                # Handle various formats: "**Section:**", "**Section: **", "**Section :**", etc.
+                content = re.sub(r'\*\*Section\s*:\s*\*\*\s*[^\n]*\n?', '', content, flags=re.IGNORECASE)
+                # Also remove any standalone section path that might be at the start
+                # This handles cases where section path might be duplicated in content
+                section_path_pattern = re.escape(section_info["section_path"])
+                if section_path_pattern:
+                    # Remove section path if it appears at the start of content
+                    content = re.sub(r'^' + section_path_pattern + r'\s+', '', content, flags=re.IGNORECASE)
+                content = content.strip()
+                
+                if not content or len(content) < 20:
+                    continue
+                
+                # Clean the content now (after header extraction and section marker removal)
                 content = self.clean_text(content)
                 if not content or len(content) < 20:
                     continue
