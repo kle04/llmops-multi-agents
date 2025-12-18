@@ -24,7 +24,8 @@ dependencies = [
     "pandas>=2.0.0",
     "matplotlib>=3.7.0",
     "httpx>=0.24.0",
-    "langchain-google-genai>=1.0.0"
+    "langchain-google-genai>=1.0.0",
+    "ranx>=0.3.0"
 ]
 
 [tool.uv.workspace]
