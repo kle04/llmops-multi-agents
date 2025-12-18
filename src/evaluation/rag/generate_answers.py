@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 def call_orchestrator_agent(
     question: str,
-    base_url: str = "https://orchestrator.khanklee.id.vn/",
+    base_url: str = "http://localhost:7010",
     timeout: float = 60.0
 ) -> Dict:
     """
@@ -45,10 +45,14 @@ def call_orchestrator_agent(
             response.raise_for_status()
             result = response.json()
             
+            sources = result.get("sources")
+            if sources is None:
+                sources = []
+            
             return {
                 "answer": result.get("response", ""),
                 "selected_agent": result.get("selected_agent"),
-                "sources": result.get("sources", []),
+                "sources": sources,
                 "error": result.get("error"),
                 "status": "success" if not result.get("error") else "error"
             }
@@ -171,10 +175,11 @@ def generate_answers_for_dataset(
                 logger.info("   Selected agent: %s", result.get("selected_agent", "unknown"))
                 item["answer"] = answer
                 item["answer_status"] = status
+                sources = result.get("sources") or []
                 item["answer_metadata"] = {
                     "selected_agent": result.get("selected_agent"),
-                    "sources": result.get("sources", []),
-                    "num_sources": len(result.get("sources", []))
+                    "sources": sources,
+                    "num_sources": len(sources)
                 }
                 updated_count += 1
             
