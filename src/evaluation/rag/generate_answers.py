@@ -1,39 +1,117 @@
 #!/usr/bin/env python3
 """
-Generate answers for RAGAs evaluation dataset using RAG Agent.
-This script calls the RAG Agent for each question to generate answers.
+Generate answers for RAGAs evaluation dataset using Orchestrator Agent endpoint.
+This script calls the Orchestrator Agent API for each question to generate answers.
 """
 
 import json
 import sys
 import logging
+import httpx
 from pathlib import Path
-from typing import List, Dict
-
-# Add parent directories to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "agents" / "rag-agent"))
-from agent import RAGAgent
+from typing import List, Dict, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+def call_orchestrator_agent(
+    question: str,
+    base_url: str = "https://orchestrator.khanklee.id.vn/",
+    timeout: float = 60.0
+) -> Dict:
+    """
+    Call Orchestrator Agent endpoint to get answer for a question.
+    
+    Args:
+        question: The question to ask
+        base_url: Base URL of Orchestrator Agent
+        timeout: Request timeout in seconds
+    
+    Returns:
+        Dictionary with answer and metadata
+    """
+    url = f"{base_url}/chat"
+    
+    payload = {
+        "message": question,
+        "user_id": "ragas_evaluation",
+        "session_id": "evaluation_session"
+    }
+    
+    try:
+        with httpx.Client(timeout=timeout) as client:
+            response = client.post(url, json=payload)
+            response.raise_for_status()
+            result = response.json()
+            
+            return {
+                "answer": result.get("response", ""),
+                "selected_agent": result.get("selected_agent"),
+                "sources": result.get("sources", []),
+                "error": result.get("error"),
+                "status": "success" if not result.get("error") else "error"
+            }
+    except httpx.TimeoutException:
+        logger.error("Request timeout")
+        return {
+            "answer": "",
+            "selected_agent": None,
+            "sources": [],
+            "error": "Request timeout",
+            "status": "timeout"
+        }
+    except httpx.HTTPStatusError as e:
+        logger.error("HTTP error: %s - %s", e.response.status_code, e.response.text)
+        return {
+            "answer": "",
+            "selected_agent": None,
+            "sources": [],
+            "error": f"HTTP {e.response.status_code}: {e.response.text}",
+            "status": "error"
+        }
+    except Exception as e:
+        logger.error("Error calling Orchestrator Agent: %s", e)
+        return {
+            "answer": "",
+            "selected_agent": None,
+            "sources": [],
+            "error": str(e),
+            "status": "error"
+        }
+
 def generate_answers_for_dataset(
     dataset_file: str,
     output_file: str,
-    use_existing_answers: bool = False
+    orchestrator_url: str = "http://localhost:7010",
+    use_existing_answers: bool = False,
+    timeout: float = 60.0
 ) -> None:
     """
-    Generate answers for all questions in the dataset using RAG Agent.
+    Generate answers for all questions in the dataset using Orchestrator Agent endpoint.
     
     Args:
         dataset_file: Path to input dataset JSON file
         output_file: Path to output dataset JSON file with answers
+        orchestrator_url: Base URL of Orchestrator Agent
         use_existing_answers: If True, skip questions that already have answers
+        timeout: Request timeout in seconds
     """
     logger.info("🚀 Starting answer generation...")
     
-    # 1. Load dataset
+    # 1. Check Orchestrator Agent health
+    logger.info("🏥 Checking Orchestrator Agent health at %s...", orchestrator_url)
+    try:
+        with httpx.Client(timeout=10.0) as client:
+            health_response = client.get(f"{orchestrator_url}/health")
+            health_response.raise_for_status()
+            health_data = health_response.json()
+            logger.info("✅ Orchestrator Agent is healthy: %s", health_data.get("status", "unknown"))
+    except Exception as e:
+        logger.warning("⚠️  Could not verify Orchestrator Agent health: %s", e)
+        logger.warning("   Continuing anyway...")
+    
+    # 2. Load dataset
     logger.info("📖 Loading dataset from %s...", dataset_file)
     dataset_path = Path(dataset_file)
     if not dataset_path.exists():
@@ -45,17 +123,10 @@ def generate_answers_for_dataset(
     
     logger.info("✅ Loaded %d questions", len(dataset))
     
-    # 2. Initialize RAG Agent
-    logger.info("🤖 Initializing RAG Agent...")
-    try:
-        rag_agent = RAGAgent()
-        logger.info("✅ RAG Agent initialized successfully")
-    except Exception as e:
-        logger.error("❌ Failed to initialize RAG Agent: %s", e)
-        return
-    
     # 3. Generate answers for each question
     logger.info("💬 Generating answers for %d questions...", len(dataset))
+    logger.info("   Orchestrator URL: %s", orchestrator_url)
+    logger.info("   Timeout: %.1f seconds", timeout)
     
     updated_count = 0
     skipped_count = 0
@@ -76,26 +147,34 @@ def generate_answers_for_dataset(
                    i, len(dataset), question_id, question[:60])
         
         try:
-            # Call RAG Agent
-            result = rag_agent.invoke(query=question, user_context={})
+            # Call Orchestrator Agent endpoint
+            result = call_orchestrator_agent(
+                question=question,
+                base_url=orchestrator_url,
+                timeout=timeout
+            )
             
             # Extract answer
             answer = result.get("answer", "")
             status = result.get("status", "unknown")
             
-            if status == "error" or not answer:
+            if status in ["error", "timeout"] or not answer:
                 logger.warning("   ⚠️  Failed to generate answer (status: %s)", status)
+                if result.get("error"):
+                    logger.warning("   Error: %s", result.get("error"))
                 error_count += 1
                 item["answer"] = ""  # Set empty answer
                 item["answer_status"] = status
+                item["answer_error"] = result.get("error", "")
             else:
                 logger.info("   ✅ Generated answer (%d chars)", len(answer))
+                logger.info("   Selected agent: %s", result.get("selected_agent", "unknown"))
                 item["answer"] = answer
                 item["answer_status"] = status
                 item["answer_metadata"] = {
-                    "relevant_documents_count": result.get("relevant_documents_count", 0),
-                    "total_retrieved_count": result.get("total_retrieved_count", 0),
-                    "processing_time": result.get("processing_time", 0.0)
+                    "selected_agent": result.get("selected_agent"),
+                    "sources": result.get("sources", []),
+                    "num_sources": len(result.get("sources", []))
                 }
                 updated_count += 1
             
@@ -128,18 +207,23 @@ def generate_answers_for_dataset(
         logger.info("   Question: %s...", sample['question'][:80])
         logger.info("   Answer length: %d chars", len(sample.get('answer', '')))
         logger.info("   Answer status: %s", sample.get('answer_status', 'N/A'))
+        if sample.get('answer_metadata'):
+            logger.info("   Selected agent: %s", sample['answer_metadata'].get('selected_agent', 'N/A'))
 
 def main():
     """Main function."""
     import argparse
     
     parser = argparse.ArgumentParser(
-        description="Generate answers for RAGAs evaluation dataset using RAG Agent",
+        description="Generate answers for RAGAs evaluation dataset using Orchestrator Agent endpoint",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   # Generate answers for all questions
   python generate_answers.py --dataset ragas_evaluation_dataset.json --output ragas_evaluation_dataset_with_answers.json
+  
+  # Use custom Orchestrator Agent URL
+  python generate_answers.py --dataset ragas_evaluation_dataset.json --output ragas_evaluation_dataset_with_answers.json --url http://localhost:7010
   
   # Skip questions that already have answers
   python generate_answers.py --dataset ragas_evaluation_dataset.json --output ragas_evaluation_dataset_with_answers.json --use-existing
@@ -161,6 +245,20 @@ Examples:
     )
     
     parser.add_argument(
+        "--url",
+        type=str,
+        default="http://localhost:7010",
+        help="Orchestrator Agent base URL (default: http://localhost:7010)"
+    )
+    
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=60.0,
+        help="Request timeout in seconds (default: 60.0)"
+    )
+    
+    parser.add_argument(
         "--use-existing",
         action="store_true",
         help="Skip questions that already have answers"
@@ -176,7 +274,9 @@ Examples:
     generate_answers_for_dataset(
         dataset_file=str(dataset_file),
         output_file=str(output_file),
-        use_existing_answers=args.use_existing
+        orchestrator_url=args.url,
+        use_existing_answers=args.use_existing,
+        timeout=args.timeout
     )
 
 if __name__ == "__main__":
