@@ -537,7 +537,7 @@ def calculate_statistics(result: Dict) -> Dict:
 
 def visualize_metrics(result: Dict, output_dir: str) -> None:
     """
-    Create visualizations for RAGAs metrics.
+    Create thesis-quality visualizations for RAGAs metrics.
     
     Args:
         result: Evaluation results from RAGAs
@@ -546,6 +546,16 @@ def visualize_metrics(result: Dict, output_dir: str) -> None:
     logger.info("📈 Creating visualizations...")
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
+    
+    # Set professional plot style
+    plt.rcParams.update({
+        'font.size': 12,
+        'axes.titlesize': 14,
+        'axes.labelsize': 12,
+        'xtick.labelsize': 10,
+        'ytick.labelsize': 10,
+        'figure.dpi': 300
+    })
     
     # Convert to DataFrame
     if hasattr(result, 'to_pandas'):
@@ -556,9 +566,9 @@ def visualize_metrics(result: Dict, output_dir: str) -> None:
     metrics = ["faithfulness", "answer_relevancy", "context_precision", "context_recall"]
     metric_labels = {
         "faithfulness": "Faithfulness",
-        "answer_relevancy": "Answer Relevancy",
-        "context_precision": "Context Precision",
-        "context_recall": "Context Recall",
+        "answer_relevancy": "Ans. Relevancy",
+        "context_precision": "Ctx. Precision",
+        "context_recall": "Ctx. Recall",
     }
     
     # Filter available metrics
@@ -568,103 +578,97 @@ def visualize_metrics(result: Dict, output_dir: str) -> None:
         logger.warning("⚠️  No metrics found in results for visualization")
         return
     
-    # 1. Box plot for all metrics
-    fig, ax = plt.subplots(figsize=(12, 6))
+    # Common thesis colors (muted/professional)
+    colors = ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2']
+    
+    # 1. Box plot for all metrics (Distribution)
+    # ------------------------------------------
+    fig, ax = plt.subplots(figsize=(10, 6))
     data_to_plot = [df[m].dropna() for m in available_metrics]
     labels = [metric_labels.get(m, m) for m in available_metrics]
     
-    bp = ax.boxplot(data_to_plot, labels=labels, patch_artist=True)
+    # Create boxplot with modern styling
+    bp = ax.boxplot(data_to_plot, tick_labels=labels, patch_artist=True,
+                   medianprops=dict(color="black", linewidth=1.5),
+                   boxprops=dict(linewidth=1.2),
+                   whiskerprops=dict(linewidth=1.2),
+                   capprops=dict(linewidth=1.2))
     
     # Color the boxes
-    colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4']
     for patch, color in zip(bp['boxes'], colors[:len(bp['boxes'])]):
         patch.set_facecolor(color)
-        patch.set_alpha(0.7)
+        patch.set_alpha(0.6)
     
-    ax.set_ylabel('Score', fontsize=12)
-    ax.set_title('RAGAs Metrics Distribution', fontsize=14, fontweight='bold')
-    ax.grid(True, alpha=0.3, axis='y')
-    ax.set_ylim(0, 1)
+    ax.set_ylabel('Score')
+    ax.set_title('Metric Distribution (Box Plot)', fontweight='bold')
+    ax.grid(True, alpha=0.3, axis='y', linestyle='--')
+    ax.set_ylim(-0.05, 1.05)
     
-    plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
-    plt.savefig(output_path / 'ragas_metrics_boxplot.png', dpi=300, bbox_inches='tight')
+    plt.savefig(output_path / 'ragas_metrics_boxplot.png', bbox_inches='tight')
     logger.info("✅ Saved boxplot: ragas_metrics_boxplot.png")
     plt.close()
     
-    # 2. Bar chart with mean scores
-    fig, ax = plt.subplots(figsize=(10, 6))
+    # 2. Bar chart with Mean & Std Dev
+    # --------------------------------
+    fig, ax = plt.subplots(figsize=(8, 6))
     means = [df[m].mean() for m in available_metrics]
     stds = [df[m].std() for m in available_metrics]
     labels = [metric_labels.get(m, m) for m in available_metrics]
     
-    bars = ax.bar(labels, means, yerr=stds, capsize=5, color=colors[:len(available_metrics)], alpha=0.7)
+    # Bars with error bars (capsize adds the little horizontal lines)
+    bars = ax.bar(labels, means, yerr=stds, capsize=5, 
+                  color=colors[:len(available_metrics)], 
+                  edgecolor='black', alpha=0.8,
+                  error_kw=dict(lw=1.5, capthick=1.5))
     
-    # Add value labels on bars
+    # Add value labels
     for bar, mean in zip(bars, means):
         height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2., height,
+        # Place text slightly above max(height, mean+error) to avoid overlap usually, 
+        # but simple height + offset is often cleaner if error bars aren't huge.
+        ax.text(bar.get_x() + bar.get_width()/2., height + 0.02,
                 f'{mean:.3f}',
-                ha='center', va='bottom', fontsize=10, fontweight='bold')
+                ha='center', va='bottom', fontsize=11, fontweight='bold')
     
-    ax.set_ylabel('Mean Score', fontsize=12)
-    ax.set_title('RAGAs Metrics - Mean Scores with Standard Deviation', fontsize=14, fontweight='bold')
-    ax.set_ylim(0, 1)
-    ax.grid(True, alpha=0.3, axis='y')
+    ax.set_ylabel('Mean Score')
+    ax.set_title('Average Performance', fontweight='bold')
+    ax.set_ylim(0, 1.1)
+    ax.grid(True, alpha=0.3, axis='y', linestyle='--')
     
-    plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
-    plt.savefig(output_path / 'ragas_metrics_barchart.png', dpi=300, bbox_inches='tight')
+    plt.savefig(output_path / 'ragas_metrics_barchart.png', bbox_inches='tight')
     logger.info("✅ Saved bar chart: ragas_metrics_barchart.png")
     plt.close()
     
-    # 3. Histogram for each metric
-    n_metrics = len(available_metrics)
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    axes = axes.flatten()
-    
-    for idx, metric in enumerate(available_metrics):
-        ax = axes[idx]
-        values = df[metric].dropna()
-        
-        ax.hist(values, bins=20, color=colors[idx], alpha=0.7, edgecolor='black')
-        ax.axvline(values.mean(), color='red', linestyle='--', linewidth=2, label=f'Mean: {values.mean():.3f}')
-        ax.axvline(values.median(), color='blue', linestyle='--', linewidth=2, label=f'Median: {values.median():.3f}')
-        
-        ax.set_xlabel('Score', fontsize=10)
-        ax.set_ylabel('Frequency', fontsize=10)
-        ax.set_title(metric_labels.get(metric, metric), fontsize=12, fontweight='bold')
-        ax.set_xlim(0, 1)
-        ax.grid(True, alpha=0.3)
-        ax.legend(fontsize=9)
-    
-    plt.suptitle('RAGAs Metrics - Score Distributions', fontsize=16, fontweight='bold', y=0.995)
-    plt.tight_layout()
-    plt.savefig(output_path / 'ragas_metrics_histograms.png', dpi=300, bbox_inches='tight')
-    logger.info("✅ Saved histograms: ragas_metrics_histograms.png")
-    plt.close()
-    
-    # 4. Correlation heatmap (if multiple metrics)
+    # 3. Correlation heatmap (if > 1 metric)
+    # --------------------------------------
     if len(available_metrics) > 1:
-        fig, ax = plt.subplots(figsize=(8, 6))
+        fig, ax = plt.subplots(figsize=(7, 6))
         correlation_matrix = df[available_metrics].corr()
         
-        im = ax.imshow(correlation_matrix, cmap='coolwarm', aspect='auto', vmin=-1, vmax=1)
+        # 'coolwarm' is good standard for correlation (-1 to 1)
+        im = ax.imshow(correlation_matrix, cmap='coolwarm', vmin=-1, vmax=1)
+        
+        # Ticks
         ax.set_xticks(range(len(available_metrics)))
         ax.set_yticks(range(len(available_metrics)))
         ax.set_xticklabels([metric_labels.get(m, m) for m in available_metrics], rotation=45, ha='right')
         ax.set_yticklabels([metric_labels.get(m, m) for m in available_metrics])
         
-        # Add text annotations
+        # Annotations
         for i in range(len(available_metrics)):
             for j in range(len(available_metrics)):
-                text = ax.text(j, i, f'{correlation_matrix.iloc[i, j]:.2f}',
-                             ha="center", va="center", color="black", fontweight='bold')
+                val = correlation_matrix.iloc[i, j]
+                # White text for dark colors, black for light
+                text_color = "white" if abs(val) > 0.5 else "black"
+                ax.text(j, i, f'{val:.2f}',
+                       ha="center", va="center", color=text_color, fontweight='bold')
         
-        ax.set_title('RAGAs Metrics - Correlation Matrix', fontsize=14, fontweight='bold')
+        ax.set_title('Metric Correlation Matrix', fontweight='bold')
         plt.colorbar(im, ax=ax, label='Correlation')
         plt.tight_layout()
-        plt.savefig(output_path / 'ragas_metrics_correlation.png', dpi=300, bbox_inches='tight')
+        plt.savefig(output_path / 'ragas_metrics_correlation.png', bbox_inches='tight')
         logger.info("✅ Saved correlation matrix: ragas_metrics_correlation.png")
         plt.close()
 

@@ -1,0 +1,31 @@
+{
+  "parameters": {
+    "k": 5,
+    "dataset_path": "ranx_evaluation_dataset.json"
+  },
+  "overall_metrics": {
+    "hit_rate@5": 0.975,
+    "precision@5": 0.7,
+    "ndcg@5": 0.9045238583404245
+  },
+  "statistics": {
+    "hit_rate@5": {
+      "mean": 0.975,
+      "std": 0.15811388300841897,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "precision@5": {
+      "mean": 0.7,
+      "std": 0.22188007849009164,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "ndcg@5": {
+      "mean": 0.9045238583404247,
+      "std": 0.19288565561111876,
+      "min": 0.0,
+      "max": 1.0
+    }
+  }
+}
