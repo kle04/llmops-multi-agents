@@ -20,7 +20,9 @@ dependencies = [
     "pypdf2>=3.0.1",
     "scikit-learn>=1.8.0",
     "qdrant-client==1.15.1",
-    "sentence-transformers>=5.2.0",
+    "sentence-transformers>=2.2.0",
+    "torch>=2.0.0",
+    "transformers>=4.57.1",
     "python-multipart",
 ]
 
