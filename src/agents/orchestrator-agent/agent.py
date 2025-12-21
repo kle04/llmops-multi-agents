@@ -174,10 +174,15 @@ class OrchestratorAgent:
                 else:
                     current_message.content = f"{system_instruction}\n\n{message}"
             
+            # Log LLM Input
+            logger.info(f"🤔 Sending to LLM: {len(formatted_messages)} messages")
+            # logger.debug(f"    Prompt content: {formatted_messages[-1].content[:500]}...") # internal logs
+
             result = await self.llm.ainvoke(formatted_messages)
             content = getattr(result, "content", str(result))
             
-            logger.debug(f"LLM response content: {content[:200]}...")
+            # Log LLM Output
+            logger.info(f"💡 LLM Response: {content[:100]}...") # Log start of response
             
             return await self._parse_and_route_decision(content, message)
             

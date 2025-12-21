@@ -75,8 +75,30 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Debug Logging Middleware
+from fastapi import Request
+import time
+import logging
 
-@app.get("/health")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    
+    # Log Request
+    body = await request.body()
+    logger.info(f"➡️  Incoming {request.method} {request.url}")
+    # logger.debug(f"    Body: {body.decode('utf-8')[:500]}...") # Uncomment for body logging
+
+    response = await call_next(request)
+    
+    # Log Response
+    process_time = time.time() - start_time
+    logger.info(f"⬅️  Response {response.status_code} (took {process_time:.4f}s)")
+    
+    return response
 async def health():
     # include redis health if available
     try:    
