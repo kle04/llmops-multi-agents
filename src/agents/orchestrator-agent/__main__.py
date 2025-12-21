@@ -182,6 +182,28 @@ async def get_user_sessions(user_id: str):
     sessions = await postgres_store.list_sessions(user_id)
     return {"sessions": sessions}
 
+@app.delete("/history/{user_id}/{session_id}")
+async def delete_chat_session(user_id: str, session_id: str):
+    """Delete all history for a specific session (Redis + Postgres)."""
+    
+    # 1. Clear from Redis (Short-term)
+    if chat_store and redis_manager.is_ready():
+        await chat_store.clear(user_id, session_id)
+    
+    if langchain_store and redis_manager.is_ready():
+        await langchain_store.clear(user_id, session_id)
+        
+    # 2. Clear from Postgres (Long-term)
+    pg_deleted = False
+    if postgres_store and postgres_manager.is_ready():
+        pg_deleted = await postgres_store.delete_session(user_id, session_id)
+        
+    return {
+        "status": "success", 
+        "message": f"Session {session_id} deleted for user {user_id}",
+        "postgres_deleted": pg_deleted
+    }
+
 @app.post("/ingest")
 async def ingest_document(file: UploadFile = File(...)):
     """Ingest a document (PDF, MD, TXT) into the knowledge base."""

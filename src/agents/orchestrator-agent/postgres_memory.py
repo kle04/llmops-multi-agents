@@ -220,3 +220,39 @@ class PostgresChatHistoryStore:
         except Exception as e:
             logger.error(f"Lỗi khi list sessions từ Postgres: {e}")
             return []
+            
+    async def delete_session(self, user_id: str, session_id: str) -> bool:
+        """
+        Xoá toàn bộ lịch sử của session (messages + session record).
+        
+        Args:
+            user_id: ID người dùng (để đảm bảo quyền sở hữu)
+            session_id: ID session cần xoá
+            
+        Returns:
+            bool: True nếu xoá thành công (hoặc không tồn tại), False nếu lỗi.
+        """
+        if not self.pg.is_ready() or not self.pg.pool:
+            return False
+            
+        try:
+            async with self.pg.pool.acquire() as conn:
+                # With ON DELETE CASCADE defined in schema:
+                # Constraint fk_session FOREIGN KEY(session_id) REFERENCES sessions(session_id) ON DELETE CASCADE
+                # We only need to delete from sessions table.
+                
+                result = await conn.execute("""
+                    DELETE FROM sessions
+                    WHERE session_id = $1 AND user_id = $2
+                """, session_id, user_id)
+                
+                deleted_count = int(result.split(" ")[1])
+                if deleted_count > 0:
+                    logger.info(f"Đã xoá session {session_id} của user {user_id} (kèm messages)")
+                else:
+                    logger.info(f"Session {session_id} không tồn tại hoặc không thuộc về {user_id}")
+                        
+            return True
+        except Exception as e:
+            logger.error(f"Lỗi khi xoá session {session_id} từ Postgres: {e}")
+            return False
