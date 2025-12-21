@@ -4,23 +4,34 @@ Embedding Manager cho Mental Health RAG Agent
 Quản lý embeddings với tối ưu hóa cho nội dung tâm lý tiếng Việt
 """
 
-import numpy as np
 from typing import List, Dict, Optional, Union
-from sentence_transformers import SentenceTransformer
-import torch
 from config import Config
+import logging
+import numpy as np
+
+logger = logging.getLogger(__name__)
 
 class EmbeddingManager:
     def __init__(self):
         """
         Khởi tạo Embedding Manager với model tối ưu cho tiếng Việt + thuật ngữ tâm lý
         """
-        print(f"🧮 Khởi tạo Embedding Manager...")
-        print(f"   Model: {Config.EMBEDDING_MODEL}")
+        logger.info(f"🧮 Khởi tạo Embedding Manager...")
+        logger.info(f"   Model: {Config.EMBEDDING_MODEL}")
         
+        # Lazy import heavy libraries
+        global SentenceTransformer, torch, np
+        try:
+            from sentence_transformers import SentenceTransformer
+            import torch
+            import numpy as np
+        except ImportError as e:
+            logger.error(f"Failed to import heavy dependencies: {e}")
+            raise
+
         # Load model
         try:
-            print(f"   Loading {Config.EMBEDDING_MODEL}...")
+            logger.info(f"   Loading {Config.EMBEDDING_MODEL}...")
             # Always use trust_remote_code=True for modern models (like Qwen)
             self.model = SentenceTransformer(Config.EMBEDDING_MODEL, trust_remote_code=True)
             self.model_name = Config.EMBEDDING_MODEL
@@ -36,15 +47,15 @@ class EmbeddingManager:
                 # Batch embeddings
                 self.embedding_dimension = sample_embeddings.shape[1]
             
-            print(f"✅ Đã load embedding model thành công")
-            print(f"   Dimension: {self.embedding_dimension}")
-            print(f"   Device: {self.model.device}")
-            print(f"   Test embeddings shape: {sample_embeddings.shape}")
+            logger.info(f"✅ Đã load embedding model thành công")
+            logger.info(f"   Dimension: {self.embedding_dimension}")
+            logger.info(f"   Device: {self.model.device}")
+            logger.info(f"   Test embeddings shape: {sample_embeddings.shape}")
             
         except Exception as e:
-            print(f"❌ Lỗi load embedding model: {e}")
-            print(f"   Model: {Config.EMBEDDING_MODEL}")
-            print(f"   Error type: {type(e).__name__}")
+            logger.error(f"❌ Lỗi load embedding model: {e}")
+            logger.error(f"   Model: {Config.EMBEDDING_MODEL}")
+            logger.error(f"   Error type: {type(e).__name__}")
             raise
     
     def preprocess_text_for_embedding(self, text: str) -> str:
