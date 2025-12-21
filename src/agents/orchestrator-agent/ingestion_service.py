@@ -33,18 +33,27 @@ class IngestionService:
         logger.info("🧠 Initializing Ingestion Service...")
         try:
             # Initialize managers
+            logger.info("   [1/4] Initializing Embedding Manager (this may download models)...")
             self.embedding_manager = EmbeddingManager()
+            logger.info("   ✅ Embedding Manager Initialized")
+            
+            logger.info("   [2/4] Initializing Qdrant Manager...")
             self.qdrant_manager = QdrantManager()
+            logger.info("   ✅ Qdrant Manager Initialized")
             
             # Initialize processors
+            logger.info("   [3/4] Initializing PDF Processor...")
             self.pdf_processor = PDFProcessor(embedding_manager=self.embedding_manager)
+            
+            logger.info("   [4/4] Initializing Markdown Processor...")
             self.markdown_processor = MarkdownProcessor(embedding_manager=self.embedding_manager)
             
             # Check connection immediately
+            logger.info("   Checking health status...")
             self.health_check()
             logger.info("✅ Ingestion Service Ready")
         except Exception as e:
-            logger.error(f"❌ Failed to initialize Ingestion Service: {e}")
+            logger.error(f"❌ Failed to initialize Ingestion Service: {e}", exc_info=True)
             raise
 
     def health_check(self) -> dict:
