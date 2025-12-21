@@ -5,7 +5,7 @@ USER root
 
 # -------- SYSTEM DEPENDENCIES --------
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
     curl \
     wget \
     gnupg \
@@ -13,7 +13,6 @@ RUN apt-get update && \
     python3 \
     python3-pip \
     python3-venv \
-    software-properties-common \
     git \
     docker.io \
     jq \
