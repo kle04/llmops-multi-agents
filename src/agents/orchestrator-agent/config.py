@@ -47,3 +47,17 @@ class Config:
     HISTORY_LIMIT = int(os.getenv("HISTORY_LIMIT", 50))
     REDIS_TTL_SECONDS = int(os.getenv("REDIS_TTL_SECONDS", 604800))  # 7 days
     MAX_MESSAGE_CHARS = int(os.getenv("MAX_MESSAGE_CHARS", 2000))
+
+    # Data Ingestion
+    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")
+    QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+    QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "")
+    COLLECTION_NAME = os.getenv("COLLECTION_NAME", "mental_health_advisor")
+    TOP_K_DOCUMENTS = int(os.getenv("TOP_K_DOCUMENTS", 5))
+    SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", 0.7))
+    CHUNK_SIZE=os.getenv("CHUNK_SIZE", 800)
+    CHUNK_OVERLAP=os.getenv("CHUNK_OVERLAP", 150)
+    CHUNK_STRATEGY=os.getenv("CHUNK_STRATEGY", "recursive")
+    OVERLAP_METHOD=os.getenv("OVERLAP_METHOD", "sentence")
+    EMBEDDING_BATCH_SIZE = int(os.getenv("EMBEDDING_BATCH_SIZE", 8))
+    NORMALIZE_EMBEDDINGS = os.getenv("NORMALIZE_EMBEDDINGS", "True").lower() == "true"

@@ -1,6 +1,6 @@
 # Main - FastAPI app cho orchestrator agent
 
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from typing import Optional, List
@@ -10,6 +10,18 @@ import uvicorn
 from redis_memory import RedisManager, ChatHistoryStore, LangChainHistoryStore
 from postgres_memory import PostgresManager, PostgresChatHistoryStore
 from langchain_core.messages import BaseMessage
+# Import ingestion service
+import shutil
+import tempfile
+import os
+from pathlib import Path
+
+try:
+    from ingestion_service import IngestionService
+    HAS_INGESTION = True
+except ImportError as e:
+    print(f"⚠️  Could not import IngestionService: {e}")
+    HAS_INGESTION = False
 
 class ChatRequest(BaseModel):
     message: str
@@ -29,6 +41,7 @@ postgres_manager = PostgresManager()
 chat_store: Optional[ChatHistoryStore] = None
 langchain_store: Optional[LangChainHistoryStore] = None
 postgres_store: Optional[PostgresChatHistoryStore] = None
+ingestion_service: Optional[IngestionService] = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -41,6 +54,17 @@ async def lifespan(app: FastAPI):
     langchain_store = LangChainHistoryStore(redis_manager)
     global postgres_store
     postgres_store = PostgresChatHistoryStore(postgres_manager)
+    
+    # Initialize ingestion service
+    global ingestion_service
+    if HAS_INGESTION:
+        try:
+            print("🚀 Initializing Ingestion Service...")
+            ingestion_service = IngestionService()
+        except Exception as e:
+            print(f"❌ Failed to initialize ingestion service: {e}")
+            ingestion_service = None
+            
     yield
 
 
@@ -59,7 +83,8 @@ async def health():
         redis_health = await redis_manager.health_check() if redis_manager else {"connected": False}
         postgres_health = await postgres_manager.health_check() if postgres_manager else {"connected": False}
         agent_health = await agent.health_check() if agent else {"status": "unhealthy"}
-        return {"status": "healthy", "redis": redis_health, "postgres": postgres_health, "agent": agent_health}
+        ingestion_status = "available" if ingestion_service else "unavailable"
+        return {"status": "healthy", "redis": redis_health, "postgres": postgres_health, "agent": agent_health, "ingestion": ingestion_status}
     except Exception as e:
         return {"status": "unhealthy", "redis": {"connected": False}, "agent": {"status": "unhealthy", "error": str(e)}}
 
@@ -80,7 +105,8 @@ async def chat(req: ChatRequest):
         await postgres_store.append_message(user_id, session_id, role="user", content=req.message)
     if langchain_store and redis_manager.is_ready():
         await langchain_store.append_turn(user_id, session_id, turn_type="human", content=req.message)
-        context = await langchain_store.get_history_context(user_id, session_id)
+        
+    context = await langchain_store.get_history_context(user_id, session_id)
 
     result = await agent.process_message(req.message, context)
     # Normalize output shape
@@ -155,6 +181,50 @@ async def get_user_sessions(user_id: str):
         return {"error": "Postgres not available", "sessions": []}
     sessions = await postgres_store.list_sessions(user_id)
     return {"sessions": sessions}
+
+@app.post("/ingest")
+async def ingest_document(file: UploadFile = File(...)):
+    """Ingest a document (PDF, MD, TXT) into the knowledge base."""
+    if not ingestion_service:
+        raise HTTPException(status_code=503, detail="Ingestion service is not available")
+    
+    filename = file.filename
+    ext = Path(filename).suffix.lower()
+    
+    if ext not in ['.pdf', '.md', '.txt']:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}. Supported: .pdf, .md, .txt")
+    
+    # Create temp file
+    tmp_path = None
+    try:
+        # Create temp file with correct extension
+        with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
+            shutil.copyfileobj(file.file, tmp)
+            tmp_path = tmp.name
+            
+        print(f"📥 Received file: {filename}, saved to {tmp_path}")
+        
+        # Process using service
+        # ingest_file takes path and original filename (for extension detection context)
+        success = ingestion_service.ingest_file(tmp_path, filename)
+        
+        if success:
+            return {"status": "success", "message": f"Successfully ingested {filename}"}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to ingest document")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Ingestion error: {e}")
+        raise HTTPException(status_code=500, detail=f"Ingestion error: {str(e)}")
+    finally:
+        # Cleanup temp file
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+            except Exception as e:
+                print(f"⚠️  Failed to delete temp file {tmp_path}: {e}")
 
 def main():
     uvicorn.run(

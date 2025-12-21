@@ -23,3 +23,5 @@ class Config:
     
     # Hugging Face Embeddings
     EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")
+    NORMALIZE_EMBEDDINGS=os.getenv("NORMALIZE_EMBEDDINGS", True)
+    EMBEDDING_BATCH_SIZE=os.getenv("EMBEDDING_BATCH_SIZE", 8)
