@@ -71,7 +71,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Orchestrator Agent",
     description="Orchestrator Agent for managing and coordinating tasks.",
-    version="1.0.0",
+    version="1.0.4",
     lifespan=lifespan
 )
 
