@@ -1,4 +1,4 @@
-FROM jenkins/jenkins-lts
+FROM jenkins/jenkins:lts
 
 # Switch to root to install dependencies
 USER root
@@ -6,18 +6,18 @@ USER root
 # -------- SYSTEM DEPENDENCIES --------
 RUN apt-get update && \
     apt-get install -y \
-        curl \
-        wget \
-        gnupg \
-        lsb-release \
-        python3 \
-        python3-pip \
-        python3-venv \
-        software-properties-common \
-        git \
-        docker.io \
-        jq \
-        flake8 && \
+    curl \
+    wget \
+    gnupg \
+    lsb-release \
+    python3 \
+    python3-pip \
+    python3-venv \
+    software-properties-common \
+    git \
+    docker.io \
+    jq \
+    flake8 && \
     rm -rf /var/lib/apt/lists/*
 
 # -------- INSTALL GITHUB CLI (gh) --------
