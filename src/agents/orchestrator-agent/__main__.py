@@ -71,7 +71,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Orchestrator Agent",
     description="Orchestrator Agent for managing and coordinating tasks.",
-    version="1.0.4",
+    version="2.0.0",
     lifespan=lifespan
 )
 
@@ -99,14 +99,22 @@ async def log_requests(request: Request, call_next):
     logger.info(f"⬅️  Response {response.status_code} (took {process_time:.4f}s)")
     
     return response
+
+@app.get("/health")
 async def health():
     # include redis health if available
     try:    
         redis_health = await redis_manager.health_check() if redis_manager else {"connected": False}
         postgres_health = await postgres_manager.health_check() if postgres_manager else {"connected": False}
         agent_health = await agent.health_check() if agent else {"status": "unhealthy"}
-        ingestion_status = "available" if ingestion_service else "unavailable"
-        return {"status": "healthy", "redis": redis_health, "postgres": postgres_health, "agent": agent_health, "ingestion": ingestion_status}
+        ingestion_health = ingestion_service.health_check() if ingestion_service else {"status": "unavailable"}
+        return {
+            "status": "healthy",
+            "redis": redis_health,
+            "postgres": postgres_health,
+            "agent": agent_health,
+            "ingestion": ingestion_health
+        }
     except Exception as e:
         return {"status": "unhealthy", "redis": {"connected": False}, "agent": {"status": "unhealthy", "error": str(e)}}
 
