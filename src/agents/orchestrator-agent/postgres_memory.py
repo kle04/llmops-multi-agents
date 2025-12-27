@@ -101,6 +101,39 @@ class PostgresManager:
             status["error"] = str(e)
             return status
 
+    async def create_user(self, user_id: str, username: str, email: str, password_hash: str) -> bool:
+        """Create a new user with password hash."""
+        if not self.pool:
+            return False
+        try:
+            async with self.pool.acquire() as conn:
+                await conn.execute("""
+                    INSERT INTO users (user_id, username, email, password_hash, created_at, last_seen)
+                    VALUES ($1, $2, $3, $4, NOW(), NOW())
+                """, user_id, username, email, password_hash)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to create user: {e}")
+            return False
+
+    async def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
+        """Get user by username."""
+        if not self.pool:
+            return None
+        try:
+            async with self.pool.acquire() as conn:
+                row = await conn.fetchrow("""
+                    SELECT user_id, username, email, password_hash, created_at
+                    FROM users
+                    WHERE username = $1
+                """, username)
+                if row:
+                    return dict(row)
+                return None
+        except Exception as e:
+            logger.error(f"Failed to get user: {e}")
+            return None
+
 
 class PostgresChatHistoryStore:
     """

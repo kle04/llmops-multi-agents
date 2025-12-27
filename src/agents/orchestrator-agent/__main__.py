@@ -15,6 +15,12 @@ import shutil
 import tempfile
 import os
 from pathlib import Path
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, status, HTTPException
+from jose import JWTError, jwt
+from auth_utils import verify_password, get_password_hash, create_access_token, SECRET_KEY, ALGORITHM
+import uuid
+import logging
 
 try:
     from ingestion_service import IngestionService
@@ -28,6 +34,26 @@ class ChatRequest(BaseModel):
     user_id: Optional[str] = None
     session_id: Optional[str] = None
 
+class User(BaseModel):
+    username: str
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    disabled: Optional[bool] = None
+
+class UserInDB(User):
+    password_hash: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+class UserRegister(BaseModel):
+    username: str
+    email: Optional[str] = None
+    password: str
 
 class ChatResponse(BaseModel):
     selected_agent: Optional[str] = None
@@ -120,10 +146,70 @@ async def health():
 
 
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    
+    user = await postgres_manager.get_user_by_username(token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+@app.post("/register", response_model=bool)
+async def register(user: UserRegister):
+    existing_user = await postgres_manager.get_user_by_username(user.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already registered"
+        )
+    
+    hashed_password = get_password_hash(user.password)
+    user_id = str(uuid.uuid4())
+    result = await postgres_manager.create_user(user_id, user.username, user.email, hashed_password)
+    if not result:
+        raise HTTPException(status_code=500, detail="Failed to create user")
+    return True
+
+@app.post("/token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await postgres_manager.get_user_by_username(form_data.username)
+    if not user or not verify_password(form_data.password, user["password_hash"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token = create_access_token(data={"sub": user["username"]})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/users/me")
+async def read_users_me(current_user: dict = Depends(get_current_user)):
+    return {
+        "user_id": current_user["user_id"],
+        "username": current_user["username"],
+        "email": current_user["email"],
+        "created_at": current_user["created_at"]
+    }
 @app.post("/chat", response_model=ChatResponse)
-async def chat(req: ChatRequest):
-    # Ensure minimal identifiers
-    user_id = req.user_id or "anonymous"
+async def chat(req: ChatRequest, current_user: dict = Depends(get_current_user)):
+    # Use authenticated user_id
+    user_id = current_user["user_id"] or "anonymous"
+    # Allow session_id from request or default
     session_id = req.session_id or "default"
 
     # Append user message to chat history
@@ -176,8 +262,12 @@ async def chat(req: ChatRequest):
 
 
 @app.get("/history/{user_id}/{session_id}")
-async def get_postgres_history(user_id: str, session_id: str):
+async def get_postgres_history(user_id: str, session_id: str, current_user: dict = Depends(get_current_user)):
     """Get full conversation history from Postgres (long-term storage)."""
+    # Verify user access (optional: strict check if user_id matches current_user)
+    if user_id != current_user["user_id"]:
+         raise HTTPException(status_code=403, detail="Not authorized to access this history")
+
     if not postgres_store or not postgres_manager.is_ready():
         return {"error": "Postgres not available", "messages": [], "created_at": None, "last_updated": None}
     chat = await postgres_store.load_session_history(user_id, session_id)
@@ -188,12 +278,15 @@ async def get_postgres_history(user_id: str, session_id: str):
     }
 
 @app.get("/history/redis/{user_id}/{session_id}")
-async def get_redis_history(user_id: str, session_id: str, limit: Optional[int] = None):
+async def get_redis_history(user_id: str, session_id: str, limit: Optional[int] = None, current_user: dict = Depends(get_current_user)):
     """Get conversation history from Redis (short-term storage).
     
     Args:
         limit: Optional limit on number of recent turns to return (default: all)
     """
+    if user_id != current_user["user_id"]:
+         raise HTTPException(status_code=403, detail="Not authorized to access this history")
+
     if not langchain_store or not redis_manager.is_ready():
         return {"error": "Redis not available", "messages": []}
     
@@ -205,16 +298,21 @@ async def get_redis_history(user_id: str, session_id: str, limit: Optional[int] 
     return {"messages": messages}
 
 @app.get("/sessions/{user_id}")
-async def get_user_sessions(user_id: str):
+async def get_user_sessions(user_id: str, current_user: dict = Depends(get_current_user)):
     """List all session IDs for a given user."""
+    if user_id != current_user["user_id"]:
+         raise HTTPException(status_code=403, detail="Not authorized to access these sessions")
+
     if not postgres_store or not postgres_manager.is_ready():
         return {"error": "Postgres not available", "sessions": []}
     sessions = await postgres_store.list_sessions(user_id)
     return {"sessions": sessions}
 
 @app.delete("/history/{user_id}/{session_id}")
-async def delete_chat_session(user_id: str, session_id: str):
+async def delete_chat_session(user_id: str, session_id: str, current_user: dict = Depends(get_current_user)):
     """Delete all history for a specific session (Redis + Postgres)."""
+    if user_id != current_user["user_id"]:
+         raise HTTPException(status_code=403, detail="Not authorized to delete this session")
     
     # 1. Clear from Redis (Short-term)
     if chat_store and redis_manager.is_ready():
@@ -235,7 +333,7 @@ async def delete_chat_session(user_id: str, session_id: str):
     }
 
 @app.post("/ingest")
-async def ingest_document(file: UploadFile = File(...)):
+async def ingest_document(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     """Ingest a document (PDF, MD, TXT) into the knowledge base."""
     if not ingestion_service:
         raise HTTPException(status_code=503, detail="Ingestion service is not available")
