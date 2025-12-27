@@ -134,6 +134,25 @@ class PostgresManager:
             logger.error(f"Failed to get user: {e}")
             return None
 
+    async def delete_user(self, user_id: str) -> bool:
+        """Delete a user and all associated data (Cascade)."""
+        if not self.pool:
+            return False
+            
+        try:
+            async with self.pool.acquire() as conn:
+                result = await conn.execute("""
+                    DELETE FROM users 
+                    WHERE user_id = $1
+                """, user_id)
+                # result is like 'DELETE 1'
+                if result == "DELETE 0":
+                    return False
+                return True
+        except Exception as e:
+            logger.error(f"Failed to delete user: {e}")
+            return False
+
     async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Get session metadata by ID."""
         if not self.pool:
@@ -151,6 +170,60 @@ class PostgresManager:
         except Exception as e:
             logger.error(f"Failed to get session: {e}")
             return None
+
+    async def list_sessions(self, user_id: str) -> List[Dict[str, Any]]:
+        """List all sessions for a user."""
+        if not self.pool:
+            return []
+        
+        try:
+            async with self.pool.acquire() as conn:
+                rows = await conn.fetch("""
+                    SELECT session_id, title, last_updated 
+                    FROM sessions 
+                    WHERE user_id = $1 
+                    ORDER BY last_updated DESC
+                """, user_id)
+                return [dict(row) for row in rows]
+        except Exception as e:
+            logger.error(f"Failed to list sessions: {e}")
+            return []
+
+    async def update_session_title(self, session_id: str, title: str) -> bool:
+        """Update the title of a session."""
+        if not self.pool:
+            return False
+            
+        try:
+            async with self.pool.acquire() as conn:
+                await conn.execute("""
+                    UPDATE sessions
+                    SET title = $1
+                    WHERE session_id = $2
+                """, title, session_id)
+                return True
+        except Exception as e:
+            logger.error(f"Failed to update session title: {e}")
+            return False
+
+    async def delete_session(self, user_id: str, session_id: str) -> bool:
+        """Delete a session from Postgres."""
+        if not self.pool:
+            return False
+            
+        try:
+            async with self.pool.acquire() as conn:
+                result = await conn.execute("""
+                    DELETE FROM sessions 
+                    WHERE session_id = $1 AND user_id = $2
+                """, session_id, user_id)
+                # result is like 'DELETE 1'
+                if result == "DELETE 0":
+                    return False
+                return True
+        except Exception as e:
+            logger.error(f"Failed to delete session from Postgres: {e}")
+            return False
 
 
 class PostgresChatHistoryStore:
@@ -262,12 +335,20 @@ class PostgresChatHistoryStore:
         try:
             async with self.pg.pool.acquire() as conn:
                 rows = await conn.fetch("""
-                    SELECT session_id
+                    SELECT session_id, title, last_updated
                     FROM sessions
                     WHERE user_id = $1
                     ORDER BY last_updated DESC
                 """, user_id)
-                return [row["session_id"] for row in rows]
+                # Return list of dicts instead of list of strings
+                return [
+                    {
+                        "session_id": row["session_id"],
+                        "title": row["title"],
+                        "last_updated": row["last_updated"]
+                    } 
+                    for row in rows
+                ]
         except Exception as e:
             logger.error(f"Lỗi khi list sessions từ Postgres: {e}")
             return []
