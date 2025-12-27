@@ -134,6 +134,24 @@ class PostgresManager:
             logger.error(f"Failed to get user: {e}")
             return None
 
+    async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Get session metadata by ID."""
+        if not self.pool:
+            return None
+        try:
+            async with self.pool.acquire() as conn:
+                row = await conn.fetchrow("""
+                    SELECT session_id, user_id, last_updated
+                    FROM sessions
+                    WHERE session_id = $1
+                """, session_id)
+                if row:
+                    return dict(row)
+                return None
+        except Exception as e:
+            logger.error(f"Failed to get session: {e}")
+            return None
+
 
 class PostgresChatHistoryStore:
     """

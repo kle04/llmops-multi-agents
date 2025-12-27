@@ -31,7 +31,6 @@ except ImportError as e:
 
 class ChatRequest(BaseModel):
     message: str
-    user_id: Optional[str] = None
     session_id: Optional[str] = None
 
 class User(BaseModel):
@@ -208,9 +207,21 @@ async def read_users_me(current_user: dict = Depends(get_current_user)):
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest, current_user: dict = Depends(get_current_user)):
     # Use authenticated user_id
-    user_id = current_user["user_id"] or "anonymous"
+    user_id = current_user["user_id"]
     # Allow session_id from request or default
-    session_id = req.session_id or "default"
+    session_id = req.session_id or str(uuid.uuid4())
+    
+    # Verify session ownership if session_id is provided and exists
+    if req.session_id and postgres_manager.is_ready():
+        existing_session = await postgres_manager.get_session(session_id)
+        if existing_session:
+            if existing_session["user_id"] != user_id:
+                logger.warning(f"Session hijacking attempt: User {user_id} tried to access session {session_id} of user {existing_session['user_id']}")
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You do not have permission to access this session"
+                )
+    
 
     # Append user message to chat history
     if chat_store and redis_manager.is_ready():
