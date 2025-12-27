@@ -4,8 +4,9 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- Table to store users
 CREATE TABLE IF NOT EXISTS users (
     user_id VARCHAR(255) PRIMARY KEY,
-    username VARCHAR(255),
+    username VARCHAR(255) UNIQUE,
     email VARCHAR(255),
+    password_hash VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     last_seen TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
