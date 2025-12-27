@@ -134,6 +134,25 @@ class PostgresManager:
             logger.error(f"Failed to get user: {e}")
             return None
 
+    async def delete_user(self, user_id: str) -> bool:
+        """Delete a user and all associated data (Cascade)."""
+        if not self.pool:
+            return False
+            
+        try:
+            async with self.pool.acquire() as conn:
+                result = await conn.execute("""
+                    DELETE FROM users 
+                    WHERE user_id = $1
+                """, user_id)
+                # result is like 'DELETE 1'
+                if result == "DELETE 0":
+                    return False
+                return True
+        except Exception as e:
+            logger.error(f"Failed to delete user: {e}")
+            return False
+
     async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Get session metadata by ID."""
         if not self.pool:

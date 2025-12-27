@@ -205,6 +205,19 @@ async def read_users_me(current_user: dict = Depends(get_current_user)):
         "email": current_user["email"],
         "created_at": current_user["created_at"]
     }
+
+@app.delete("/users/me")
+async def delete_user_me(current_user: dict = Depends(get_current_user)):
+    """Permanently delete the current user account and all data."""
+    if not postgres_manager.is_ready():
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    
+    success = await postgres_manager.delete_user(current_user["user_id"])
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found or already deleted")
+        
+    return {"status": "success", "message": f"User {current_user['username']} deleted"}
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest, current_user: dict = Depends(get_current_user)):
     # Use authenticated user_id
@@ -366,6 +379,9 @@ async def delete_chat_session(user_id: str, session_id: str, current_user: dict 
 @app.post("/ingest")
 async def ingest_document(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     """Ingest a document (PDF, MD, TXT) into the knowledge base."""
+    if current_user["username"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin privileges required")
+
     if not ingestion_service:
         raise HTTPException(status_code=503, detail="Ingestion service is not available")
     
