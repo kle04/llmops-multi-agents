@@ -344,41 +344,70 @@ class RAGAgent:
             }
 
     def filter_documents(self, query: str, docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        relevant_docs = []
-        logger.info(f"Filtering {len(docs)} documents với LLM grading")
+        """
+        Lọc danh sách documents bằng một lần gọi LLM duy nhất (Batch Processing).
+        """
+        if not docs:
+            return []
+
+        logger.info(f"Filtering {len(docs)} documents với LLM grading (Batch Mode)")
         
-        for doc in docs:
-            # Documents đã được filter theo score ở Qdrant level
-            check_prompt = f"""
-            Hãy đánh giá xem đoạn văn bản sau có liên quan tới câu hỏi không?
-
-            Câu hỏi: {query}
-
-            Đoạn văn bản: {doc["content"][:500]}...
-            
-            Chỉ trả lời "YES" nếu liên quan hoặc "NO" nếu không liên quan.
-            """
-            
-            try:
-                messages = [HumanMessage(content=check_prompt)]
-                response = self.llm.invoke(messages)
-                grade = response.content.strip().upper()
-
-                if grade == "YES":
-                    logger.info(f"Document từ {doc['source']}, chunk {doc['chunk_index']} được chấp nhận (score: {doc['score']:.3f})")
-                    relevant_docs.append(doc)
-                elif grade == "NO":
-                    logger.info(f"Document từ {doc['source']}, chunk {doc['chunk_index']} không được chấp nhận (score: {doc['score']:.3f})")
-                else:
-                    logger.warning(f"LLM trả lời không rõ ràng: '{grade}', giữ document dựa trên score")
-                    relevant_docs.append(doc)
-                    
-            except Exception as e:
-                logger.exception(f"LLM grading failed: {e}, giữ document dựa trên similarity score")
-                relevant_docs.append(doc)
+        # 1. Chuẩn bị context cho prompt
+        doc_texts = []
+        for i, doc in enumerate(docs):
+            doc_texts.append(f"Document [{i}]:\nNội dung: {doc['content'][:800]}...\n")
         
-        logger.info(f"Filtering complete: {len(relevant_docs)}/{len(docs)} documents passed LLM grading")
-        return relevant_docs
+        combined_docs = "\n".join(doc_texts)
+
+        # 2. Tạo Prompt
+        batch_prompt = f"""
+        Bạn là chuyên gia đánh giá tài liệu. Nhiệm vụ của bạn là kiểm tra xem các tài liệu sau có liên quan để trả lời câu hỏi của người dùng hay không.
+
+        Câu hỏi: {query}
+
+        Danh sách tài liệu:
+        {combined_docs}
+
+        Yêu cầu:
+        - Đánh giá từng Document [i].
+        - Chỉ chọn những document thực sự liên quan và hữu ích để trả lời câu hỏi.
+        - Trả về kết quả dưới dạng danh sách các CHỈ SỐ (index) của các document liên quan, cách nhau bởi dấu phẩy.
+        - Ví dụ: 0, 2, 4
+        - Nếu không có tài liệu nào liên quan, hãy trả về: NONE
+
+        Chỉ trả về danh sách số hoặc NONE, không giải thích gì thêm.
+        """
+
+        try:
+            # 3. Gọi LLM
+            messages = [HumanMessage(content=batch_prompt)]
+            response = self.llm.invoke(messages)
+            content = response.content.strip()
+            logger.debug(f"LLM Filter Response: {content}")
+
+            # 4. Parse kết quả
+            relevant_docs = []
+            
+            if "NONE" in content.upper():
+                logger.info("LLM đánh giá không có tài liệu nào liên quan.")
+                return []
+
+            # Tìm tất cả các số trong phản hồi
+            import re
+            indices = [int(s) for s in re.findall(r'\d+', content)]
+            
+            # 5. Map lại vào danh sách gốc
+            for idx in indices:
+                if 0 <= idx < len(docs):
+                    doc = docs[idx]
+                    logger.info(f"Giữ lại Document [{idx}] từ {doc.get('source', 'unknown')} (score: {doc.get('score', 0):.3f})")
+                    relevant_docs.append(doc)
+            
+            return relevant_docs
+
+        except Exception as e:
+            logger.exception(f"Batch filtering failed: {e}. Fallback: Giữ lại tất cả tài liệu.")
+            return docs
     
     def aggregate_context(self, docs: List[Dict[str, Any]]) -> str:
         if not docs:

@@ -58,6 +58,7 @@ Authenticate and retrieve an access token.
   "token_type": "bearer"
 }
 ```
+**Note:** The response also sets an `access_token` **HttpOnly Cookie**. The browser will automatically include this cookie in subsequent requests. It is recommended to rely on this cookie for browser-based applications to prevent XSS.
 
 ### Get Current User
 Retrieve profile information for the authenticated user.

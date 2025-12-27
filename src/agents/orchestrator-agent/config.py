@@ -61,3 +61,8 @@ class Config:
     OVERLAP_METHOD=os.getenv("OVERLAP_METHOD", "sentence")
     EMBEDDING_BATCH_SIZE = int(os.getenv("EMBEDDING_BATCH_SIZE", 8))
     NORMALIZE_EMBEDDINGS = os.getenv("NORMALIZE_EMBEDDINGS", "True").lower() == "true"
+
+    # CORS
+    # Expects a comma-separated string, e.g., "http://localhost:3000,https://myapp.com"
+    _cors_str = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:3000/,https://chatbot.khanklee.id.vn,https://chatbot.khanklee.id.vn/")
+    CORS_ORIGINS = [origin.strip() for origin in _cors_str.split(",") if origin.strip()]

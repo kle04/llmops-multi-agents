@@ -10,13 +10,14 @@ import uvicorn
 from redis_memory import RedisManager, ChatHistoryStore, LangChainHistoryStore
 from postgres_memory import PostgresManager, PostgresChatHistoryStore
 from langchain_core.messages import BaseMessage
+from fastapi.middleware.cors import CORSMiddleware
 # Import ingestion service
 import shutil
 import tempfile
 import os
 from pathlib import Path
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi import Depends, status, HTTPException
+from fastapi import Depends, status, HTTPException, Response, Cookie
 from jose import JWTError, jwt
 from auth_utils import verify_password, get_password_hash, create_access_token, SECRET_KEY, ALGORITHM
 import uuid
@@ -97,8 +98,19 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Orchestrator Agent",
     description="Orchestrator Agent for managing and coordinating tasks.",
-    version="2.0.0",
+    version="2.0.1",
     lifespan=lifespan
+)
+
+# Debug: Log allowed origins
+print(f"🌍 CORS Allowed Origins: {Config.CORS_ORIGINS}")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=Config.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Debug Logging Middleware
@@ -146,16 +158,26 @@ async def health():
 
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(
+    token: Optional[str] = Depends(oauth2_scheme),
+    access_token: Optional[str] = Cookie(None)
+):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    
+    # Prioritize cookie, fallback to header
+    final_token = access_token or token
+    
+    if not final_token:
+        raise credentials_exception
+
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(final_token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
@@ -185,7 +207,7 @@ async def register(user: UserRegister):
     return True
 
 @app.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     user = await postgres_manager.get_user_by_username(form_data.username)
     if not user or not verify_password(form_data.password, user["password_hash"]):
         raise HTTPException(
@@ -195,6 +217,17 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         )
     
     access_token = create_access_token(data={"sub": user["username"]})
+    
+    # Set HttpOnly Cookie
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=False, # Set to True in Production (HTTPS)
+        samesite="lax",
+        max_age=1800 # 30 minutes
+    )
+    
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.get("/users/me")
@@ -226,9 +259,11 @@ async def chat(req: ChatRequest, current_user: dict = Depends(get_current_user))
     session_id = req.session_id or str(uuid.uuid4())
     
     # Verify session ownership if session_id is provided and exists
+    is_new_session = True
     if req.session_id and postgres_manager.is_ready():
         existing_session = await postgres_manager.get_session(session_id)
         if existing_session:
+            is_new_session = False
             if existing_session["user_id"] != user_id:
                 logger.warning(f"Session hijacking attempt: User {user_id} tried to access session {session_id} of user {existing_session['user_id']}")
                 raise HTTPException(
@@ -264,7 +299,7 @@ async def chat(req: ChatRequest, current_user: dict = Depends(get_current_user))
             agent_used=result.get("selected_agent") or "Orchestrator",
             source=sources if isinstance(sources, list) else [],
         )
-    
+
     # Append assistant message to Postgres (Long-term)
     if postgres_store:
         await postgres_store.append_message(
@@ -276,13 +311,10 @@ async def chat(req: ChatRequest, current_user: dict = Depends(get_current_user))
             source=sources if isinstance(sources, list) else [],
         )
         
-        # Generate Title if new session (simple check: if only 2 messages now)
-        # Better check: check if title is null.
-        if postgres_manager.is_ready():
-             current_session = await postgres_manager.get_session(session_id)
-             if current_session and not current_session.get("title"):
-                 # Trigger title generation in background (fire and forget)
-                 asyncio.create_task(generate_and_save_title(session_id, req.message, response_text))
+        # Generate Title ONLY if it's a new session
+        if is_new_session and postgres_manager.is_ready():
+             # Trigger title generation in background (fire and forget)
+             asyncio.create_task(generate_and_save_title(session_id, req.message, response_text))
 
     if langchain_store and redis_manager.is_ready():
         await langchain_store.append_turn(user_id, session_id, turn_type="ai", content=response_text)
