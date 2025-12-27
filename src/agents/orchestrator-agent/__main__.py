@@ -98,17 +98,16 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Orchestrator Agent",
     description="Orchestrator Agent for managing and coordinating tasks.",
-    version="2.0.0",
+    version="2.0.1",
     lifespan=lifespan
 )
 
-origins = [
-    "http://localhost:3000",
-    "http://localhost:3000/"
-]
+# Debug: Log allowed origins
+print(f"🌍 CORS Allowed Origins: {Config.CORS_ORIGINS}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=Config.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
