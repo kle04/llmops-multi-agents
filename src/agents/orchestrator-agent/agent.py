@@ -278,6 +278,24 @@ class OrchestratorAgent:
                 "error": str(e)
             }
         
+    async def generate_title(self, user_message: str, assistant_response: str) -> str:
+        """Generate a short 3-5 word title for the session."""
+        try:
+            prompt = f"""
+            Summarize the following interaction into a short, concise title (max 5 words).
+            Do not use quotes.
+            
+            User: {user_message}
+            Assistant: {assistant_response}
+            
+            Title:
+            """
+            response = await self.llm.ainvoke(prompt)
+            return response.content.strip()
+        except Exception as e:
+            print(f"Failed to generate title: {e}")
+            return "New Session"
+
     async def health_check(self) -> Dict[str, Any]:
         """Check health status of all components."""
         try:
