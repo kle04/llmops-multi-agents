@@ -263,11 +263,18 @@ class OrchestratorAgent:
             }
         
         try:
+            # 1. Get Raw Response from RAG Agent
             rag_result = await self.a2a_client.send_message(message, stream=False)
+            raw_response = rag_result.get("content", "")
+            sources = rag_result.get("sources", [])
+
+            # 2. Synthesize/Refine the Response
+            synthesized_response = await self._synthesize_response(message, raw_response)
+
             return {
                 "selected_agent": "RAG Agent",
-                "response": rag_result.get("content", ""),
-                "sources": rag_result.get("sources", [])
+                "response": synthesized_response,
+                "sources": sources
             }
         except Exception as e:
             logger.error(f"RAG Agent request failed: {e}, falling back to direct response")
@@ -277,6 +284,39 @@ class OrchestratorAgent:
                 "sources": None,
                 "error": str(e)
             }
+
+    async def _synthesize_response(self, original_message: str, draft_response: str) -> str:
+        """Synthesize and refine the RAG response for better consistency and tone."""
+        try:
+            if not draft_response:
+                return "Xin lỗi, tôi không tìm thấy thông tin phù hợp trong cơ sở dữ liệu."
+
+            prompt = f"""
+            Bạn là một trợ lý sức khỏe tinh thần chuyên nghiệp, tận tâm và thấu hiểu.
+            Nhiệm vụ của bạn là hoàn thiện câu trả lời thô dưới đây để gửi cho người dùng.
+
+            **Ngữ cảnh:**
+            - Câu hỏi của người dùng: "{original_message}"
+            - Câu trả lời thô (từ hệ thống RAG): "{draft_response}"
+
+            **Yêu cầu:**
+            1. **Giữ nguyên ý chính và thông tin chuyên môn** từ "Câu trả lời thô". Không bịa đặt thêm thông tin sai lệch.
+            2. **Điều chỉnh giọng văn**: Nhẹ nhàng, đồng cảm, khích lệ, phù hợp với tâm lý học đường (học sinh, sinh viên).
+            3. **Cấu trúc lại** (nếu cần) để câu trả lời mạch lạc, dễ đọc hơn (dùng bullet point nếu liệt kê).
+            4. **Xưng hô**: Bạn xưng là "mình" hoặc "tôi" (thân thiện), gọi người dùng là "bạn" hoặc "em" (tùy ngữ cảnh, mặc định là "bạn").
+            5. Nếu "Câu trả lời thô" quá ngắn hoặc thiếu cảm xúc, hãy viết lại cho hay hơn nhưng vẫn bám sát nội dung gốc.
+
+            **Kết quả:**
+            Chỉ trả về nội dung câu trả lời đã hoàn thiện.
+            """
+            
+            # Use the Orchestrator's LLM to refine
+            response = await self.llm.ainvoke(prompt)
+            return response.content.strip()
+
+        except Exception as e:
+            logger.error(f"Error validating logic response: {e}")
+            return draft_response # Fallback to original if synthesis fails
         
     async def generate_title(self, user_message: str, assistant_response: str) -> str:
         """Generate a short 3-5 word title for the session."""
