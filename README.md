@@ -25,17 +25,26 @@ For a deep dive into the implementation details, algorithms, and workflows of ea
 *   **[Data Preparation Pipeline](./src/data-preparing/README.md)**  
     The automated ETL (Extract, Transform, Load) pipeline. It handles the ingestion of raw PDF documents, performs Vietnamese-specific text cleaning, chunks data for semantic context, and indexes vectors into **Qdrant**.
 
-## 2. Technology Stack
+## 2. Related Repositories
+All related repositories can be found here:
+*   **Manifest Repository**: **[Manifest Repo](https://github.com/KhanhLe04/manifest-llmops-multi-agents)**
+
+    This repository contains the configuration files for GitOps, including ArgoCD, Jenkins, and Sealed Secret.
+*   **Frontend Repository**: **[Frontend Repo](https://github.com/KhanhLe04/chatbot-frontend)**
+
+    This repository contains the frontend code for the chatbot application.
+
+## 3. Technology Stack
 
 The system is built on a modern, cloud-native stack designed for scalability and observability.
 
-### 2.1. AI & Machine Learning
+### 3.1. AI & Machine Learning
 *   **Large Language Model**: Google Gemini API (Reasoning, Intent Classification, Generation)
 *   **Embedding Model**: `intfloat/multilingual-e5-base` (Optimized for multilingual semantic search)
 *   **Vector Database**: Qdrant (High-performance vector similarity search)
 *   **Frameworks**: LangChain, LangGraph
 
-### 2.2. Infrastructure & DevOps
+### 3.2. Infrastructure & DevOps
 | Category | Technology | Purpose |
 | :--- | :--- | :--- |
 | **Source Code** | GitHub | Version Control |
@@ -51,7 +60,7 @@ The system is built on a modern, cloud-native stack designed for scalability and
 | **Database, cache** | Redis, PostgreSQL | Short and long term memory storage |
 | **AI Protocol** | A2A Protocol | Agent-to-Agent communication, easy to scale |
 
-## 3. Project Structure
+## 4. Project Structure
 
 ```
 llmops-multi-agents/
@@ -64,7 +73,3 @@ llmops-multi-agents/
 │   └── evaluation               # Evaluation for Multi-agent system
 └── README.md                # Project overview (this file)
 ```
-
-## 4. Manifest Repository
-
-Manifest Repository for GitOps can be found here: **[Manifest Repo](https://github.com/KhanhLe04/manifest-llmops-multi-agents)**
