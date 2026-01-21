@@ -1,7 +1,0 @@
-Model,Model Path,Hit@1,Hit@4,Hit@10,Total Time (s),Queries,Candidates,Status
-intfloat/multilingual-e5-base,intfloat/multilingual-e5-base,78.8,93.4,98.0,9.295119285583496,500,500,Success
-Alibaba-NLP/gte-multilingual-base,Alibaba-NLP/gte-multilingual-base,77.4,92.2,96.6,13.20091199874878,500,500,Success
-keepitreal/vietnamese-sbert,keepitreal/vietnamese-sbert,76.8,94.39999999999999,97.8,9.379428148269653,500,500,Success
-Qwen/Qwen3-Embedding-0.6B,Qwen/Qwen3-Embedding-0.6B,79.60000000000001,94.39999999999999,98.0,61.94478130340576,500,500,Success
-BAAI/bge-m3,BAAI/bge-m3,80.4,92.4,95.6,34.74832272529602,500,500,Success
-intfloat/multilingual-e5-large-instruct,intfloat/multilingual-e5-large-instruct,79.2,93.4,97.0,34.509400844573975,500,500,Success
